@@ -41,9 +41,14 @@ class RiskBreakdown:
     driver_count: int = 0
     top_drivers: list[RiskFactor] = field(default_factory=list)
 
+    @property
+    def composite_score(self) -> int:
+        return self.total_score
+
     def to_dict(self) -> dict[str, Any]:
         return {
             "total_score": self.total_score,
+            "composite_score": self.total_score,
             "risk_band": self.risk_band,
             "recommendation": self.recommendation,
             "drivers": [d.to_dict() for d in self.drivers],
@@ -338,3 +343,6 @@ class RiskScorer:
             driver_count=len(drivers),
             top_drivers=top_drivers,
         )
+
+    calculate_score = calculate_risk
+

@@ -295,6 +295,8 @@ def normalize_org_name(name: Optional[str]) -> str:
     """Convenience helper for standard company name normalization."""
     return _DEFAULT_NORMALIZER.normalize_company_name(name)
 
+normalize_company_name = normalize_org_name
+
 def normalize_address(addr: Optional[str]) -> NormalizedAddress:
     """Convenience helper for standard address normalization."""
     return _DEFAULT_NORMALIZER.normalize_address(addr)

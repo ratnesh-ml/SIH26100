@@ -243,3 +243,83 @@ class MockRegistryProvider(RegistryProvider):
             source="Simulated registry (demo)",
             latency_ms=elapsed_ms,
         )
+
+    # -------------------------------------------------------------------------
+    # Synchronous Execution Helpers (for deterministic pipeline execution)
+    # -------------------------------------------------------------------------
+
+    def verify_gstin_sync(self, gstin: str) -> RegistryResult:
+        clean_gstin = gstin.strip().upper() if gstin else ""
+        rec = self._gstin_cache.get(clean_gstin)
+        if rec:
+            return RegistryResult(found=True, status=rec.get("status", "ACTIVE"), data=rec)
+        return RegistryResult(
+            found=False,
+            status="NOT_FOUND",
+            data={"gstin": clean_gstin, "message": "GSTIN record not found in simulated registry"},
+        )
+
+    def verify_pan_sync(self, pan: str) -> RegistryResult:
+        clean_pan = pan.strip().upper() if pan else ""
+        rec = self._pan_cache.get(clean_pan)
+        if rec:
+            return RegistryResult(found=True, status=rec.get("status", "VALID"), data=rec)
+        return RegistryResult(
+            found=False,
+            status="NOT_FOUND",
+            data={"pan": clean_pan, "message": "PAN record not found in simulated registry"},
+        )
+
+    def verify_udyam_sync(self, udyam_no: str) -> RegistryResult:
+        clean_udyam = udyam_no.strip().upper() if udyam_no else ""
+        rec = self._udyam_cache.get(clean_udyam)
+        if rec:
+            return RegistryResult(found=True, status=rec.get("status", "ACTIVE"), data=rec)
+        return RegistryResult(
+            found=False,
+            status="NOT_FOUND",
+            data={"udyam": clean_udyam, "message": "Udyam registration not found in simulated registry"},
+        )
+
+    def verify_cin_sync(self, cin: str) -> RegistryResult:
+        clean_cin = cin.strip().upper() if cin else ""
+        rec = self._cin_cache.get(clean_cin)
+        if rec:
+            return RegistryResult(found=True, status=rec.get("status", "ACTIVE"), data=rec)
+        return RegistryResult(
+            found=False,
+            status="NOT_FOUND",
+            data={"cin": clean_cin, "message": "CIN not found in simulated registry"},
+        )
+
+    def check_debarment_sync(
+        self,
+        name: Optional[str] = None,
+        pan: Optional[str] = None,
+        gstin: Optional[str] = None,
+        cin: Optional[str] = None,
+    ) -> RegistryResult:
+        hits = []
+        clean_pan = pan.strip().upper() if pan else (gstin[2:12].strip().upper() if gstin and len(gstin) >= 12 else None)
+        clean_name = name.strip().upper() if name else None
+
+        for item in self._debarment_cache:
+            item_pan = item.get("pan", "").strip().upper()
+            item_name = item.get("name", "").strip().upper()
+            if clean_pan and item_pan and clean_pan == item_pan:
+                hits.append(item)
+            elif clean_name and item_name and (clean_name in item_name or item_name in clean_name):
+                hits.append(item)
+
+        if hits:
+            return RegistryResult(
+                found=True,
+                status="DEBARRED",
+                data={"debarred": True, "hit_count": len(hits), "hits": hits},
+            )
+        return RegistryResult(
+            found=False,
+            status="CLEAR",
+            data={"debarred": False, "hit_count": 0, "hits": []},
+        )
+

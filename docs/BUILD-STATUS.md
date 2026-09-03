@@ -1,8 +1,8 @@
 # VigilBid (SIH26100) — Build Status & Transition Baseline
 
-**Document Version:** 2.12.0  
+**Document Version:** 2.13.0  
 **Date:** September 2026  
-**Status:** Phase 24 Complete — Stable Evidence Model & Provenance Tracing Operational  
+**Status:** Phase 25 Complete — Connected End-to-End Processing Pipeline Operational  
 **Target:** SIH Grand Finale — Problem Statement SIH26100 (CPCL / Ministry of Petroleum & Natural Gas)
 
 ---
@@ -65,13 +65,14 @@ In public procurement under GFR 2017 and CVC guidelines, procurement officers ma
 | **Risk Scoring & Anomaly Forensics Engine** | ✅ Completed (100%) | `pipeline/risk/scorer.py` and `pipeline/risk/anomaly.py`: transparent 0-100 risk composite, risk bands (`LOW`, `MEDIUM`, `HIGH`), ranked risk drivers, and forensic scanners (PDF producer, timestamp inversion, incremental updates, microscopic text, white-on-white text, prompt injection, cross-bidder collusion links). |
 | **Cross-Bidder Link Graph Engine & APIs** | ✅ Completed (100%) | `pipeline/risk/graph.py` and REST APIs (`GET /api/v1/tenders/{id}/graph`, `POST /api/v1/risk/graph`): deterministic NetworkX graph construction mapping shared directors, phone numbers, emails, addresses, bank accounts, PDF authors, metadata, and near-duplicate text with CVC-aligned related-party citations. |
 | **Evidence Modeling & Provenance Subsystem** | ✅ Completed (100%) | `pipeline/evidence/highlighter.py`: stable `EvidenceItem` contract (document, page, field, quote, bounding box, source, method, confidence), responsive CSS percentages, multi-document split traces (`EvidenceTrace`), and visual highlight styling. |
+| **Connected End-to-End Processing Pipeline** | ✅ Completed (100%) | `pipeline/runner.py`: 14 explicit named steps (`upload_and_registration`, `page_extraction`, `text_extraction`, `ocr_fallback`, `classification`, `field_extraction`, `normalization`, `entity_resolution`, `government_verification`, `tender_requirement_checks`, `compliance_rules`, `anomalies`, `risk_scoring`, `findings_and_evidence`), automatic retries, fail-safe degradation, backward-compatible aliases (`step_01_ingest` through `step_11_explain`), tested end-to-end with demo bidder package. |
 | **Job Status & Pipeline REST APIs** | ✅ Completed (100%) | `GET /api/v1/jobs/{id}`, `GET /api/v1/bidders/{id}/jobs`, `POST /api/v1/jobs/{id}/process` live with 11-step progress tracking. |
 | **Live Health Probe Endpoint** | ✅ Completed (100%) | `/health` actively probes database status, dialect, and latency. |
 | **Background Worker Process** | ✅ Completed (100%) | `worker.py` and `backend/workers/job_worker.py` with DB readiness check, queue poll cycle, and graceful signal shutdown. |
 | **Frontend Production Build** | ✅ Completed (100%) | Vite + React 18 + TypeScript builds cleanly (`dist/` created in 38s) with dark mode and API client. |
-| **Automated Tests & Startup Verification** | ✅ Completed (100%) | 248 pytest unit, auth, tender, bidder, ingest, PDF, OCR, job pipeline, classifier, extraction, normalization, validation, entity resolution, registry, cross-document verification, tender extraction, compliance rules, risk scoring, document anomaly, cross-bidder graph, and evidence model tests passing, `scripts/verify_structure.py` passing with 0 warnings. |
+| **Automated Tests & Startup Verification** | ✅ Completed (100%) | 259 pytest unit, auth, tender, bidder, ingest, PDF, OCR, job pipeline, classifier, extraction, normalization, validation, entity resolution, registry, cross-document verification, tender extraction, compliance rules, risk scoring, document anomaly, cross-bidder graph, evidence model, and connected pipeline runner tests passing, `scripts/verify_structure.py` passing with 0 warnings. |
 | **Project Automation Tooling** | ✅ Completed (100%) | Single-command deployment (`docker compose up --build`), `Makefile`, and `scripts/dev.ps1`. |
-| **Synthetic Demo Dataset (`seed/`)** | 🔄 Ready for Generation | `template_tender.json` created; 4+1 generator script pending Phase 25. |
+| **Synthetic Demo Dataset (`seed/`)** | 🔄 Ready for Generation | `template_tender.json` created; 4+1 generator script pending Phase 26. |
 
 **Current Repo Baseline:** Stable Evidence Model and Provenance Subsystem is fully operational, guaranteeing that every compliance finding, verification check, forensic anomaly, and risk factor links back to verifiable evidence with page, field, quote, and responsive CSS bounding box overlays. All 248 automated tests pass.
 
@@ -215,8 +216,9 @@ In public procurement under GFR 2017 and CVC guidelines, procurement officers ma
 
 ## 8. Next Recommended Step
  
-**Execute Phase 25 (Synthetic Demo Dataset Generator & 4+1 Demo Bidders Testbed):**
+**Execute Phase 26 (Synthetic Demo Dataset Generator & 4+1 Demo Bidders Testbed):**
 1. Implement synthetic bidder document generator (`seed/generate_demo_docs.py`) to produce the 4+1 demo bidder PDFs (scanned + digital) and ground truth fixtures.
 2. Generate synthetic bidder packages: Bidder A (Clean PASS), Bidder B (Name variation / MSE abbreviation REVIEW), Bidder C (Hard PAN-GSTIN mismatch / Debarred FAIL), Bidder D (Adversarial prompt injection / Collusion link HIGH risk), and Bidder E (Border country unapproved REVIEW).
 3. Validate end-to-end evaluation pipeline and compliance dossiers across all 5 testbed packages.
-4. Begin Phase 25 implementation per timeline in `docs/05`.
+4. Begin Phase 26 implementation per timeline in `docs/05`.
+
