@@ -4,6 +4,7 @@ from pipeline.extraction.base import BaseExtractor, ExtractedFieldDTO
 from pipeline.extraction.financial import FinancialExtractor
 from pipeline.extraction.gst import GSTExtractor
 from pipeline.extraction.pan import PANExtractor
+from pipeline.extraction.tender import TenderRequirement, TenderRequirementExtractor
 from pipeline.extraction.registry import (
     extract_document_fields,
     get_extractor,
@@ -43,4 +44,6 @@ __all__ = [
     "normalize_org_name",
     "normalize_date",
     "normalize_turnover",
+    "TenderRequirement",
+    "TenderRequirementExtractor",
 ]
