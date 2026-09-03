@@ -1,0 +1,113 @@
+services:
+  # 1. PostgreSQL 16 Relational Database
+  db:
+    image: postgres:16-alpine
+    container_name: vigilbid_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-vigilbid}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-vigilbid}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    networks:
+      - vigilbid_net
+
+  # 2. FastAPI ASGI Backend Server
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: vigilbid_backend
+    restart: unless-stopped
+    command: ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+    environment:
+      PROJECT_NAME: "VigilBid (SIH26100)"
+      ENVIRONMENT: "development"
+      DATABASE_URL: "postgresql+asyncpg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-vigilbid}"
+      DATABASE_SYNC_URL: "postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-vigilbid}"
+      SECRET_KEY: ${SECRET_KEY:-dev-secret-key-change-in-production-64chars-min}
+      FERNET_KEY: ${FERNET_KEY:-uE_3m_9sF9yKz6T-Yh1N9P0wZ7vL5k4j2h1g8f7e6d4=}
+      STORAGE_DIR: "/app/data/storage"
+      PRIMARY_OCR: "paddleocr"
+      FALLBACK_OCR: "tesseract"
+      LLM_ENABLED: "false"
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app/backend
+      - ./pipeline:/app/pipeline
+      - ./rules:/app/rules
+      - ./seed:/app/seed
+      - storage_data:/app/data/storage
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - vigilbid_net
+
+  # 3. Asynchronous Pipeline Background Worker
+  worker:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: vigilbid_worker
+    restart: unless-stopped
+    command: ["python", "worker.py"]
+    environment:
+      PROJECT_NAME: "VigilBid (SIH26100) Worker"
+      DATABASE_URL: "postgresql+asyncpg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-vigilbid}"
+      DATABASE_SYNC_URL: "postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-vigilbid}"
+      SECRET_KEY: ${SECRET_KEY:-dev-secret-key-change-in-production-64chars-min}
+      FERNET_KEY: ${FERNET_KEY:-uE_3m_9sF9yKz6T-Yh1N9P0wZ7vL5k4j2h1g8f7e6d4=}
+      STORAGE_DIR: "/app/data/storage"
+    volumes:
+      - ./backend:/app/backend
+      - ./pipeline:/app/pipeline
+      - ./rules:/app/rules
+      - ./seed:/app/seed
+      - storage_data:/app/data/storage
+    depends_on:
+      db:
+        condition: service_healthy
+      backend:
+        condition: service_started
+    networks:
+      - vigilbid_net
+
+  # 4. Vite + React 18 SPA Frontend
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    container_name: vigilbid_frontend
+    restart: unless-stopped
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      VITE_API_URL: "http://localhost:8000"
+    depends_on:
+      - backend
+    networks:
+      - vigilbid_net
+
+volumes:
+  postgres_data:
+    driver: local
+  storage_data:
+    driver: local
+
+networks:
+  vigilbid_net:
+    driver: bridge

@@ -2,12 +2,17 @@
 
 import os
 from pathlib import Path
+from dotenv import load_dotenv
 from pydantic import BaseModel, Field
+
+# Load .env if present
+load_dotenv()
 
 
 class Settings(BaseModel):
     PROJECT_NAME: str = "VigilBid (SIH26100)"
     API_V1_STR: str = "/api/v1"
+    ENVIRONMENT: str = Field(default_factory=lambda: os.getenv("ENVIRONMENT", "development"))
     SECRET_KEY: str = Field(default_factory=lambda: os.getenv("SECRET_KEY", "dev-secret-key-change-in-production-64chars-min"))
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 480  # 8 hours
     
@@ -16,6 +21,12 @@ class Settings(BaseModel):
         default_factory=lambda: os.getenv(
             "DATABASE_URL", 
             "postgresql+asyncpg://postgres:postgres@localhost:5432/vigilbid"
+        )
+    )
+    DATABASE_SYNC_URL: str = Field(
+        default_factory=lambda: os.getenv(
+            "DATABASE_SYNC_URL", 
+            "postgresql://postgres:postgres@localhost:5432/vigilbid"
         )
     )
     

@@ -3,6 +3,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from backend.core.config import settings
+from backend.core.database import check_database_connection
 from backend.api.router import api_router
 
 
@@ -27,13 +28,22 @@ def create_app() -> FastAPI:
     # Health Check (Public)
     @application.get("/health", tags=["Health"])
     async def health_check():
-        """Public health check endpoint validating system status."""
+        """Public health check endpoint validating system and database status."""
+        db_health = await check_database_connection()
+        is_healthy = db_health["connected"]
+        
         return {
-            "status": "healthy",
+            "status": "healthy" if is_healthy else "degraded",
             "project": settings.PROJECT_NAME,
             "version": "1.0.0",
+            "environment": settings.ENVIRONMENT,
             "components": {
-                "db": "ready",
+                "database": {
+                    "status": "connected" if db_health["connected"] else "disconnected",
+                    "dialect": db_health["dialect"],
+                    "latency_ms": db_health["latency_ms"],
+                    "error": db_health["error"],
+                },
                 "ocr": settings.PRIMARY_OCR,
                 "llm": "enabled" if settings.LLM_ENABLED else "disabled",
             },

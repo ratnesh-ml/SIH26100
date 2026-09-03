@@ -28,50 +28,80 @@ See [docs/REPOSITORY-STRUCTURE.md](docs/REPOSITORY-STRUCTURE.md) for full folder
 
 ## 2. Quickstart & Local Development
 
-### Prerequisites
-- Python 3.11 or 3.12
-- Node.js 18+ and npm 10+
-- PostgreSQL 16 (or local Docker container)
+### Option A: Single-Command Docker Deployment (Recommended)
 
-### Step 1: Environment Configuration
-Copy the template configuration file:
+To start the entire platform (PostgreSQL 16, FastAPI Backend, Vite Frontend, and Background Worker) in isolated network containers:
+
 ```bash
+# 1. Clone the repository
+git clone https://github.com/ratnesh-ml/SIH26100.git
+cd SIH26100
+
+# 2. Configure environment (defaults work out-of-the-box)
 cp .env.example .env
+
+# 3. Build and launch all 4 services
+docker compose up --build
 ```
 
-### Step 2: Run Verification Checks
-Validate directory structure, package scaffolding, and module importability:
+**Services Running:**
+| Service | Endpoint / Port | Description |
+|---|---|---|
+| **Frontend SPA** | `http://localhost:5173` | React 18 + Vite development client |
+| **Backend API** | `http://localhost:8000` | FastAPI ASGI REST application |
+| **Interactive API Docs** | `http://localhost:8000/api/v1/docs` | Swagger / OpenAPI UI |
+| **System Health Check** | `http://localhost:8000/health` | Active live database & service health probe |
+| **Database** | `localhost:5432` | PostgreSQL 16 Alpine container (`vigilbid_db`) |
+| **Background Worker** | Container `vigilbid_worker` | Asynchronous 11-step pipeline job poller |
+
+To stop all services:
+```bash
+docker compose down
+```
+
+---
+
+### Option B: Local Host Development (Zero-Docker)
+
+For local development directly on the host machine:
+
+#### 1. Setup Environment
+```bash
+# Copy default local configuration
+cp .env.example .env
+
+# Install backend dependencies
+python -m pip install -r requirements.txt
+
+# Install frontend dependencies
+cd frontend && npm install && cd ..
+```
+
+#### 2. Run Verification & Test Suites
 ```bash
 # Cross-platform / POSIX:
 python scripts/verify_structure.py
+pytest tests/ -v
 
 # Or via Makefile:
 make verify
+make test
 
 # Or on Windows PowerShell:
 .\scripts\dev.ps1 verify
+.\scripts\dev.ps1 test
 ```
 
-### Step 3: Run Automated Tests
+#### 3. Start Development Services Individually
 ```bash
-pytest tests/ -v
-# or: make test
-```
-
-### Step 4: Run Development Servers
-
-**Backend (FastAPI):**
-```bash
+# Terminal 1: Backend API server
 uvicorn backend.main:app --reload --port 8000
-# API docs available at: http://localhost:8000/api/v1/docs
-```
 
-**Frontend (Vite + React):**
-```bash
-cd frontend
-npm install
-npm run dev
-# App available at: http://localhost:5173
+# Terminal 2: Pipeline Background Worker
+python worker.py
+
+# Terminal 3: Frontend Client
+cd frontend && npm run dev
 ```
 
 ---

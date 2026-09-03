@@ -1,0 +1,35 @@
+# Version control
+.git
+.gitignore
+
+# Python
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Node
+node_modules/
+npm-debug.log
+dist/
+
+# Local configuration & Storage
+.env
+.env.local
+data/storage/*
+!data/storage/.gitkeep
+data/fixtures/*
+!data/fixtures/.gitkeep
+
+# OS / IDE
+.DS_Store
+.idea/
+.vscode/
+Thumbs.db

@@ -1,8 +1,8 @@
 # VigilBid (SIH26100) — Build Status & Transition Baseline
 
-**Document Version:** 1.1.0  
+**Document Version:** 1.2.0  
 **Date:** September 2026  
-**Status:** Phase 03 Complete — Production Structure Scaffolded & Verified  
+**Status:** Phase 04 Complete — Local Development Environment & Services Operational  
 **Target:** SIH Grand Finale — Problem Statement SIH26100 (CPCL / Ministry of Petroleum & Natural Gas)
 
 ---
@@ -29,18 +29,17 @@ In public procurement under GFR 2017 and CVC guidelines, procurement officers ma
 | **Architecture & Specifications** | ✅ Completed (100%) | Complete in `docs/00` through `docs/06` (32 detailed sections). |
 | **Architecture Lock & Contracts** | ✅ Completed (100%) | Locked in `docs/ARCHITECTURE-LOCK.md` & `docs/INTERFACE-CONTRACTS.md`. |
 | **Repository Structure Documentation** | ✅ Completed (100%) | Detailed directory layout in `docs/REPOSITORY-STRUCTURE.md`. |
-| **Research Dump & Audit** | ✅ Completed (100%) | Analyzed, audited, classified into 7 categories in `docs/00`. |
-| **Static Blueprint Viewer** | ✅ Completed (100%) | Operates via `index.html`, `css/style.css`, and `js/main.js` (renders markdown via `marked.js`). |
-| **Backend Scaffold (`backend/`)** | ✅ Completed (100%) | FastAPI factory (`/health`), 24 REST routes stubs, 17 SQLAlchemy models, Pydantic v2 schemas, RBAC, services, workers. |
-| **Document Pipeline Scaffold (`pipeline/`)** | ✅ Completed (100%) | 11 subsystems scaffolded: `ocr`, `document_processing`, `extraction`, `entity_resolution`, `registry_adapters`, `compliance`, `risk`, `audit`, `evidence`, `rag`, `reports`, `runner`. |
-| **Rules & Weights Framework (`rules/`)** | ✅ Completed (100%) | YAML definitions for `cpcl_goods_v1.yaml` (34 rules) and `risk_weights.yaml`. |
-| **Frontend Web Application (`frontend/`)** | ✅ Completed (100%) | Vite + React 18 + TypeScript scaffolded with Tailwind styling, API client, and layout. |
-| **Automated Tests & Startup Verification** | ✅ Completed (100%) | 34 pytest unit tests passing, `scripts/verify_structure.py` passing, zero deprecation warnings. |
-| **Project Automation Tooling** | ✅ Completed (100%) | `.env.example`, updated `.gitignore`, `Makefile`, and `scripts/dev.ps1`. |
-| **Database & Migrations (`backend/models`)** | 🔄 Ready for Migrations | 17 models defined; Alembic migration environment pending Phase 04. |
-| **Synthetic Demo Dataset (`seed/`)** | 🔄 Ready for Generation | `template_tender.json` created; generator script pending Phase 04. |
+| **Containerization & Compose** | ✅ Completed (100%) | `docker-compose.yml`, `backend/Dockerfile`, `frontend/Dockerfile`, `.dockerignore`. |
+| **Database Connectivity Engine** | ✅ Completed (100%) | `backend/core/database.py` with async SQLAlchemy 2.0 engine, async sessionmaker, and DB connection probe. |
+| **Live Health Probe Endpoint** | ✅ Completed (100%) | `/health` actively probes database status, dialect, and latency. |
+| **Background Worker Process** | ✅ Completed (100%) | `worker.py` and `backend/workers/job_worker.py` with DB readiness check and graceful signal shutdown. |
+| **Frontend Production Build** | ✅ Completed (100%) | Vite + React 18 + TypeScript builds cleanly (`dist/` created in 38s) with dark mode and API client. |
+| **Automated Tests & Startup Verification** | ✅ Completed (100%) | 38 pytest unit tests passing, `scripts/verify_structure.py` passing with 0 warnings. |
+| **Project Automation Tooling** | ✅ Completed (100%) | Single-command deployment (`docker compose up --build`), `Makefile`, and `scripts/dev.ps1`. |
+| **Database Migrations (`alembic`)** | 🔄 Ready for Migrations | 17 models defined; Alembic migration environment pending Phase 05. |
+| **Synthetic Demo Dataset (`seed/`)** | 🔄 Ready for Generation | `template_tender.json` created; 4+1 generator script pending Phase 05. |
 
-**Current Repo Baseline:** The repository has successfully transitioned out of blueprint-only status. Phase 03 production repository scaffolding is complete, verified, and ready for business logic and data model binding.
+**Current Repo Baseline:** The local development environment is fully operational with repeatable single-command Docker deployment and host-mode fallback. All 4 services (PostgreSQL 16, FastAPI backend, Vite frontend, and pipeline worker) are configured and verified.
 
 ---
 
@@ -182,8 +181,8 @@ In public procurement under GFR 2017 and CVC guidelines, procurement officers ma
 
 ## 8. Next Recommended Step
  
--**Execute Phase 04 (Data Modeling, Migrations, and Synthetic Data Engine):**
+**Execute Phase 05 (Database Migrations, Seed Generation & Pipeline Ingestion):**
 1. Initialize Alembic migrations environment and generate initial PostgreSQL schema migration for all 17 tables.
 2. Implement synthetic bidder document generator (`seed/generate_demo_docs.py`) to produce the 4+1 demo bidder PDFs and ground truth fixtures.
-3. Configure Docker Compose environment (`docker-compose.yml`) for local PostgreSQL 16 service.
-4. Begin Phase 04 implementation per timeline in `docs/05`.
+3. Wire the 11-step pipeline runner into the PostgreSQL `jobs` table polling loop.
+4. Begin Phase 05 implementation per timeline in `docs/05`.

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { fetchHealth } from './api/client';
 import { Shield, CheckCircle, FileText, AlertTriangle, Scale } from 'lucide-react';
 
