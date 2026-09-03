@@ -1,8 +1,8 @@
 # VigilBid (SIH26100) — Build Status & Transition Baseline
 
-**Document Version:** 2.19.0  
+**Document Version:** 2.20.0  
 **Date:** September 2026  
-**Status:** Phase 30 Complete — Comprehensive Backend API Audit & Verification Completed  
+**Status:** Phase 31 Complete — Frontend Foundation (Auth, Navigation, Tenders, Bidders, Cockpit) Operational  
 **Target:** SIH Grand Finale — Problem Statement SIH26100 (CPCL / Ministry of Petroleum & Natural Gas)
 
 ---
@@ -76,12 +76,12 @@ In public procurement under GFR 2017 and CVC guidelines, procurement officers ma
 | **Backend API Audit & Reports/Dossier Export** | ✅ Completed (100%) | 100% endpoint audit against CPCL specification covering all 16 categories: Tenders, Bidders, Bids, Documents (`GET /documents/{id}/file`, `GET /documents/{id}/pages/{n}.png`), Status, OCR, Findings, Compliance, Risk, Evidence, Registry, Graph, Decisions, Audit Trail, Copilot, and Reports (`GET /bidders/{id}/report.pdf`, `GET /tenders/{id}/report.pdf`). Complete reference published in `docs/API.md`. |
 | **Live Health Probe Endpoint** | ✅ Completed (100%) | `/health` actively probes database status, dialect, and latency. |
 | **Background Worker Process** | ✅ Completed (100%) | `worker.py` and `backend/workers/job_worker.py` with DB readiness check, queue poll cycle, and graceful signal shutdown. |
-| **Frontend Production Build** | ✅ Completed (100%) | Vite + React 18 + TypeScript builds cleanly (`dist/` created in 38s) with dark mode and API client. |
+| **Frontend Foundation (React + TS + Vite)** | ✅ Completed (100%) | Production React 18 + TypeScript + Vite frontend connected to backend contracts: Login view with preset demo credentials, sticky Navbar with live DB health indicator, paginated Tender List with status filter, Tender Creation modal with PQC parameters, Bidder List with risk score indicators and qualification badges, and Bidder Detail Cockpit with statutory tax IDs, forensic risk drivers, deterministic findings, evidence citations, and CVC dossier PDF download. Builds in 2.70s. |
 | **Automated Tests & Startup Verification** | ✅ Completed (100%) | 338 pytest unit, auth, tender, bidder, ingest, PDF, OCR, job pipeline, classifier, extraction, normalization, validation, entity resolution, registry, cross-document verification, tender extraction, compliance rules, risk scoring, document anomaly, cross-bidder graph, evidence model, connected pipeline runner, full pipeline integration, cryptographic audit hash-chain, human-in-the-loop review, procurement RAG, procurement copilot, page image streaming, and CVC dossier report tests passing, `scripts/verify_structure.py` passing with 0 warnings. |
 | **Project Automation Tooling** | ✅ Completed (100%) | Single-command deployment (`docker compose up --build`), `Makefile`, and `scripts/dev.ps1`. |
 | **Synthetic Demo Dataset (`seed/`)** | 🔄 Ready for Generation | `template_tender.json` created; 4+1 generator script pending Phase 26. |
 
-**Current Repo Baseline:** The entire backend API has been audited, validated, and verified against the official project specification. All 16 endpoint categories are fully functional, secured with JWT authentication and strict Role-Based Access Control, persisted to PostgreSQL 16, covered by automated tests, and documented in `docs/API.md`. PyMuPDF-rendered document page streaming (`GET /documents/{id}/pages/{n}.png`) and CVC/RTI-ready PDF compliance dossiers (`GET /bidders/{id}/report.pdf`, `GET /tenders/{id}/report.pdf`) are fully implemented and passing. All 338 automated tests pass.
+**Current Repo Baseline:** The frontend foundation is fully operational and coupled to backend schemas without visual fluff. Officers can authenticate, view tenders, create tenders with CPCL PQC criteria, inspect participating bidder rosters with composite risk scores (0–100), and inspect deep bidder cockpits with statutory tax credentials, forensic anomaly signals, deterministic findings, evidence quotes, and direct CVC dossier PDF export. All 338 backend tests and frontend Vite production builds pass with zero errors.
 
 ---
 
@@ -223,8 +223,8 @@ In public procurement under GFR 2017 and CVC guidelines, procurement officers ma
 
 ## 8. Next Recommended Step
  
-**Execute Phase 31 (Synthetic Demo Dataset & Dossier Generation):**
+**Execute Phase 32 (Synthetic Demo Dataset & Dossier Generation):**
 1. Generate complete 4+1 demo bidder dataset (`B1` clean MSE, `B2` minor turnover gap, `B3` hard PAN-GSTIN mismatch, `B4` shell company / cross-bidder collusion, `B5` control).
 2. Validate end-to-end processing across all 5 bidders with live PDF dossiers.
-3. Prepare for Phase 31 demo flow alignment.
+3. Prepare for Phase 32 demo flow alignment.
 
