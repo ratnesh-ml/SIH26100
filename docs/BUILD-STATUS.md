@@ -1,8 +1,8 @@
 # VigilBid (SIH26100) — Build Status & Transition Baseline
 
-**Document Version:** 2.16.0  
+**Document Version:** 2.17.0  
 **Date:** September 2026  
-**Status:** Phase 27 Complete — Human-in-the-Loop Review & Decision Enforcement Operational  
+**Status:** Phase 28 Complete — Procurement-Specific RAG & Multi-Domain Copilot Operational  
 **Target:** SIH Grand Finale — Problem Statement SIH26100 (CPCL / Ministry of Petroleum & Natural Gas)
 
 ---
@@ -71,14 +71,15 @@ In public procurement under GFR 2017 and CVC guidelines, procurement officers ma
 | **Cryptographic Audit Trail & Hash-Chaining** | ✅ Completed (100%) | `pipeline/audit/hasher.py` and `backend/services/audit_service.py`: Forward SHA-256 hash-chained immutable audit log (`audit_log` table) recording actor, timestamp, action, entity, previous state, new state, reason, and evidence reference. Automated event logging across tender creation/update, bidder registration/updates, document uploads, pipeline completions, and officer decisions. Cryptographic continuity verification (`GET /api/v1/audit/verify`, `POST /api/v1/audit/verify`) flagging any tampered payload or broken pointer. |
 | **Audit Trail REST APIs** | ✅ Completed (100%) | `GET /api/v1/tenders/{id}/audit`, `GET /api/v1/audit/trail`, `GET /api/v1/audit/verify`, `POST /api/v1/audit/verify` with role-based access control and pagination. |
 | **Human-in-the-Loop Review & Decisions** | ✅ Completed (100%) | `backend/services/decision_service.py` & REST APIs (`/api/v1/bids/{id}/decision`, `/api/v1/findings/{id}/decision`, `/api/v1/bidders/{id}/complete-review`, `/api/v1/bids/{id}/complete-review`, `/api/v1/bidders/{id}/findings?pending=true`, `/decisions` history): formal decision states (Accept, Reject, Request clarification, Override), mandatory justification requirement on Override, officer decisions strictly separated from machine recommendations, pending findings filtering, decision history tracking, and complete-review validation blocking review finalization if unresolved mandatory findings remain. |
+| **Procurement-Specific RAG & Copilot** | ✅ Completed (100%) | `pipeline/rag/`: Multi-domain segregated knowledge base (`tender`, `bidder_document`, `regulatory`, `evidence`), section and page-aware chunker (`DocumentChunker`), BM25 ranked retrieval (`ProcurementRetriever`), grounded answer synthesis with mandatory structured citations and page references (`ProcurementCopilot`), REST APIs (`POST /api/v1/copilot/query`, `GET /api/v1/copilot/knowledge-domains`), and benchmark test suite (`eval_examples.py`) passing with 100% accuracy across 9 evaluation scenarios. |
 | **Live Health Probe Endpoint** | ✅ Completed (100%) | `/health` actively probes database status, dialect, and latency. |
 | **Background Worker Process** | ✅ Completed (100%) | `worker.py` and `backend/workers/job_worker.py` with DB readiness check, queue poll cycle, and graceful signal shutdown. |
 | **Frontend Production Build** | ✅ Completed (100%) | Vite + React 18 + TypeScript builds cleanly (`dist/` created in 38s) with dark mode and API client. |
-| **Automated Tests & Startup Verification** | ✅ Completed (100%) | 304 pytest unit, auth, tender, bidder, ingest, PDF, OCR, job pipeline, classifier, extraction, normalization, validation, entity resolution, registry, cross-document verification, tender extraction, compliance rules, risk scoring, document anomaly, cross-bidder graph, evidence model, connected pipeline runner, full pipeline integration, cryptographic audit hash-chain, and human-in-the-loop review tests passing, `scripts/verify_structure.py` passing with 0 warnings. |
+| **Automated Tests & Startup Verification** | ✅ Completed (100%) | 316 pytest unit, auth, tender, bidder, ingest, PDF, OCR, job pipeline, classifier, extraction, normalization, validation, entity resolution, registry, cross-document verification, tender extraction, compliance rules, risk scoring, document anomaly, cross-bidder graph, evidence model, connected pipeline runner, full pipeline integration, cryptographic audit hash-chain, human-in-the-loop review, and procurement-specific RAG tests passing, `scripts/verify_structure.py` passing with 0 warnings. |
 | **Project Automation Tooling** | ✅ Completed (100%) | Single-command deployment (`docker compose up --build`), `Makefile`, and `scripts/dev.ps1`. |
 | **Synthetic Demo Dataset (`seed/`)** | 🔄 Ready for Generation | `template_tender.json` created; 4+1 generator script pending Phase 26. |
 
-**Current Repo Baseline:** Human-in-the-loop evaluation review and decision enforcement are fully operational. Officers can record decisions at the finding and bid level with distinct decision states (Accept, Reject, Request clarification, Override). Overrides strictly require written justifications. Machine recommendations remain pristine and separated. Review completion is validated and blocked if unresolved mandatory findings remain. All 304 automated tests pass.
+**Current Repo Baseline:** Procurement-Specific RAG and Regulatory Copilot are fully operational. Knowledge is strictly segregated into 4 domains (tender, bidder_document, regulatory, evidence). Chunks preserve page numbers, sections, and clause metadata. BM25 search scores relevance and generates cited, grounded answers with zero hallucination. All 316 automated tests pass.
 
 ---
 
@@ -220,8 +221,8 @@ In public procurement under GFR 2017 and CVC guidelines, procurement officers ma
 
 ## 8. Next Recommended Step
  
-**Execute Phase 28 (Synthetic Demo Dataset & Dossier Generation):**
-1. Generate complete 4+1 demo bidder dataset (`B1` clean MSE, `B2` missing doc, `B3` hard mismatch, `B4` shell company / collusion, `B5` control).
+**Execute Phase 29 (Synthetic Demo Dataset & Dossier Generation):**
+1. Generate complete 4+1 demo bidder dataset (`B1` clean MSE, `B2` minor turnover gap, `B3` hard PAN-GSTIN mismatch, `B4` shell company / cross-bidder collusion, `B5` control).
 2. Validate end-to-end processing across all 5 bidders with live PDF dossiers.
-3. Prepare for Phase 28 demo flow alignment.
+3. Prepare for Phase 29 demo flow alignment.
 

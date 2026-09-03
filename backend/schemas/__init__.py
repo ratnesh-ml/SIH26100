@@ -43,6 +43,13 @@ from backend.schemas.finding import (
 from backend.schemas.document import DocumentSummary, RejectedFileOut, IngestionResponse
 from backend.schemas.job import JobState, StepStatus, JobStatus
 from backend.schemas.audit import AuditEventOut, AuditVerifyOut
+from backend.schemas.copilot import (
+    CitationOut,
+    CopilotQueryRequest,
+    CopilotQueryResponse,
+    RAGDomainInfo,
+    RAGKnowledgeBaseStatus,
+)
 from backend.schemas.graph import (
     GraphNodeOut,
     GraphEdgeOut,
@@ -101,5 +108,10 @@ __all__ = [
     "BidderPairLinkOut",
     "GraphSummaryOut",
     "BidderLinkGraphOut",
+    "CitationOut",
+    "CopilotQueryRequest",
+    "CopilotQueryResponse",
+    "RAGDomainInfo",
+    "RAGKnowledgeBaseStatus",
 ]
 

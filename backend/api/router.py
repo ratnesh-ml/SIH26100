@@ -52,12 +52,16 @@ from backend.schemas import (
     AuditEventOut,
     AuditVerifyOut,
     BidderLinkGraphOut,
+    CopilotQueryRequest,
+    CopilotQueryResponse,
+    RAGKnowledgeBaseStatus,
 )
 from backend.services.tender_service import TenderService
 from backend.services.bidder_service import BidderService
 from backend.services.document_service import DocumentService
 from backend.services.job_service import JobService
 from backend.services.decision_service import DecisionService
+from backend.services.copilot_service import CopilotService
 from pipeline.risk.graph import CrossBidderGraphBuilder
 
 logger = logging.getLogger("vigilbid.api")
@@ -635,14 +639,23 @@ async def get_link_graph(
     return {"nodes": [], "edges": []}
 
 
-# 7. Copilot & RAG
-@api_router.post("/copilot/query", tags=["Copilot"])
-async def copilot_query(
-    payload: dict[str, Any],
+# 7. Procurement Copilot & RAG Knowledge Base
+@api_router.post("/copilot/query", response_model=CopilotQueryResponse, tags=["Copilot"])
+async def query_copilot(
+    payload: CopilotQueryRequest,
+    current_user: Annotated[User, Depends(get_current_user)],
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+):
+    """Query procurement copilot across regulatory, tender, bidder, and evidence knowledge domains."""
+    return await CopilotService.answer_query(session, payload, current_user)
+
+
+@api_router.get("/copilot/knowledge-domains", response_model=RAGKnowledgeBaseStatus, tags=["Copilot"])
+async def get_knowledge_domains(
     current_user: Annotated[User, Depends(get_current_user)],
 ):
-    """Query regulatory knowledge base (GFR/CVC/BEC clauses)."""
-    return {"answer": "Copilot service is in scaffold mode.", "citations": [], "used_llm": False}
+    """Retrieve status and chunk inventory for all 4 procurement knowledge domains."""
+    return CopilotService.get_knowledge_base_status()
 
 
 # 8. Audit Trail & Dossiers
@@ -801,4 +814,7 @@ async def compute_cross_bidder_graph(
     builder = CrossBidderGraphBuilder()
     graph = builder.build_graph(bidders_data, tender_id=tender_id)
     return graph.to_dict()
+
+
+
 
