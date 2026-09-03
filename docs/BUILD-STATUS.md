@@ -1,8 +1,8 @@
 # VigilBid (SIH26100) — Build Status & Transition Baseline
 
-**Document Version:** 2.3.0  
+**Document Version:** 2.4.0  
 **Date:** September 2026  
-**Status:** Phase 15 Complete — Field Normalization & Statutory Validation Engine Operational  
+**Status:** Phase 16 Complete — Cross-Document Entity Resolution Engine Operational  
 **Target:** SIH Grand Finale — Problem Statement SIH26100 (CPCL / Ministry of Petroleum & Natural Gas)
 
 ---
@@ -51,15 +51,16 @@ In public procurement under GFR 2017 and CVC guidelines, procurement officers ma
 | **Document Classification Engine** | ✅ Completed (100%) | `pipeline/document_processing/classifier.py`: deterministic statutory anchors (Form GST REG-06, PAN, Udyam, UDIN turnover, ITR-V, OEM Annexure-I, Integrity Pact, MII, Land Border, Startup DPIIT, Debarment), keyword density, filename heuristics, multi-page scanning, and fallback to UNKNOWN with evidentiary audit trail. |
 | **Structured Field Extraction Engine** | ✅ Completed (100%) | `pipeline/extraction/`: deterministic extractors for GST REG-06 (GSTIN, legal/trade names, constitution, address, date, status, PAN), PAN card, Udyam MSME, and CA Turnover certificates (multi-year turnover, UDIN, CA name), with Mod-36 checksum, ISO-date normalization, and INR turnover parsing. |
 | **Field Normalization & Anti-Collision Engine** | ✅ Completed (100%) | `pipeline/entity_resolution/`: validators for PAN, GSTIN, Udyam, dates, turnover INR, company names, addresses; whitespace, punctuation, company suffixes, and anti-collision logic preventing false merges of unrelated companies. |
+| **Entity Resolution & Parity Scoring Engine** | ✅ Completed (100%) | `pipeline/entity_resolution/matcher.py`: multi-metric resolution (Jaro-Winkler, Token Set Ratio, Phonetics, PIN parity), strong identifier primacy (PAN, GSTIN, Udyam), legal form consistency check, and explanatory narrative generation. |
 | **Job Status & Pipeline REST APIs** | ✅ Completed (100%) | `GET /api/v1/jobs/{id}`, `GET /api/v1/bidders/{id}/jobs`, `POST /api/v1/jobs/{id}/process` live with 11-step progress tracking. |
 | **Live Health Probe Endpoint** | ✅ Completed (100%) | `/health` actively probes database status, dialect, and latency. |
 | **Background Worker Process** | ✅ Completed (100%) | `worker.py` and `backend/workers/job_worker.py` with DB readiness check, queue poll cycle, and graceful signal shutdown. |
 | **Frontend Production Build** | ✅ Completed (100%) | Vite + React 18 + TypeScript builds cleanly (`dist/` created in 38s) with dark mode and API client. |
-| **Automated Tests & Startup Verification** | ✅ Completed (100%) | 147 pytest unit, auth, tender, bidder, ingest, PDF, OCR, job pipeline, classifier, extraction, normalization, and validation tests passing, `scripts/verify_structure.py` passing with 0 warnings. |
+| **Automated Tests & Startup Verification** | ✅ Completed (100%) | 157 pytest unit, auth, tender, bidder, ingest, PDF, OCR, job pipeline, classifier, extraction, normalization, validation, and entity resolution tests passing, `scripts/verify_structure.py` passing with 0 warnings. |
 | **Project Automation Tooling** | ✅ Completed (100%) | Single-command deployment (`docker compose up --build`), `Makefile`, and `scripts/dev.ps1`. |
-| **Synthetic Demo Dataset (`seed/`)** | 🔄 Ready for Generation | `template_tender.json` created; 4+1 generator script pending Phase 16. |
+| **Synthetic Demo Dataset (`seed/`)** | 🔄 Ready for Generation | `template_tender.json` created; 4+1 generator script pending Phase 17. |
 
-**Current Repo Baseline:** Field Normalization and Statutory Validation are operational with anti-collision company disambiguation (preventing false merges across business sectors), canonical uppercase suffixes, address expansion, and Gregorian date validation. All 147 automated tests pass.
+**Current Repo Baseline:** Cross-Document Entity Resolution is operational using the documented multi-metric scoring approach (0.45 PAN link + 0.30 Name sim + 0.15 Addr sim + 0.10 Udyam link - 0.20 Legal form penalty), strong identifier primacy, conservative non-fraud vocabulary, and audit explanations. All 157 automated tests pass.
 
 ---
 
@@ -201,8 +202,8 @@ In public procurement under GFR 2017 and CVC guidelines, procurement officers ma
 
 ## 8. Next Recommended Step
  
-**Execute Phase 16 (Cross-Document Parity Checker & Synthetic Ground-Truth Generation):**
+**Execute Phase 17 (External Statutory Registry Mock Adapters & Verification):**
 1. Implement synthetic bidder document generator (`seed/generate_demo_docs.py`) to produce the 4+1 demo bidder PDFs (scanned + digital) and ground truth fixtures.
-2. Build Cross-Document Parity Engine (`pipeline/entity_resolution/matcher.py`) computing PAN-GSTIN parity, name resolution confidence, and flag matrices.
-3. Validate parity checker against synthetic ground truth.
-4. Begin Phase 16 implementation per timeline in `docs/05`.
+2. Build External Registry Adapters (`pipeline/registry_adapters/`) with realistic rate-limiting, circuit breaking, and offline fixture support.
+3. Validate registry lookups (GSTN active/cancelled, NSDL PAN, MCA21, Udyam) against mock providers.
+4. Begin Phase 17 implementation per timeline in `docs/05`.

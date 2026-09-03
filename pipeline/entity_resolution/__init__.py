@@ -1,6 +1,15 @@
-"""Entity Resolution and Normalization Subsystem."""
+"""Entity Resolution, Parity Scoring, and Normalization Subsystem."""
 
-from pipeline.entity_resolution.matcher import EntityMatcher, ResolutionScore
+from pipeline.entity_resolution.matcher import (
+    EntityMatcher,
+    EntityMatchStatus,
+    EntityRecord,
+    EntityResolutionResult,
+    FieldComparisonDetail,
+    ResolutionScore,
+    jaro_winkler_similarity,
+    token_set_ratio,
+)
 from pipeline.entity_resolution.normalizer import (
     EntityNormalizer,
     NormalizedAddress,
@@ -24,9 +33,15 @@ from pipeline.entity_resolution.validators import (
 )
 
 __all__ = [
-    "EntityNormalizer",
     "EntityMatcher",
+    "EntityMatchStatus",
+    "EntityRecord",
+    "EntityResolutionResult",
+    "FieldComparisonDetail",
     "ResolutionScore",
+    "jaro_winkler_similarity",
+    "token_set_ratio",
+    "EntityNormalizer",
     "NormalizedOrgName",
     "NormalizedAddress",
     "normalize_org_name",
