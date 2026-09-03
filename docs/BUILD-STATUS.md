@@ -1,8 +1,8 @@
 # VigilBid (SIH26100) — Build Status & Transition Baseline
 
-**Document Version:** 2.5.0  
+**Document Version:** 2.6.0  
 **Date:** September 2026  
-**Status:** Phase 17 Complete — Government Registry Abstraction & Mock Provider Operational  
+**Status:** Phase 18 Complete — Cross-Document Verification & Parity Engine Operational  
 **Target:** SIH Grand Finale — Problem Statement SIH26100 (CPCL / Ministry of Petroleum & Natural Gas)
 
 ---
@@ -54,15 +54,16 @@ In public procurement under GFR 2017 and CVC guidelines, procurement officers ma
 | **Field Normalization & Anti-Collision Engine** | ✅ Completed (100%) | `pipeline/entity_resolution/`: validators for PAN, GSTIN, Udyam, dates, turnover INR, company names, addresses; whitespace, punctuation, company suffixes, and anti-collision logic preventing false merges of unrelated companies. |
 | **Entity Resolution & Parity Scoring Engine** | ✅ Completed (100%) | `pipeline/entity_resolution/matcher.py`: multi-metric resolution (Jaro-Winkler, Token Set Ratio, Phonetics, PIN parity), strong identifier primacy (PAN, GSTIN, Udyam), legal form consistency check, and explanatory narrative generation. |
 | **Government Registry Abstraction & Mock Provider**| ✅ Completed (100%) | `pipeline/registry_adapters/`: `RegistryProvider` interface, `RegistryResult` standard shape (`found`, `status`, `data`, `source`, `fetched_at`, `latency_ms`), fixture-backed simulation (`gstin.json`, `pan.json`, `udyam.json`, `cin.json`, `debarment.json`), 300-800ms artificial latency for demo fan-out, and transparent `"Source: Simulated registry (demo)"` disclosure across UI/API. |
+| **Cross-Document Verification Engine** | ✅ Completed (100%) | `pipeline/compliance/cross_verifier.py`: comprehensive verification across PAN ↔ GST, GST ↔ Udyam, Company ↔ GST/Udyam, Identity ↔ Registry, and Registration ↔ Document Dates. Outputs check ID, expected relationship, actual values, confidence, status (`PASS`, `FAIL`, `WARN`, `REVIEW`), and conservative non-fraud narratives. |
 | **Job Status & Pipeline REST APIs** | ✅ Completed (100%) | `GET /api/v1/jobs/{id}`, `GET /api/v1/bidders/{id}/jobs`, `POST /api/v1/jobs/{id}/process` live with 11-step progress tracking. |
 | **Live Health Probe Endpoint** | ✅ Completed (100%) | `/health` actively probes database status, dialect, and latency. |
 | **Background Worker Process** | ✅ Completed (100%) | `worker.py` and `backend/workers/job_worker.py` with DB readiness check, queue poll cycle, and graceful signal shutdown. |
 | **Frontend Production Build** | ✅ Completed (100%) | Vite + React 18 + TypeScript builds cleanly (`dist/` created in 38s) with dark mode and API client. |
-| **Automated Tests & Startup Verification** | ✅ Completed (100%) | 170 pytest unit, auth, tender, bidder, ingest, PDF, OCR, job pipeline, classifier, extraction, normalization, validation, entity resolution, and registry tests passing, `scripts/verify_structure.py` passing with 0 warnings. |
+| **Automated Tests & Startup Verification** | ✅ Completed (100%) | 184 pytest unit, auth, tender, bidder, ingest, PDF, OCR, job pipeline, classifier, extraction, normalization, validation, entity resolution, registry, and cross-document verification tests passing, `scripts/verify_structure.py` passing with 0 warnings. |
 | **Project Automation Tooling** | ✅ Completed (100%) | Single-command deployment (`docker compose up --build`), `Makefile`, and `scripts/dev.ps1`. |
-| **Synthetic Demo Dataset (`seed/`)** | 🔄 Ready for Generation | `template_tender.json` created; 4+1 generator script pending Phase 18. |
+| **Synthetic Demo Dataset (`seed/`)** | 🔄 Ready for Generation | `template_tender.json` created; 4+1 generator script pending Phase 19. |
 
-**Current Repo Baseline:** Statutory Government Registry Abstraction is operational with fixture-backed mock providers for GSTN, NSDL PAN, Udyam MSME, MCA21 CIN, and CPPP Debarment. Results conform to standard schema with realistic 300–800 ms artificial latency and explicit "Source: Simulated registry (demo)" disclosure. All 170 automated tests pass.
+**Current Repo Baseline:** Cross-Document Verification and Statutory Parity Engine is operational, evaluating PAN ↔ GST, GST ↔ Udyam, Company ↔ GST/Udyam, Government Registry lookups, and chronological date plausibility with strictly conservative non-fraud terminology and structured finding results. All 184 automated tests pass.
 
 ---
 
@@ -204,8 +205,8 @@ In public procurement under GFR 2017 and CVC guidelines, procurement officers ma
 
 ## 8. Next Recommended Step
  
-**Execute Phase 18 (Compliance Evaluation Engine Core & 34 YAML Rules Library):**
+**Execute Phase 19 (Risk Scoring Engine & Anomaly Detection Signals):**
 1. Implement synthetic bidder document generator (`seed/generate_demo_docs.py`) to produce the 4+1 demo bidder PDFs (scanned + digital) and ground truth fixtures.
-2. Build Compliance Engine Core (`pipeline/compliance/engine.py`) evaluating the 34 statutory procurement rules in `rules/cpcl_goods_v1.yaml`.
-3. Validate deterministic rule executions against statutory bidder evidence.
-4. Begin Phase 18 implementation per timeline in `docs/05`.
+2. Build Risk Scorer (`pipeline/risk/scorer.py`) and Anomaly Detector (`pipeline/risk/anomaly.py`) evaluating the 12 weighted risk signals from `rules/risk_weights.yaml`.
+3. Validate overall bidder risk composite scores and top risk drivers against ground truth.
+4. Begin Phase 19 implementation per timeline in `docs/05`.
