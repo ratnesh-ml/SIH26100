@@ -75,7 +75,7 @@ def upgrade() -> None:
     op.create_table(
         'bidders',
         sa.Column('id', sa.Uuid(), nullable=False),
-        sa.Column('tender_id', sa.Uuid(), nullable=False),
+        sa.Column('tender_id', sa.Uuid(), nullable=True),
         sa.Column('declared_name', sa.String(length=500), nullable=False),
         sa.Column('canonical_name', sa.String(length=500), nullable=True),
         sa.Column('pan_enc', sa.LargeBinary(), nullable=True),
@@ -97,6 +97,28 @@ def upgrade() -> None:
     )
     op.create_index('ix_bidders_tender_id', 'bidders', ['tender_id'])
     op.create_index('ix_bidders_canonical_name', 'bidders', ['canonical_name'])
+
+    # 4b. bids
+    op.create_table(
+        'bids',
+        sa.Column('id', sa.Uuid(), nullable=False),
+        sa.Column('tender_id', sa.Uuid(), nullable=False),
+        sa.Column('bidder_id', sa.Uuid(), nullable=False),
+        sa.Column('bid_number', sa.String(length=100), nullable=False),
+        sa.Column('status', sa.String(length=50), nullable=False, server_default='SUBMITTED'),
+        sa.Column('submission_date', sa.DateTime(timezone=True), nullable=True),
+        sa.Column('technical_score', sa.Numeric(precision=5, scale=2), nullable=True),
+        sa.Column('financial_quote', sa.Numeric(precision=16, scale=2), nullable=True),
+        sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
+        sa.CheckConstraint("status IN ('PENDING', 'SUBMITTED', 'UNDER_EVALUATION', 'QUALIFIED', 'NOT_QUALIFIED', 'DISQUALIFIED', 'WITHDRAWN')", name='check_bid_status'),
+        sa.ForeignKeyConstraint(['bidder_id'], ['bidders.id'], ondelete='CASCADE'),
+        sa.ForeignKeyConstraint(['tender_id'], ['tenders.id'], ondelete='CASCADE'),
+        sa.PrimaryKeyConstraint('id'),
+        sa.UniqueConstraint('tender_id', 'bidder_id', name='uq_tender_bidder_bid'),
+    )
+    op.create_index('ix_bids_tender_id', 'bids', ['tender_id'])
+    op.create_index('ix_bids_bidder_id', 'bids', ['bidder_id'])
+    op.create_index('ix_bids_bid_number', 'bids', ['bid_number'], unique=True)
 
     # 5. documents
     op.create_table(
@@ -347,6 +369,7 @@ def downgrade() -> None:
     op.drop_table('extracted_fields')
     op.drop_table('document_pages')
     op.drop_table('documents')
+    op.drop_table('bids')
     op.drop_table('bidders')
     op.drop_table('criteria')
     op.drop_table('tenders')

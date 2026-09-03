@@ -71,6 +71,7 @@ class Tender(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     creator: Mapped["User"] = relationship("User", back_populates="created_tenders")
     criteria: Mapped[list["Criterion"]] = relationship("Criterion", back_populates="tender", cascade="all, delete-orphan")
     bidders: Mapped[list["Bidder"]] = relationship("Bidder", back_populates="tender", cascade="all, delete-orphan")
+    bids: Mapped[list["Bid"]] = relationship("Bid", back_populates="tender", cascade="all, delete-orphan")
     links: Mapped[list["BidderLink"]] = relationship("BidderLink", back_populates="tender", cascade="all, delete-orphan")
     reports: Mapped[list["Report"]] = relationship("Report", back_populates="tender", cascade="all, delete-orphan")
 
@@ -107,7 +108,7 @@ class Bidder(Base, UUIDPrimaryKeyMixin, TimestampMixin):
         ),
     )
 
-    tender_id: Mapped[uuid.UUID] = mapped_column(UUID_TYPE, ForeignKey("tenders.id"), nullable=False)
+    tender_id: Mapped[Optional[uuid.UUID]] = mapped_column(UUID_TYPE, ForeignKey("tenders.id"), nullable=True)
     declared_name: Mapped[str] = mapped_column(String(500), nullable=False)
     canonical_name: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
     pan_enc: Mapped[Optional[bytes]] = mapped_column(LargeBinary, nullable=True)
@@ -122,7 +123,8 @@ class Bidder(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     risk_band: Mapped[str] = mapped_column(String(50), default="LOW")
     review_state: Mapped[str] = mapped_column(String(50), default="PENDING")
 
-    tender: Mapped["Tender"] = relationship("Tender", back_populates="bidders")
+    tender: Mapped[Optional["Tender"]] = relationship("Tender", back_populates="bidders")
+    bids: Mapped[list["Bid"]] = relationship("Bid", back_populates="bidder", cascade="all, delete-orphan")
     documents: Mapped[list["Document"]] = relationship("Document", back_populates="bidder", cascade="all, delete-orphan")
     findings: Mapped[list["Finding"]] = relationship("Finding", back_populates="bidder", cascade="all, delete-orphan")
     verification_events: Mapped[list["VerificationEvent"]] = relationship("VerificationEvent", back_populates="bidder", cascade="all, delete-orphan")
@@ -131,6 +133,30 @@ class Bidder(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     decisions: Mapped[list["Decision"]] = relationship("Decision", back_populates="bidder", cascade="all, delete-orphan")
     jobs: Mapped[list["Job"]] = relationship("Job", back_populates="bidder", cascade="all, delete-orphan")
     reports: Mapped[list["Report"]] = relationship("Report", back_populates="bidder")
+
+
+class Bid(Base, UUIDPrimaryKeyMixin, TimestampMixin):
+    __tablename__ = "bids"
+    __table_args__ = (
+        UniqueConstraint("tender_id", "bidder_id", name="uq_tender_bidder_bid"),
+        Index("ix_bids_tender_id", "tender_id"),
+        Index("ix_bids_bidder_id", "bidder_id"),
+        CheckConstraint(
+            "status IN ('PENDING', 'SUBMITTED', 'UNDER_EVALUATION', 'QUALIFIED', 'NOT_QUALIFIED', 'DISQUALIFIED', 'WITHDRAWN')",
+            name="check_bid_status",
+        ),
+    )
+
+    tender_id: Mapped[uuid.UUID] = mapped_column(UUID_TYPE, ForeignKey("tenders.id", ondelete="CASCADE"), nullable=False)
+    bidder_id: Mapped[uuid.UUID] = mapped_column(UUID_TYPE, ForeignKey("bidders.id", ondelete="CASCADE"), nullable=False)
+    bid_number: Mapped[str] = mapped_column(String(100), unique=True, index=True, nullable=False)
+    status: Mapped[str] = mapped_column(String(50), default="SUBMITTED", server_default="SUBMITTED")
+    submission_date: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    technical_score: Mapped[Optional[float]] = mapped_column(Numeric(5, 2), nullable=True)
+    financial_quote: Mapped[Optional[float]] = mapped_column(Numeric(16, 2), nullable=True)
+
+    tender: Mapped["Tender"] = relationship("Tender", back_populates="bids")
+    bidder: Mapped["Bidder"] = relationship("Bidder", back_populates="bids")
 
 
 class Document(Base, UUIDPrimaryKeyMixin, TimestampMixin):

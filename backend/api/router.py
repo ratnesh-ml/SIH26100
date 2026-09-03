@@ -23,7 +23,17 @@ from backend.schemas import (
     TenderDetail,
     TenderListResponse,
     ComplianceMatrix,
+    BidderCreate,
+    BidderUpdate,
+    BidderSummary,
+    BidderProfile,
     BidderDetail,
+    BidderListResponse,
+    BidCreate,
+    AttachBidderRequest,
+    BidStatusUpdate,
+    BidOut,
+    BidListResponse,
     FindingOut,
     DecisionCreate,
     DecisionOut,
@@ -33,6 +43,7 @@ from backend.schemas import (
     AuditVerifyOut,
 )
 from backend.services.tender_service import TenderService
+from backend.services.bidder_service import BidderService
 
 logger = logging.getLogger("vigilbid.api")
 api_router = APIRouter()
@@ -163,23 +174,118 @@ async def get_compliance_matrix(
     return ComplianceMatrix(tender_id=tender_id, criteria=[], bidders=[])
 
 
-# 3. Bidder Endpoints
-@api_router.post("/tenders/{tender_id}/bidders", tags=["Bidders"])
-async def upload_bidder(
-    tender_id: uuid.UUID,
+# 3. Bidder & Bid Endpoints
+@api_router.post("/bidders", response_model=BidderProfile, status_code=status.HTTP_201_CREATED, tags=["Bidders"])
+async def create_bidder(
+    payload: BidderCreate,
     current_user: Annotated[User, Depends(require_role(UserRole.OFFICER, UserRole.ADMIN))],
+    session: Annotated[AsyncSession, Depends(get_db_session)],
 ):
-    """Upload bidder document package and enqueue processing job."""
-    raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED, detail="Bidder upload not yet implemented")
+    """Create vendor profile with encrypted PAN/GSTIN and legal canonicalization."""
+    return await BidderService.create_bidder(session, payload)
 
 
-@api_router.get("/bidders/{bidder_id}", response_model=BidderDetail, tags=["Bidders"])
+@api_router.get("/bidders", response_model=BidderListResponse, tags=["Bidders"])
+async def list_bidders(
+    page: int = Query(1, ge=1),
+    limit: int = Query(20, ge=1, le=100),
+    search: Optional[str] = Query(None, description="Search by declared or canonical vendor name"),
+    current_user: Annotated[User, Depends(get_current_user)] = None,
+    session: Annotated[AsyncSession, Depends(get_db_session)] = None,
+):
+    """List all registered vendor profiles with search and pagination."""
+    result = await BidderService.list_bidders(session, page=page, limit=limit, search=search)
+    return BidderListResponse(**result)
+
+
+@api_router.get("/bidders/{bidder_id}", response_model=BidderProfile, tags=["Bidders"])
 async def get_bidder(
     bidder_id: uuid.UUID,
     current_user: Annotated[User, Depends(get_current_user)],
+    session: Annotated[AsyncSession, Depends(get_db_session)],
 ):
-    """Retrieve bidder summary and verification details."""
-    raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED, detail="Bidder detail not yet implemented")
+    """Retrieve vendor master profile with masked PAN/GSTIN."""
+    return await BidderService.get_bidder(session, bidder_id)
+
+
+@api_router.patch("/bidders/{bidder_id}", response_model=BidderProfile, tags=["Bidders"])
+async def update_bidder(
+    bidder_id: uuid.UUID,
+    payload: BidderUpdate,
+    current_user: Annotated[User, Depends(require_role(UserRole.OFFICER, UserRole.ADMIN))],
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+):
+    """Update vendor master profile contact, address, or company registration details."""
+    return await BidderService.update_bidder(session, bidder_id, payload)
+
+
+@api_router.post("/tenders/{tender_id}/bidders", response_model=BidOut, status_code=status.HTTP_201_CREATED, tags=["Bidders"])
+async def attach_bidder_to_tender(
+    tender_id: uuid.UUID,
+    payload: AttachBidderRequest,
+    current_user: Annotated[User, Depends(require_role(UserRole.OFFICER, UserRole.ADMIN))],
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+):
+    """Register and attach a bidder to a tender, creating a formal Bid record."""
+    return await BidderService.attach_bidder_to_tender(session, tender_id, payload)
+
+
+@api_router.get("/tenders/{tender_id}/bidders", response_model=list[BidOut], tags=["Bidders"])
+async def list_tender_bidders(
+    tender_id: uuid.UUID,
+    current_user: Annotated[User, Depends(get_current_user)],
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+):
+    """List all participating bidders and bids for a specific tender."""
+    return await BidderService.list_tender_bidders(session, tender_id)
+
+
+@api_router.post("/bids", response_model=BidOut, status_code=status.HTTP_201_CREATED, tags=["Bids"])
+async def create_bid(
+    payload: BidCreate,
+    current_user: Annotated[User, Depends(require_role(UserRole.OFFICER, UserRole.ADMIN))],
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+):
+    """Create a bid record explicitly linking tender and bidder."""
+    return await BidderService.create_bid(session, payload)
+
+
+@api_router.get("/bids", response_model=BidListResponse, tags=["Bids"])
+async def list_bids(
+    tender_id: Optional[uuid.UUID] = Query(None),
+    bidder_id: Optional[uuid.UUID] = Query(None),
+    status: Optional[str] = Query(None),
+    page: int = Query(1, ge=1),
+    limit: int = Query(20, ge=1, le=100),
+    current_user: Annotated[User, Depends(get_current_user)] = None,
+    session: Annotated[AsyncSession, Depends(get_db_session)] = None,
+):
+    """List bids filterable by tender, bidder, and evaluation status."""
+    result = await BidderService.list_bids(
+        session, tender_id=tender_id, bidder_id=bidder_id, status_filter=status, page=page, limit=limit
+    )
+    return BidListResponse(**result)
+
+
+@api_router.get("/bids/{bid_id}", response_model=BidOut, tags=["Bids"])
+async def get_bid(
+    bid_id: uuid.UUID,
+    current_user: Annotated[User, Depends(get_current_user)],
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+):
+    """Retrieve detailed bid metadata and evaluation status."""
+    return await BidderService.get_bid(session, bid_id)
+
+
+@api_router.patch("/bids/{bid_id}/status", response_model=BidOut, tags=["Bids"])
+async def update_bid_status(
+    bid_id: uuid.UUID,
+    payload: BidStatusUpdate,
+    current_user: Annotated[User, Depends(require_role(UserRole.OFFICER, UserRole.EVALUATOR, UserRole.ADMIN))],
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+):
+    """Update bid evaluation lifecycle status."""
+    return await BidderService.update_bid_status(session, bid_id, payload)
 
 
 @api_router.post("/bidders/{bidder_id}/documents/{doc_id}/retag", tags=["Bidders"])

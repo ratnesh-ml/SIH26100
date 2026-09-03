@@ -15,11 +15,22 @@ from backend.schemas.tender import (
     ComplianceMatrix,
 )
 from backend.schemas.bidder import (
+    BidderCreate,
+    BidderUpdate,
     BidderSummary,
+    BidderProfile,
     BidderDetail,
+    BidderListResponse,
     RiskDriverOut,
     AnomalySignalOut,
     RiskProfileOut,
+)
+from backend.schemas.bid import (
+    BidCreate,
+    AttachBidderRequest,
+    BidStatusUpdate,
+    BidOut,
+    BidListResponse,
 )
 from backend.schemas.finding import EvidenceItem, FindingOut, DecisionCreate, DecisionOut
 from backend.schemas.job import StepStatus, JobStatus
@@ -35,13 +46,24 @@ __all__ = [
     "CriterionBase",
     "CriterionOut",
     "TenderCreate",
+    "TenderUpdate",
     "TenderSummary",
     "TenderDetail",
+    "TenderListResponse",
     "MatrixCell",
     "BidderMatrixRow",
     "ComplianceMatrix",
+    "BidderCreate",
+    "BidderUpdate",
     "BidderSummary",
+    "BidderProfile",
     "BidderDetail",
+    "BidderListResponse",
+    "BidCreate",
+    "AttachBidderRequest",
+    "BidStatusUpdate",
+    "BidOut",
+    "BidListResponse",
     "RiskDriverOut",
     "AnomalySignalOut",
     "RiskProfileOut",

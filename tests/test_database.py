@@ -23,6 +23,7 @@ EXPECTED_TABLES = {
     "tenders",
     "criteria",
     "bidders",
+    "bids",
     "documents",
     "document_pages",
     "extracted_fields",
@@ -39,8 +40,8 @@ EXPECTED_TABLES = {
 }
 
 
-def test_metadata_contains_all_17_tables():
-    """Verify that SQLAlchemy metadata defines precisely the 17 locked tables."""
+def test_metadata_contains_all_18_tables():
+    """Verify that SQLAlchemy metadata defines precisely the 18 locked tables."""
     table_names = set(Base.metadata.tables.keys())
     assert table_names == EXPECTED_TABLES, f"Missing tables: {EXPECTED_TABLES - table_names}"
 
