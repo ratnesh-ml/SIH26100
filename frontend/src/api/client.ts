@@ -13,6 +13,8 @@ import {
   ComplianceMatrix,
   DecisionOut,
   CompleteReviewResponse,
+  BidderLinkGraphOut,
+  AnomalySignalOut,
   JobStatus,
   User,
 } from '../types';
@@ -150,6 +152,14 @@ export async function fetchBidderFindings(bidderId: string, statusFilter?: strin
 
 export async function fetchBidderRisk(bidderId: string): Promise<RiskProfileOut> {
   return request<RiskProfileOut>(`${API_BASE}/bidders/${bidderId}/risk`);
+}
+
+export async function fetchBidderAnomalies(bidderId: string): Promise<AnomalySignalOut[]> {
+  return request<AnomalySignalOut[]>(`${API_BASE}/bidders/${bidderId}/anomalies`);
+}
+
+export async function fetchTenderGraph(tenderId: string): Promise<BidderLinkGraphOut> {
+  return request<BidderLinkGraphOut>(`${API_BASE}/tenders/${tenderId}/graph`);
 }
 
 // 5. Ingestion & Document Uploads

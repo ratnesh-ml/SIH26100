@@ -53,6 +53,7 @@ interface BidderDetailViewProps {
   currentUser?: User;
   onOpenPipeline?: (jobId: string, bidderId: string) => void;
   onOpenUploadModal?: () => void;
+  onOpenRiskAnomalies?: () => void;
   canUpload?: boolean;
 }
 
@@ -103,6 +104,7 @@ export const BidderDetailView: React.FC<BidderDetailViewProps> = ({
   currentUser,
   onOpenPipeline,
   onOpenUploadModal,
+  onOpenRiskAnomalies,
   canUpload,
 }) => {
   const [bidder, setBidder] = useState<BidderDetail | null>(null);
@@ -487,6 +489,17 @@ export const BidderDetailView: React.FC<BidderDetailViewProps> = ({
             <Download className="w-3.5 h-3.5 text-sky-400" />
             <span>CVC Dossier (PDF)</span>
           </a>
+
+          {onOpenRiskAnomalies && (
+            <button
+              onClick={onOpenRiskAnomalies}
+              className="py-1.5 px-3 rounded-lg bg-slate-950 hover:bg-slate-800 border border-slate-800 text-amber-400 hover:text-white font-medium text-xs inline-flex items-center gap-1.5 transition-colors"
+              title="Inspect Forensic Risk Drivers & Document Anomalies"
+            >
+              <ShieldAlert className="w-3.5 h-3.5" />
+              <span>Risk & Anomalies</span>
+            </button>
+          )}
 
           {canUpload && onOpenUploadModal && (
             <button

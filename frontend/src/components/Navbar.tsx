@@ -4,7 +4,7 @@ import { User } from '../types';
 
 interface NavbarProps {
   currentUser: User | null;
-  activeView: 'tenders' | 'matrix' | 'bidders' | 'bidder-detail' | 'pipeline';
+  activeView: 'tenders' | 'matrix' | 'bidders' | 'bidder-detail' | 'pipeline' | 'risk-anomalies' | 'graph';
   onNavigate: (view: 'tenders' | 'bidders') => void;
   onLogout: () => void;
   healthStatus?: string;
@@ -17,8 +17,12 @@ export const Navbar: React.FC<NavbarProps> = ({
   onLogout,
   healthStatus,
 }) => {
-  const isTendersActive = activeView === 'tenders' || activeView === 'matrix';
-  const isBiddersActive = activeView === 'bidders' || activeView === 'bidder-detail' || activeView === 'pipeline';
+  const isTendersActive = activeView === 'tenders' || activeView === 'matrix' || activeView === 'graph';
+  const isBiddersActive =
+    activeView === 'bidders' ||
+    activeView === 'bidder-detail' ||
+    activeView === 'pipeline' ||
+    activeView === 'risk-anomalies';
 
   return (
     <header className="border-b border-slate-800 bg-slate-900/90 backdrop-blur px-6 py-3.5 flex items-center justify-between sticky top-0 z-40">

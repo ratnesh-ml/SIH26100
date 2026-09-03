@@ -48,6 +48,7 @@ from backend.schemas import (
     CompleteReviewResponse,
     JobStatus,
     StepStatus,
+    AnomalySignalOut,
     RiskProfileOut,
     AuditEventOut,
     AuditVerifyOut,
@@ -651,23 +652,28 @@ async def complete_bid_review(
     return await DecisionService.complete_review_for_bid(session, bid_id, current_user)
 
 
-# 6. Risk Profile & Graph
+# 6. Risk Profile & Anomalies
 @api_router.get("/bidders/{bidder_id}/risk", response_model=RiskProfileOut, tags=["Risk"])
 async def get_risk_profile(
     bidder_id: uuid.UUID,
     current_user: Annotated[User, Depends(get_current_user)],
+    session: Annotated[AsyncSession, Depends(get_db_session)],
 ):
     """Retrieve transparent risk score, drivers, and forensic anomalies."""
-    return RiskProfileOut(bidder_id=bidder_id, score=0, band="LOW", drivers=[], anomalies=[])
+    risk_data = await BidderService.get_risk_profile(session, bidder_id)
+    return RiskProfileOut(**risk_data)
 
 
-@api_router.get("/tenders/{tender_id}/graph", tags=["Graph"])
-async def get_link_graph(
-    tender_id: uuid.UUID,
+@api_router.get("/bidders/{bidder_id}/anomalies", response_model=list[AnomalySignalOut], tags=["Risk"])
+async def get_bidder_anomalies(
+    bidder_id: uuid.UUID,
     current_user: Annotated[User, Depends(get_current_user)],
+    session: Annotated[AsyncSession, Depends(get_db_session)],
 ):
-    """Return cross-bidder entity and attribute links."""
-    return {"nodes": [], "edges": []}
+    """Retrieve document structural and forensic anomalies for a bidder."""
+    risk_data = await BidderService.get_risk_profile(session, bidder_id)
+    return [AnomalySignalOut(**a) for a in risk_data.get("anomalies", [])]
+
 
 
 # 7. Procurement Copilot & RAG Knowledge Base
@@ -920,7 +926,7 @@ async def check_registry(
 @api_router.get("/tenders/{tender_id}/graph", response_model=BidderLinkGraphOut, tags=["Risk & Collusion"])
 async def get_tender_bidder_graph(
     tender_id: uuid.UUID,
-    current_user: Annotated[User, Depends(require_role(UserRole.OFFICER, UserRole.EVALUATOR, UserRole.VIGILANCE, UserRole.ADMIN))],
+    current_user: Annotated[User, Depends(get_current_user)],
     session: Annotated[AsyncSession, Depends(get_db_session)],
 ):
     """Retrieve the Cross-Bidder Link Graph for all bidders attached to a tender."""

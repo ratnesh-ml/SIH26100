@@ -1,8 +1,8 @@
 # VigilBid (SIH26100) — Build Status & Transition Baseline
 
-**Document Version:** 2.23.0  
+**Document Version:** 2.24.0  
 **Date:** September 2026  
-**Status:** Phase 34 Complete — Primary Bidder Cockpit (Screen S6) Operational  
+**Status:** Phase 35 Complete — Forensic Risk, Document Anomalies, and Cross-Bidder Collusion Graph Views Operational  
 **Target:** SIH Grand Finale — Problem Statement SIH26100 (CPCL / Ministry of Petroleum & Natural Gas)
 
 ---
@@ -80,11 +80,12 @@ In public procurement under GFR 2017 and CVC guidelines, procurement officers ma
 | **Document Upload & Pipeline Stepper (S4/S5)** | ✅ Completed (100%) | Screen S4 (UploadModal) & Screen S5 (PipelineStepperView) wired to backend contracts: Drag-and-drop ZIP/PDF package upload with SHA-256 deduplication and validation, real-time 11-step forensic pipeline stepper (Classify, OCR, Extract, Normalize, Resolve, Verify, Rules, Anomalies, Risk, Dossier) with per-step execution status and durations, live 2s auto-polling, error state highlighting with retry action (`POST /jobs/{id}/process`), and ingested document filings table with inline document re-tagging dropdown (`POST /bidders/{id}/documents/{doc_id}/retag`). Builds in 3.01s. |
 | **Bidder Compliance Matrix (Screen S3)** | ✅ Completed (100%) | Screen S3 (ComplianceMatrixView) connected to actual backend API (`GET /tenders/{id}/matrix`): Bidder rows × criteria columns comparative evaluation heatmap, interactive PASS / WARN / REVIEW / FAIL status chips with deep linking to Bidder Cockpit, KPI status counters, composite risk score and band indicators, multi-dimensional filtering (overall status, risk level, bidder name text search), sorting by risk/name/status, sticky left column for wide displays, and CVC / GFR 2017 compliant legend. Builds in 3.24s. |
 | **Primary Bidder Cockpit (Screen S6)** | ✅ Completed (100%) | Screen S6 (BidderDetailView) implementing the "one screen that wins": Three-column layout (Left Criteria Rail with category grouping and status filters; Center Evidence Viewer with raster page PNG, zoom/page controls, and bounding box highlight rectangles; Right Finding Card + Officer Decision Panel with Accept/Clarify/Override/Reject actions, justification validation, and audit decision history), declared vs canonical names, entity confidence pill, overall status badge, composite risk gauge, complete review action, and collapsible bottom drawer for forensic risk drivers and structural document anomalies. Builds in 2.75s. |
-| **Automated Tests & Startup Verification** | ✅ Completed (100%) | 338 pytest unit, auth, tender, bidder, ingest, PDF, OCR, job pipeline, classifier, extraction, normalization, validation, entity resolution, registry, cross-document verification, tender extraction, compliance rules, risk scoring, document anomaly, cross-bidder graph, evidence model, connected pipeline runner, full pipeline integration, cryptographic audit hash-chain, human-in-the-loop review, procurement RAG, procurement copilot, page image streaming, and CVC dossier report tests passing, `scripts/verify_structure.py` passing with 0 warnings. |
+| **Risk, Anomalies & Cross-Bidder Graph Views** | ✅ Completed (100%) | `RiskAnomalyView.tsx` (Score 0-100 gauge, risk bands, risk drivers table with score contributions, entity resolution confidence, document anomalies table with severity filters, forensic code badges, and raw technical evidence metadata panel) and `CrossBidderGraphView.tsx` (Screen S7: Interactive SVG entity relationship canvas with bidder nodes and attribute nodes, CVC related-party collusion warning banners, KPI summary cards, inspector sidebar with properties and evidence JSON, collusion pairs table, edges table, and nodes table). Builds in 4.70s. |
+| **Automated Tests & Startup Verification** | ✅ Completed (100%) | 340 pytest unit, auth, tender, bidder, ingest, PDF, OCR, job pipeline, classifier, extraction, normalization, validation, entity resolution, registry, cross-document verification, tender extraction, compliance rules, risk scoring, document anomaly, cross-bidder graph, evidence model, connected pipeline runner, full pipeline integration, cryptographic audit hash-chain, human-in-the-loop review, procurement RAG, procurement copilot, page image streaming, risk profile API, anomalies API, and cross-bidder graph API tests passing. |
 | **Project Automation Tooling** | ✅ Completed (100%) | Single-command deployment (`docker compose up --build`), `Makefile`, and `scripts/dev.ps1`. |
-| **Synthetic Demo Dataset (`seed/`)** | 🔄 Ready for Generation | `template_tender.json` created; 4+1 generator script pending Phase 26. |
+| **Synthetic Demo Dataset (`seed/`)** | 🔄 Ready for Generation | `template_tender.json` created; 4+1 generator script pending next milestone. |
 
-**Current Repo Baseline:** The frontend application features the primary Bidder Cockpit (Screen S6) with a full three-column evaluation layout (Criteria Rail, Evidence Viewer with raster page PNGs and bounding box overlays, Finding Card + Officer Decision Panel with audit history) coupled to backend REST endpoints. Officers can inspect extracted vs expected benchmarks, review forensic explanations and statutory clauses, record human decisions with cryptographic audit logging, execute complete review workflows, and inspect forensic risk point drivers and anomaly signals. All 338 backend tests and frontend Vite production builds pass with zero errors.
+**Current Repo Baseline:** The frontend application features complete views for Forensic Risk Breakdown, Document Structural Anomalies, and Cross-Bidder Collusion & Link Graph (Screen S7), directly integrated with live backend endpoints (`GET /api/v1/bidders/{id}/risk`, `GET /api/v1/bidders/{id}/anomalies`, `GET /api/v1/tenders/{id}/graph`). The risk view presents composite scores (0-100), band indicators, and point driver attributions with evidentiary links. The anomaly view details severity levels, anomaly types, technical descriptions, and raw forensic metadata. The graph view delivers an interactive SVG topology, CVC-aligned related-party collusion alerts, inspector sidebars, and comprehensive collusion pairs and edge data tables. All 340 backend tests and Vite production builds pass with zero errors.
 
 ---
 
@@ -226,8 +227,8 @@ In public procurement under GFR 2017 and CVC guidelines, procurement officers ma
 
 ## 8. Next Recommended Step
  
-**Execute Phase 35 (Synthetic Demo Dataset & Dossier Generation):**
+**Execute Phase 36 (Synthetic Demo Dataset & Dossier Generation):**
 1. Generate complete 4+1 demo bidder dataset (`B1` clean MSE, `B2` minor turnover gap, `B3` hard PAN-GSTIN mismatch, `B4` shell company / cross-bidder collusion, `B5` control).
 2. Validate end-to-end processing across all 5 bidders with live PDF dossiers.
-3. Prepare for Phase 35 demo flow alignment.
+3. Prepare for demo flow alignment and final documentation.
 

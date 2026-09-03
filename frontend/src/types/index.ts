@@ -215,16 +215,66 @@ export interface AnomalySignalOut {
   severity: string;
   points: number;
   description: string;
+  evidence?: Record<string, any>;
 }
 
 export interface RiskProfileOut {
   bidder_id: string;
-  risk_score: number;
-  risk_band: 'LOW' | 'MEDIUM' | 'HIGH';
+  score?: number;
+  risk_score?: number;
+  band?: 'LOW' | 'MEDIUM' | 'HIGH';
+  risk_band?: 'LOW' | 'MEDIUM' | 'HIGH';
   entity_confidence?: number;
   drivers: RiskDriverOut[];
   anomalies: AnomalySignalOut[];
 }
+
+export interface GraphNodeOut {
+  id: string;
+  label: string;
+  type: string;
+  node_type?: string;
+  properties?: Record<string, any>;
+}
+
+export interface GraphEdgeOut {
+  source: string;
+  target: string;
+  reason: string;
+  evidence?: Record<string, any>;
+  strength: number;
+  edge_type?: string;
+}
+
+export interface BidderPairLinkOut {
+  source_bidder: string;
+  target_bidder: string;
+  source_bidder_name: string;
+  target_bidder_name: string;
+  reason: string;
+  evidence?: Record<string, any>;
+  strength: number;
+  shared_attributes?: Record<string, any>[];
+  cvc_warning?: string;
+}
+
+export interface GraphSummaryOut {
+  tender_id?: string;
+  total_bidders: number;
+  linked_bidders_count: number;
+  collusion_clusters_count: number;
+  total_direct_links: number;
+  max_link_strength: number;
+}
+
+export interface BidderLinkGraphOut {
+  nodes: GraphNodeOut[];
+  edges: GraphEdgeOut[];
+  direct_bidder_links?: BidderPairLinkOut[];
+  clusters?: string[][];
+  summary?: GraphSummaryOut;
+}
+
 
 export interface StepStatus {
   name: string;

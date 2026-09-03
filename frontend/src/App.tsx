@@ -9,6 +9,8 @@ import { BidderDetailView } from './components/BidderDetailView';
 import { UploadModal } from './components/UploadModal';
 import { PipelineStepperView } from './components/PipelineStepperView';
 import { ComplianceMatrixView } from './components/ComplianceMatrixView';
+import { RiskAnomalyView } from './components/RiskAnomalyView';
+import { CrossBidderGraphView } from './components/CrossBidderGraphView';
 import { BidderSummary, TenderDetail, TenderSummary, UploadPackageResponse, User } from './types';
 
 export default function App() {
@@ -17,7 +19,9 @@ export default function App() {
   const [initialLoading, setInitialLoading] = useState(true);
 
   // Navigation & View State
-  const [activeView, setActiveView] = useState<'tenders' | 'matrix' | 'bidders' | 'bidder-detail' | 'pipeline'>('tenders');
+  const [activeView, setActiveView] = useState<
+    'tenders' | 'matrix' | 'bidders' | 'bidder-detail' | 'pipeline' | 'risk-anomalies' | 'graph'
+  >('tenders');
   const [selectedTender, setSelectedTender] = useState<TenderSummary | null>(null);
   const [selectedBidderId, setSelectedBidderId] = useState<string | null>(null);
   const [activeJobId, setActiveJobId] = useState<string | null>(null);
@@ -133,6 +137,10 @@ export default function App() {
                   setSelectedTender(t);
                   setActiveView('matrix');
                 }}
+                onViewGraph={(t) => {
+                  setSelectedTender(t);
+                  setActiveView('graph');
+                }}
                 onOpenCreateModal={() => setIsCreateModalOpen(true)}
               />
             )}
@@ -145,6 +153,7 @@ export default function App() {
                   setSelectedBidderId(bId);
                   setActiveView('bidder-detail');
                 }}
+                onViewGraph={() => setActiveView('graph')}
                 onOpenUploadModal={() => handleOpenUploadForTender(selectedTender.id)}
                 canUpload={currentUser.role === 'officer' || currentUser.role === 'admin'}
               />
@@ -169,6 +178,7 @@ export default function App() {
                 bidderId={selectedBidderId}
                 currentUser={currentUser}
                 onBack={() => setActiveView('bidders')}
+                onOpenRiskAnomalies={() => setActiveView('risk-anomalies')}
                 onOpenPipeline={(jId, bId) => {
                   setActiveJobId(jId);
                   setActiveJobBidderId(bId);
@@ -180,6 +190,25 @@ export default function App() {
                   setIsUploadModalOpen(true);
                 }}
                 canUpload={currentUser.role === 'officer' || currentUser.role === 'admin'}
+              />
+            )}
+
+            {activeView === 'risk-anomalies' && selectedBidderId && (
+              <RiskAnomalyView
+                bidderId={selectedBidderId}
+                onBack={() => setActiveView('bidder-detail')}
+                onNavigateToCockpit={() => setActiveView('bidder-detail')}
+              />
+            )}
+
+            {activeView === 'graph' && selectedTender && (
+              <CrossBidderGraphView
+                tender={selectedTender}
+                onBack={() => setActiveView('matrix')}
+                onSelectBidder={(bId) => {
+                  setSelectedBidderId(bId);
+                  setActiveView('bidder-detail');
+                }}
               />
             )}
 

@@ -14,6 +14,7 @@ import {
   ArrowUpDown,
   Search,
   ExternalLink,
+  Share2,
 } from 'lucide-react';
 import { fetchComplianceMatrix } from '../api/client';
 import { ComplianceMatrix, FindingStatus, TenderSummary } from '../types';
@@ -22,6 +23,7 @@ interface ComplianceMatrixViewProps {
   tender: TenderSummary;
   onBack: () => void;
   onSelectBidder: (bidderId: string) => void;
+  onViewGraph?: () => void;
   onOpenUploadModal: () => void;
   canUpload: boolean;
 }
@@ -33,6 +35,7 @@ export const ComplianceMatrixView: React.FC<ComplianceMatrixViewProps> = ({
   tender,
   onBack,
   onSelectBidder,
+  onViewGraph,
   onOpenUploadModal,
   canUpload,
 }) => {
@@ -223,6 +226,16 @@ export const ComplianceMatrixView: React.FC<ComplianceMatrixViewProps> = ({
             <Download className="w-3.5 h-3.5 text-sky-400" />
             <span>Export Tender Report (PDF)</span>
           </a>
+
+          {onViewGraph && (
+            <button
+              onClick={onViewGraph}
+              className="py-1.5 px-3 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white font-medium text-xs inline-flex items-center gap-1.5 transition-colors"
+            >
+              <Share2 className="w-3.5 h-3.5 text-amber-400" />
+              <span>Collusion Graph</span>
+            </button>
+          )}
 
           {canUpload && (
             <button

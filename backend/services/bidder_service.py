@@ -10,7 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from backend.core.security import encrypt_identifier, decrypt_identifier
-from backend.models.entities import Bidder, Bid, Tender
+from backend.models.entities import Bidder, Bid, Tender, RiskDriver, AnomalySignal
 from backend.schemas.bidder import BidderCreate, BidderUpdate, BidderProfile
 from backend.schemas.bid import BidCreate, AttachBidderRequest, BidStatusUpdate, BidOut
 from backend.services.audit_service import AuditService
@@ -554,3 +554,51 @@ class BidderService:
             logger.warning("Audit logging warning on update_bid_status %s: %s", bid_id, exc)
 
         return await BidderService.get_bid(session, bid_id)
+
+    @staticmethod
+    async def get_risk_profile(session: AsyncSession, bidder_id: uuid.UUID) -> dict[str, Any]:
+        """Fetch transparent risk score, band, risk drivers, and anomaly signals for a bidder."""
+        stmt = (
+            select(Bidder)
+            .options(
+                selectinload(Bidder.risk_drivers),
+                selectinload(Bidder.anomaly_signals),
+            )
+            .where(Bidder.id == bidder_id)
+        )
+        res = await session.execute(stmt)
+        bidder = res.scalar_one_or_none()
+        if not bidder:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Bidder with ID '{bidder_id}' not found.",
+            )
+
+        drivers = [
+            {
+                "driver": d.driver,
+                "points": d.points,
+                "source_ref": d.source_ref,
+            }
+            for d in (bidder.risk_drivers or [])
+        ]
+
+        anomalies = [
+            {
+                "code": a.code,
+                "severity": a.severity,
+                "points": a.points,
+                "description": a.description,
+                "evidence": a.evidence,
+            }
+            for a in (bidder.anomaly_signals or [])
+        ]
+
+        return {
+            "bidder_id": bidder.id,
+            "score": bidder.risk_score,
+            "band": bidder.risk_band,
+            "entity_confidence": float(bidder.entity_confidence) if bidder.entity_confidence is not None else None,
+            "drivers": drivers,
+            "anomalies": anomalies,
+        }

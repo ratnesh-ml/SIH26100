@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Plus, RefreshCw, FileText, Users, Calendar, AlertCircle, Loader2, ArrowRight, Table } from 'lucide-react';
+import { Plus, RefreshCw, FileText, Users, Calendar, AlertCircle, Loader2, ArrowRight, Table, Share2 } from 'lucide-react';
 import { fetchTenders } from '../api/client';
 import { TenderSummary, User } from '../types';
 
@@ -7,6 +7,7 @@ interface TenderListViewProps {
   currentUser: User;
   onSelectTender: (tender: TenderSummary) => void;
   onViewMatrix: (tender: TenderSummary) => void;
+  onViewGraph?: (tender: TenderSummary) => void;
   onOpenCreateModal: () => void;
 }
 
@@ -14,6 +15,7 @@ export const TenderListView: React.FC<TenderListViewProps> = ({
   currentUser,
   onSelectTender,
   onViewMatrix,
+  onViewGraph,
   onOpenCreateModal,
 }) => {
   const [tenders, setTenders] = useState<TenderSummary[]>([]);
@@ -205,6 +207,17 @@ export const TenderListView: React.FC<TenderListViewProps> = ({
                           <Table className="w-3 h-3" />
                           <span>Matrix</span>
                         </button>
+
+                        {onViewGraph && (
+                          <button
+                            onClick={() => onViewGraph(t)}
+                            className="px-2.5 py-1 rounded bg-amber-500/15 hover:bg-amber-500 hover:text-white border border-amber-500/30 text-amber-400 transition-colors inline-flex items-center gap-1 font-medium text-xs"
+                            title="Inspect Cross-Bidder Collusion & Link Graph"
+                          >
+                            <Share2 className="w-3 h-3" />
+                            <span>Graph</span>
+                          </button>
+                        )}
 
                         <button
                           onClick={() => onSelectTender(t)}
