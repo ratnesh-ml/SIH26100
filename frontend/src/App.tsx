@@ -6,7 +6,9 @@ import { TenderListView } from './components/TenderListView';
 import { TenderCreateModal } from './components/TenderCreateModal';
 import { BidderListView } from './components/BidderListView';
 import { BidderDetailView } from './components/BidderDetailView';
-import { BidderSummary, TenderDetail, TenderSummary, User } from './types';
+import { UploadModal } from './components/UploadModal';
+import { PipelineStepperView } from './components/PipelineStepperView';
+import { BidderSummary, TenderDetail, TenderSummary, UploadPackageResponse, User } from './types';
 
 export default function App() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -14,10 +16,17 @@ export default function App() {
   const [initialLoading, setInitialLoading] = useState(true);
 
   // Navigation & View State
-  const [activeView, setActiveView] = useState<'tenders' | 'bidders' | 'bidder-detail'>('tenders');
+  const [activeView, setActiveView] = useState<'tenders' | 'bidders' | 'bidder-detail' | 'pipeline'>('tenders');
   const [selectedTender, setSelectedTender] = useState<TenderSummary | null>(null);
   const [selectedBidderId, setSelectedBidderId] = useState<string | null>(null);
+  const [activeJobId, setActiveJobId] = useState<string | null>(null);
+  const [activeJobBidderId, setActiveJobBidderId] = useState<string | null>(null);
+
+  // Modals
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [uploadTenderId, setUploadTenderId] = useState<string | undefined>(undefined);
+  const [uploadBidderId, setUploadBidderId] = useState<string | undefined>(undefined);
   const [tenderListKey, setTenderListKey] = useState(0);
 
   useEffect(() => {
@@ -55,6 +64,8 @@ export default function App() {
     setCurrentUser(null);
     setSelectedTender(null);
     setSelectedBidderId(null);
+    setActiveJobId(null);
+    setActiveJobBidderId(null);
     setActiveView('tenders');
   };
 
@@ -68,6 +79,20 @@ export default function App() {
     setActiveView('bidder-detail');
   };
 
+  const handleOpenUploadForTender = (tenderId: string) => {
+    setUploadTenderId(tenderId);
+    setUploadBidderId(undefined);
+    setIsUploadModalOpen(true);
+  };
+
+  const handleUploadComplete = (res: UploadPackageResponse) => {
+    if (res.job_id) {
+      setActiveJobId(res.job_id);
+      setActiveJobBidderId(res.bidder_id);
+      setActiveView('pipeline');
+    }
+  };
+
   const handleTenderCreated = (_newTender: TenderDetail) => {
     // Increment key to trigger refresh in TenderListView
     setTenderListKey((prev) => prev + 1);
@@ -77,7 +102,7 @@ export default function App() {
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-sky-500/20 selection:text-sky-300">
       <Navbar
         currentUser={currentUser}
-        activeView={activeView}
+        activeView={activeView === 'pipeline' ? 'bidders' : activeView}
         onNavigate={(view) => {
           if (view === 'bidders') {
             setSelectedTender(null);
@@ -115,6 +140,8 @@ export default function App() {
                   setActiveView('tenders');
                 }}
                 onSelectBidder={handleSelectBidder}
+                onOpenUploadModal={selectedTender ? () => handleOpenUploadForTender(selectedTender.id) : undefined}
+                canUpload={currentUser.role === 'officer' || currentUser.role === 'admin'}
               />
             )}
 
@@ -122,6 +149,29 @@ export default function App() {
               <BidderDetailView
                 bidderId={selectedBidderId}
                 onBack={() => setActiveView('bidders')}
+                onOpenPipeline={(jId, bId) => {
+                  setActiveJobId(jId);
+                  setActiveJobBidderId(bId);
+                  setActiveView('pipeline');
+                }}
+                onOpenUploadModal={() => {
+                  setUploadTenderId(undefined);
+                  setUploadBidderId(selectedBidderId);
+                  setIsUploadModalOpen(true);
+                }}
+                canUpload={currentUser.role === 'officer' || currentUser.role === 'admin'}
+              />
+            )}
+
+            {activeView === 'pipeline' && activeJobId && activeJobBidderId && (
+              <PipelineStepperView
+                jobId={activeJobId}
+                bidderId={activeJobBidderId}
+                onBackToBidders={() => setActiveView('bidders')}
+                onViewBidderCockpit={(bId) => {
+                  setSelectedBidderId(bId);
+                  setActiveView('bidder-detail');
+                }}
               />
             )}
           </>
@@ -132,6 +182,14 @@ export default function App() {
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         onTenderCreated={handleTenderCreated}
+      />
+
+      <UploadModal
+        isOpen={isUploadModalOpen}
+        tenderId={uploadTenderId}
+        bidderId={uploadBidderId}
+        onClose={() => setIsUploadModalOpen(false)}
+        onUploadComplete={handleUploadComplete}
       />
 
       <footer className="border-t border-slate-800/80 px-6 py-3.5 text-xs text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-2 bg-slate-950">

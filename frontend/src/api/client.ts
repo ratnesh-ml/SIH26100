@@ -9,6 +9,8 @@ import {
   TenderCreate,
   TenderDetail,
   TenderListResponse,
+  UploadPackageResponse,
+  JobStatus,
   User,
 } from '../types';
 
@@ -141,3 +143,111 @@ export async function fetchBidderFindings(bidderId: string, statusFilter?: strin
 export async function fetchBidderRisk(bidderId: string): Promise<RiskProfileOut> {
   return request<RiskProfileOut>(`${API_BASE}/bidders/${bidderId}/risk`);
 }
+
+// 5. Ingestion & Document Uploads
+export async function uploadBidderPackage(
+  tenderId: string,
+  declaredName: string,
+  files: File[]
+): Promise<UploadPackageResponse> {
+  const formData = new FormData();
+  formData.append('declared_name', declaredName);
+  for (const file of files) {
+    formData.append('files', file);
+  }
+
+  const token = getStoredToken();
+  const headers: Record<string, string> = {};
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  const response = await fetch(`${API_BASE}/tenders/${tenderId}/bidders`, {
+    method: 'POST',
+    headers,
+    body: formData,
+  });
+
+  if (!response.ok) {
+    let errorDetail = response.statusText;
+    try {
+      const errJson = await response.json();
+      if (errJson.detail) {
+        errorDetail = typeof errJson.detail === 'string' ? errJson.detail : JSON.stringify(errJson.detail);
+      }
+    } catch {
+      // ignore
+    }
+    throw new Error(errorDetail || `HTTP ${response.status}`);
+  }
+
+  return response.json();
+}
+
+export async function uploadDocuments(
+  bidderId: string,
+  files: File[]
+): Promise<UploadPackageResponse> {
+  const formData = new FormData();
+  for (const file of files) {
+    formData.append('files', file);
+  }
+
+  const token = getStoredToken();
+  const headers: Record<string, string> = {};
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  const response = await fetch(`${API_BASE}/bidders/${bidderId}/documents`, {
+    method: 'POST',
+    headers,
+    body: formData,
+  });
+
+  if (!response.ok) {
+    let errorDetail = response.statusText;
+    try {
+      const errJson = await response.json();
+      if (errJson.detail) {
+        errorDetail = typeof errJson.detail === 'string' ? errJson.detail : JSON.stringify(errJson.detail);
+      }
+    } catch {
+      // ignore
+    }
+    throw new Error(errorDetail || `HTTP ${response.status}`);
+  }
+
+  return response.json();
+}
+
+export async function retagDocument(
+  bidderId: string,
+  docId: string,
+  docType: string
+): Promise<{ job_id: string; status: string; message: string }> {
+  return request<{ job_id: string; status: string; message: string }>(
+    `${API_BASE}/bidders/${bidderId}/documents/${docId}/retag`,
+    {
+      method: 'POST',
+      body: JSON.stringify({ doc_type: docType }),
+    }
+  );
+}
+
+// 6. Processing Jobs & Pipeline Execution
+export async function fetchJobStatus(jobId: string): Promise<JobStatus> {
+  return request<JobStatus>(`${API_BASE}/jobs/${jobId}`);
+}
+
+export async function triggerJobProcessing(jobId: string): Promise<JobStatus> {
+  return request<JobStatus>(`${API_BASE}/jobs/${jobId}/process`, {
+    method: 'POST',
+  });
+}
+
+export async function fetchBidderJobs(bidderId: string): Promise<JobStatus[]> {
+  return request<JobStatus[]>(`${API_BASE}/bidders/${bidderId}/jobs`);
+}
+
+

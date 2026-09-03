@@ -7,12 +7,16 @@ interface BidderListViewProps {
   selectedTender: TenderSummary | null;
   onBackToTenders: () => void;
   onSelectBidder: (bidder: BidderSummary) => void;
+  onOpenUploadModal?: () => void;
+  canUpload?: boolean;
 }
 
 export const BidderListView: React.FC<BidderListViewProps> = ({
   selectedTender,
   onBackToTenders,
   onSelectBidder,
+  onOpenUploadModal,
+  canUpload,
 }) => {
   const [bidders, setBidders] = useState<BidderSummary[]>([]);
   const [loading, setLoading] = useState(true);
@@ -63,27 +67,29 @@ export const BidderListView: React.FC<BidderListViewProps> = ({
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-3">
-        <button
-          onClick={onBackToTenders}
-          className="p-1.5 rounded-lg bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-400 hover:text-white transition-colors inline-flex items-center gap-1.5 text-xs font-medium"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          <span>Back to Tenders</span>
-        </button>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={onBackToTenders}
+            className="p-1.5 rounded-lg bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-400 hover:text-white transition-colors inline-flex items-center gap-1.5 text-xs font-medium"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span>Back to Tenders</span>
+          </button>
 
-        <div className="h-4 w-px bg-slate-800" />
+          <div className="h-4 w-px bg-slate-800" />
 
-        <div>
-          <h2 className="text-xl font-bold tracking-tight text-white">
-            {selectedTender ? `Participating Bidders — ${selectedTender.nit_no}` : 'All Registered Bidders'}
-          </h2>
-          <p className="text-xs text-slate-400 mt-0.5">
-            {selectedTender ? selectedTender.title : 'Global participating vendor evaluation roster'}
-          </p>
+          <div>
+            <h2 className="text-xl font-bold tracking-tight text-white">
+              {selectedTender ? `Participating Bidders — ${selectedTender.nit_no}` : 'All Registered Bidders'}
+            </h2>
+            <p className="text-xs text-slate-400 mt-0.5">
+              {selectedTender ? selectedTender.title : 'Global participating vendor evaluation roster'}
+            </p>
+          </div>
         </div>
 
-        <div className="ml-auto">
+        <div className="flex items-center gap-3">
           <button
             onClick={loadBidders}
             disabled={loading}
@@ -92,6 +98,15 @@ export const BidderListView: React.FC<BidderListViewProps> = ({
           >
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
           </button>
+
+          {canUpload && selectedTender && onOpenUploadModal && (
+            <button
+              onClick={onOpenUploadModal}
+              className="py-2 px-3.5 rounded-lg bg-sky-600 hover:bg-sky-500 text-white font-medium text-xs flex items-center gap-1.5 transition-colors shadow-sm shadow-sky-950"
+            >
+              <span>Upload Bidder Package (ZIP/PDF)</span>
+            </button>
+          )}
         </div>
       </div>
 

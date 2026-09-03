@@ -162,3 +162,38 @@ export interface RiskProfileOut {
   drivers: RiskDriverOut[];
   anomalies: AnomalySignalOut[];
 }
+
+export interface StepStatus {
+  name: string;
+  step_number: number;
+  status: 'QUEUED' | 'RUNNING' | 'DONE' | 'FAILED' | 'SKIPPED';
+  started_at?: string;
+  ended_at?: string;
+  meta?: Record<string, any>;
+}
+
+export interface JobStatus {
+  id: string;
+  bidder_id: string;
+  status: 'QUEUED' | 'PROCESSING' | 'RUNNING' | 'DONE' | 'FAILED';
+  current_step: number;
+  steps: StepStatus[];
+  error?: string | null;
+  created_at: string;
+  started_at?: string;
+  ended_at?: string;
+}
+
+export interface RejectedFile {
+  filename: string;
+  reason: string;
+}
+
+export interface UploadPackageResponse {
+  bidder_id: string;
+  job_id: string;
+  total_files?: number;
+  accepted: DocumentSummary[];
+  rejected: RejectedFile[];
+}
+
