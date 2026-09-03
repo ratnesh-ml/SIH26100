@@ -146,10 +146,37 @@ class CopilotService:
     ) -> CopilotQueryResponse:
         """Handle incoming copilot query with dynamic multi-domain context resolution."""
         # Index on-demand if specific tender or bidder requested
+        bidder_context = None
         if request.tender_id:
             await cls.ensure_tender_indexed(session, request.tender_id)
         if request.bidder_id:
             await cls.ensure_bidder_indexed(session, request.bidder_id)
+            # Load context details for specialized synthesizers
+            b_stmt = select(Bidder).where(Bidder.id == request.bidder_id)
+            b_res = await session.execute(b_stmt)
+            bidder_obj = b_res.scalar_one_or_none()
+            if bidder_obj:
+                f_stmt = select(Finding).where(Finding.bidder_id == request.bidder_id)
+                f_res = await session.execute(f_stmt)
+                findings_objs = f_res.scalars().all()
+                findings_dicts = [
+                    {
+                        "rule_id": f.rule_id,
+                        "status": f.status,
+                        "title": f.title,
+                        "explanation": f.explanation,
+                        "evidence": f.evidence or [],
+                    }
+                    for f in findings_objs
+                ]
+                bidder_context = {
+                    "bidder_id": str(bidder_obj.id),
+                    "declared_name": bidder_obj.canonical_name or bidder_obj.declared_name,
+                    "risk_score": bidder_obj.risk_score,
+                    "risk_band": bidder_obj.risk_band,
+                    "risk_drivers": bidder_obj.risk_drivers or [],
+                    "findings": findings_dicts,
+                }
 
         copilot = cls.get_copilot()
         resp = copilot.answer_query(
@@ -157,6 +184,7 @@ class CopilotService:
             tender_id=str(request.tender_id) if request.tender_id else None,
             bidder_id=str(request.bidder_id) if request.bidder_id else None,
             domains=request.domains,
+            bidder_context=bidder_context,
             top_k=request.top_k,
         )
 
@@ -181,6 +209,11 @@ class CopilotService:
             domains_searched=resp.domains_searched,
             used_llm=resp.used_llm,
             confidence=resp.confidence,
+            facts=resp.facts,
+            explanations=resp.explanations,
+            injection_detected=resp.injection_detected,
+            is_conclusive=resp.is_conclusive,
+            category=resp.category,
         )
 
     @classmethod

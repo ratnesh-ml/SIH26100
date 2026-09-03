@@ -6,6 +6,7 @@ import re
 from typing import Any, Optional
 
 from pipeline.rag.chunker import DocumentChunker
+from pipeline.rag.guardrails import PromptInjectionGuard
 from pipeline.rag.kb_corpus import get_default_regulatory_chunks
 from pipeline.rag.models import (
     KnowledgeChunk,
@@ -340,8 +341,9 @@ class ProcurementRetriever:
         return retrieved
 
     def _extract_best_snippet(self, text: str, query_tokens: list[str]) -> str:
-        """Extract the most relevant sentence from text for quote citation."""
-        sentences = re.split(r"(?<=[.?!])\s+", text)
+        """Extract the most relevant factual sentence from text for quote citation."""
+        text_protected = re.sub(r"\b(Rs|No|Pvt|Ltd|Dr|Mr|Ms)\.", r"\1_DOT_", text, flags=re.IGNORECASE)
+        sentences = [x.replace("_DOT_", ".") for x in re.split(r"(?<=[.?!])\s+", text_protected)]
         if not sentences:
             return text[:200]
 
@@ -349,6 +351,11 @@ class ProcurementRetriever:
         max_matches = -1
 
         for sent in sentences:
+            # Never choose an adversarial prompt injection as a factual citation
+            is_inj, _ = PromptInjectionGuard.scan(sent)
+            if is_inj:
+                continue
+
             sent_lower = sent.lower()
             matches = sum(1 for tok in query_tokens if tok in sent_lower)
             if matches > max_matches:

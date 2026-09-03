@@ -79,6 +79,11 @@ class CopilotResponse:
     domains_searched: list[str]
     used_llm: bool = False
     confidence: float = 1.0
+    facts: list[str] = field(default_factory=list)
+    explanations: list[str] = field(default_factory=list)
+    injection_detected: bool = False
+    is_conclusive: bool = True
+    category: str = "GENERAL"
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -87,4 +92,10 @@ class CopilotResponse:
             "domains_searched": self.domains_searched,
             "used_llm": self.used_llm,
             "confidence": round(self.confidence, 4),
+            "facts": self.facts,
+            "explanations": self.explanations,
+            "injection_detected": self.injection_detected,
+            "is_conclusive": self.is_conclusive,
+            "category": self.category,
         }
+
