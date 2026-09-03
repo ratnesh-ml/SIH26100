@@ -1,17 +1,26 @@
 """Findings and Decisions Schemas."""
 
 from datetime import datetime
-from typing import Any, Optional
+from typing import Any, Optional, Union
 import uuid
 from pydantic import BaseModel, ConfigDict
 
 
 class EvidenceItem(BaseModel):
-    document_id: uuid.UUID
-    page_no: int
-    bbox: Optional[dict[str, Any]] = None
+    document: Optional[str] = None
+    document_id: Optional[Union[uuid.UUID, str]] = None
+    page: Optional[int] = 1
+    page_no: Optional[int] = 1
+    field: Optional[str] = None
     field_name: Optional[str] = None
+    quote: Optional[str] = None
     value: Optional[str] = None
+    bounding_box: Optional[dict[str, Any]] = None
+    bbox: Optional[dict[str, Any]] = None
+    source: Optional[str] = "document_text_layer"
+    method: Optional[str] = "anchor_regex"
+    confidence: Optional[float] = 1.0
+    metadata: Optional[dict[str, Any]] = None
 
 
 class FindingOut(BaseModel):
