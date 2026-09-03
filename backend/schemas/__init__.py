@@ -34,7 +34,7 @@ from backend.schemas.bid import (
 )
 from backend.schemas.finding import EvidenceItem, FindingOut, DecisionCreate, DecisionOut
 from backend.schemas.document import DocumentSummary, RejectedFileOut, IngestionResponse
-from backend.schemas.job import StepStatus, JobStatus
+from backend.schemas.job import JobState, StepStatus, JobStatus
 from backend.schemas.audit import AuditEventOut, AuditVerifyOut
 
 __all__ = [
@@ -75,6 +75,7 @@ __all__ = [
     "FindingOut",
     "DecisionCreate",
     "DecisionOut",
+    "JobState",
     "StepStatus",
     "JobStatus",
     "AuditEventOut",

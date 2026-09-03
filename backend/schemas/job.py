@@ -3,7 +3,16 @@
 from datetime import datetime
 from typing import Any, Optional
 import uuid
+from enum import Enum
 from pydantic import BaseModel, ConfigDict
+
+
+class JobState(str, Enum):
+    QUEUED = "QUEUED"
+    PROCESSING = "PROCESSING"
+    RUNNING = "RUNNING"  # Backwards compatibility alias
+    DONE = "DONE"
+    FAILED = "FAILED"
 
 
 class StepStatus(BaseModel):

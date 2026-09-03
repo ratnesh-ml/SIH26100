@@ -41,6 +41,7 @@ from backend.schemas import (
     DecisionCreate,
     DecisionOut,
     JobStatus,
+    StepStatus,
     RiskProfileOut,
     AuditEventOut,
     AuditVerifyOut,
@@ -48,6 +49,7 @@ from backend.schemas import (
 from backend.services.tender_service import TenderService
 from backend.services.bidder_service import BidderService
 from backend.services.document_service import DocumentService
+from backend.services.job_service import JobService
 
 logger = logging.getLogger("vigilbid.api")
 api_router = APIRouter()
@@ -376,9 +378,74 @@ async def download_document(
 async def get_job_status(
     job_id: uuid.UUID,
     current_user: Annotated[User, Depends(get_current_user)],
+    session: Annotated[AsyncSession, Depends(get_db_session)],
 ):
-    """Poll pipeline 11-step progress."""
-    raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED, detail="Job status not yet implemented")
+    """Retrieve current processing status and step progress for a pipeline job."""
+    job_service = JobService()
+    job = await job_service.get_job(session, job_id)
+    if not job:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Job with ID '{job_id}' not found.",
+        )
+    return JobStatus(
+        id=job.id,
+        bidder_id=job.bidder_id,
+        status=job.status,
+        current_step=job.current_step,
+        steps=[StepStatus(**s) for s in (job.steps or [])],
+        error=job.error,
+        created_at=job.created_at,
+        started_at=job.started_at,
+        ended_at=job.ended_at,
+    )
+
+
+@api_router.get("/bidders/{bidder_id}/jobs", response_model=list[JobStatus], tags=["Jobs"])
+async def list_bidder_jobs(
+    bidder_id: uuid.UUID,
+    current_user: Annotated[User, Depends(get_current_user)],
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+):
+    """List all processing jobs associated with a bidder."""
+    job_service = JobService()
+    jobs = await job_service.list_jobs_for_bidder(session, bidder_id)
+    return [
+        JobStatus(
+            id=job.id,
+            bidder_id=job.bidder_id,
+            status=job.status,
+            current_step=job.current_step,
+            steps=[StepStatus(**s) for s in (job.steps or [])],
+            error=job.error,
+            created_at=job.created_at,
+            started_at=job.started_at,
+            ended_at=job.ended_at,
+        )
+        for job in jobs
+    ]
+
+
+@api_router.post("/jobs/{job_id}/process", response_model=JobStatus, tags=["Jobs"])
+async def trigger_job_processing(
+    job_id: uuid.UUID,
+    current_user: Annotated[User, Depends(require_role(UserRole.OFFICER, UserRole.ADMIN))],
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+):
+    """Trigger or re-trigger OCR processing for a specific job."""
+    job_service = JobService()
+    job = await job_service.process_job_ocr(session, job_id)
+    return JobStatus(
+        id=job.id,
+        bidder_id=job.bidder_id,
+        status=job.status,
+        current_step=job.current_step,
+        steps=[StepStatus(**s) for s in (job.steps or [])],
+        error=job.error,
+        created_at=job.created_at,
+        started_at=job.started_at,
+        ended_at=job.ended_at,
+    )
 
 
 # 5. Findings & Decisions

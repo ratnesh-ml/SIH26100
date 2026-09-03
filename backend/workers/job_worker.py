@@ -1,11 +1,18 @@
-"""Background Job Worker for asynchronous document processing."""
+"""Background Job Worker for asynchronous document processing and OCR pipeline execution."""
 
 import asyncio
 import logging
+from pathlib import Path
 import signal
 import sys
 from typing import Optional
-from backend.core.database import check_database_connection
+import uuid
+
+from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncSession
+
+from backend.core.database import check_database_connection, get_session_maker
+from backend.models.entities import Job
+from backend.services.job_service import JobService
 
 logger = logging.getLogger("vigilbid.worker")
 logging.basicConfig(
@@ -16,10 +23,17 @@ logging.basicConfig(
 
 
 class JobWorker:
-    """Polls PostgreSQL jobs table using SELECT FOR UPDATE SKIP LOCKED and invokes pipeline."""
+    """Polls PostgreSQL jobs table using SELECT FOR UPDATE SKIP LOCKED and executes OCR pipeline."""
 
-    def __init__(self, poll_interval_seconds: float = 2.0):
+    def __init__(
+        self,
+        poll_interval_seconds: float = 2.0,
+        session_maker: Optional[async_sessionmaker[AsyncSession]] = None,
+        job_service: Optional[JobService] = None,
+    ):
         self.poll_interval = poll_interval_seconds
+        self.session_maker = session_maker or get_session_maker()
+        self.job_service = job_service or JobService()
         self._running = False
 
     async def check_readiness(self) -> bool:
@@ -60,10 +74,24 @@ class JobWorker:
         finally:
             logger.info("Worker loop terminated cleanly.")
 
-    async def poll_cycle(self):
-        """Single polling cycle checking for QUEUED jobs."""
-        # Job execution logic will run in subsequent pipeline integration phase
-        logger.debug("Worker heartbeat: checking queue.")
+    async def poll_cycle(self) -> Optional[Job]:
+        """Single polling cycle: claims next QUEUED job and executes the OCR processing step."""
+        try:
+            async with self.session_maker() as session:
+                job = await self.job_service.claim_next_job(session)
+                if job:
+                    logger.info("Worker claimed Job %s for Bidder %s. Executing OCR processing...", job.id, job.bidder_id)
+                    processed_job = await self.job_service.process_job_ocr(session, job.id)
+                    logger.info("Worker finished Job %s with status: %s", processed_job.id, processed_job.status)
+                    return processed_job
+        except Exception as exc:
+            logger.error("Error during worker poll cycle: %s", exc, exc_info=True)
+        return None
+
+    async def process_single_job(self, job_id: uuid.UUID) -> Job:
+        """Process a specific job directly by ID without waiting for the polling loop."""
+        async with self.session_maker() as session:
+            return await self.job_service.process_job_ocr(session, job_id)
 
     async def stop(self):
         """Signal worker to gracefully shut down."""

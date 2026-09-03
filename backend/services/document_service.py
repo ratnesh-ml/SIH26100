@@ -11,6 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from backend.core.config import settings
 from backend.models.entities import Bidder, Document
 from backend.schemas.document import DocumentSummary, RejectedFileOut, IngestionResponse
+from backend.services.job_service import JobService
 from pipeline.document_processing.ingest import DocumentIngester
 
 logger = logging.getLogger("vigilbid.services.document")
@@ -22,6 +23,7 @@ class DocumentService:
     def __init__(self, storage_root: Optional[Path] = None):
         self.storage_root = storage_root or Path(settings.STORAGE_DIR)
         self.ingester = DocumentIngester()
+        self.job_service = JobService()
 
     async def ingest_uploaded_files(
         self,
@@ -119,6 +121,12 @@ class DocumentService:
 
         await session.commit()
 
+        # If files were accepted, create a processing Job in QUEUED state
+        job_id = None
+        if accepted_docs:
+            job = await self.job_service.create_job(session=session, bidder_id=bidder_id)
+            job_id = job.id
+
         # If a single file was uploaded and rejected, raise appropriate HTTP status code
         if len(uploaded_files) == 1 and not accepted_docs and rejected_files:
             rej_reason = rejected_files[0].reason.lower()
@@ -133,6 +141,7 @@ class DocumentService:
 
         return IngestionResponse(
             bidder_id=bidder_id,
+            job_id=job_id,
             total_files=total_files,
             accepted=accepted_docs,
             rejected=rejected_files,

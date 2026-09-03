@@ -27,6 +27,7 @@ class RejectedFileOut(BaseModel):
 
 class IngestionResponse(BaseModel):
     bidder_id: uuid.UUID
+    job_id: Optional[uuid.UUID] = None
     total_files: int
     accepted: list[DocumentSummary]
     rejected: list[RejectedFileOut]

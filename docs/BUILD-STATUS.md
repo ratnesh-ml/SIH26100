@@ -1,8 +1,8 @@
 # VigilBid (SIH26100) — Build Status & Transition Baseline
 
-**Document Version:** 1.9.0  
+**Document Version:** 2.0.0  
 **Date:** September 2026  
-**Status:** Phase 11 Complete — OCR Abstraction & Unlimited-OCR Adapter Operational  
+**Status:** Phase 12 Complete — Processing Job Lifecycle & Worker OCR Pipeline Operational  
 **Target:** SIH Grand Finale — Problem Statement SIH26100 (CPCL / Ministry of Petroleum & Natural Gas)
 
 ---
@@ -45,14 +45,16 @@ In public procurement under GFR 2017 and CVC guidelines, procurement officers ma
 | **Document Ingestion & Storage Safety** | ✅ Completed (100%) | `POST /api/v1/bidders/{id}/documents`, `GET /documents/{id}`, magic byte verification (`%PDF-`), ZIP safety (ratio 100:1, max 200 files), path traversal defense, SHA-256 CAS storage, deduplication. |
 | **PDF Processing & Rendering Layer** | ✅ Completed (100%) | `pipeline/pdf/` with PyMuPDF text-layer first extraction, bounding-box words, document metadata, active script forensics, on-disk cached rendering, CLI inspection, and DB persistence. |
 | **OCR Abstraction & Unlimited-OCR Adapter** | ✅ Completed (100%) | Stable `OCRProvider` interface, `UnlimitedOCRAdapter` (with retries, CPU/GPU awareness, failure handling), and architecture-approved `FallbackOCRAdapter` for local dev/CPU execution. |
+| **Processing Jobs & Worker Pipeline** | ✅ Completed (100%) | `backend/services/job_service.py` and `backend/workers/job_worker.py`: end-to-end pipeline connecting Upload → Job Creation (QUEUED) → Worker Claim (PROCESSING) → Page Extraction → OCR Execution → Persistence → Status (DONE/FAILED). |
+| **Job Status & Pipeline REST APIs** | ✅ Completed (100%) | `GET /api/v1/jobs/{id}`, `GET /api/v1/bidders/{id}/jobs`, `POST /api/v1/jobs/{id}/process` live with 11-step progress tracking. |
 | **Live Health Probe Endpoint** | ✅ Completed (100%) | `/health` actively probes database status, dialect, and latency. |
-| **Background Worker Process** | ✅ Completed (100%) | `worker.py` and `backend/workers/job_worker.py` with DB readiness check and graceful signal shutdown. |
+| **Background Worker Process** | ✅ Completed (100%) | `worker.py` and `backend/workers/job_worker.py` with DB readiness check, queue poll cycle, and graceful signal shutdown. |
 | **Frontend Production Build** | ✅ Completed (100%) | Vite + React 18 + TypeScript builds cleanly (`dist/` created in 38s) with dark mode and API client. |
-| **Automated Tests & Startup Verification** | ✅ Completed (100%) | 101 pytest unit, auth, tender, bidder, ingest, PDF, and OCR tests passing, `scripts/verify_structure.py` passing with 0 warnings. |
+| **Automated Tests & Startup Verification** | ✅ Completed (100%) | 105 pytest unit, auth, tender, bidder, ingest, PDF, OCR, and job pipeline tests passing, `scripts/verify_structure.py` passing with 0 warnings. |
 | **Project Automation Tooling** | ✅ Completed (100%) | Single-command deployment (`docker compose up --build`), `Makefile`, and `scripts/dev.ps1`. |
-| **Synthetic Demo Dataset (`seed/`)** | 🔄 Ready for Generation | `template_tender.json` created; 4+1 generator script pending Phase 12. |
+| **Synthetic Demo Dataset (`seed/`)** | 🔄 Ready for Generation | `template_tender.json` created; 4+1 generator script pending Phase 13. |
 
-**Current Repo Baseline:** The OCR Abstraction Layer (`pipeline/ocr/`) is operational with a uniform `OCRProvider` interface and stable `OCRResult` contract. Includes `UnlimitedOCRAdapter` for production long-document VLM inference and `FallbackOCRAdapter` (PyMuPDF + EasyOCR) for CPU development. All 101 automated tests pass.
+**Current Repo Baseline:** Processing Job orchestration is operational. Uploaded documents automatically spawn `QUEUED` jobs, the background worker claims them using `SELECT FOR UPDATE SKIP LOCKED`, executes text extraction and OCR (falling back to OCRProvider when text density is low), writes `document_pages` bounding boxes and confidence metrics, and marks jobs `DONE` (or `FAILED` with diagnostics). All 105 automated tests pass.
 
 ---
 
@@ -194,8 +196,8 @@ In public procurement under GFR 2017 and CVC guidelines, procurement officers ma
 
 ## 8. Next Recommended Step
  
-**Execute Phase 12 (Synthetic Demo Dataset Generator & Pipeline Worker):**
-1. Implement synthetic bidder document generator (`seed/generate_demo_docs.py`) to produce the 4+1 demo bidder PDFs (scanned + digital) and ground truth fixtures.
-2. Wire the 11-step pipeline runner into the PostgreSQL `jobs` table polling loop in `backend/workers/job_worker.py`.
-3. Test end-to-end ingestion and rule evaluation of the demo bidder packages against tender criteria.
-4. Begin Phase 12 implementation per timeline in `docs/05`.
+**Execute Phase 13 (Document Classification & Synthetic Demo Dataset Generator):**
+1. Implement document classification (`pipeline/document_processing/classifier.py`) mapping documents to types (GST REG-06, PAN, Udyam, CA Turnover, ITR-V, etc.).
+2. Implement synthetic bidder document generator (`seed/generate_demo_docs.py`) to produce the 4+1 demo bidder PDFs (scanned + digital) and ground truth fixtures.
+3. Wire the classification step into the pipeline runner and worker polling loop.
+4. Begin Phase 13 implementation per timeline in `docs/05`.
