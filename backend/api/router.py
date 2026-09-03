@@ -5,7 +5,7 @@ import logging
 from typing import Annotated, Any, Optional
 import uuid
 from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, Response
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -14,7 +14,7 @@ from backend.core.security import create_access_token, verify_password
 from backend.api.deps import get_current_token_payload, get_current_user, require_role
 from backend.auth.jwt import TokenPayload
 from backend.auth.rbac import UserRole
-from backend.models.entities import User, Decision, Finding
+from backend.models.entities import User, Decision, Finding, Tender, Bidder, Document
 from pipeline.registry_adapters import get_registry_provider
 from pipeline.audit.hasher import verify_chain_full
 from backend.services.audit_service import AuditService
@@ -380,6 +380,35 @@ async def download_document(
     )
 
 
+@api_router.get("/documents/{doc_id}/file", tags=["Documents"])
+async def get_document_file(
+    doc_id: uuid.UUID,
+    current_user: Annotated[User, Depends(require_role(UserRole.OFFICER, UserRole.APPROVER, UserRole.AUDITOR, UserRole.EVALUATOR, UserRole.VIGILANCE, UserRole.ADMIN))],
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+):
+    """Fetch and stream original PDF file with inline disposition."""
+    doc = await DocumentService.get_document(session, doc_id)
+    return FileResponse(
+        path=doc.storage_path,
+        filename=doc.original_filename,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'inline; filename="{doc.original_filename}"'},
+    )
+
+
+@api_router.get("/documents/{doc_id}/pages/{page_no}.png", tags=["Documents"])
+async def get_document_page_png(
+    doc_id: uuid.UUID,
+    page_no: int,
+    current_user: Annotated[User, Depends(get_current_user)],
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+    dpi: int = Query(150, ge=72, le=300),
+):
+    """Render and stream raster PNG image of a specific document page for evidence overlay."""
+    png_bytes = await DocumentService.render_document_page(session, doc_id, page_no, dpi=dpi)
+    return Response(content=png_bytes, media_type="image/png")
+
+
 # 4. Jobs & Pipeline Status
 @api_router.get("/jobs/{job_id}", response_model=JobStatus, tags=["Jobs"])
 async def get_job_status(
@@ -717,18 +746,132 @@ async def verify_audit_chain_post(
 async def export_bidder_dossier(
     bidder_id: uuid.UUID,
     current_user: Annotated[User, Depends(get_current_user)],
+    session: Annotated[AsyncSession, Depends(get_db_session)],
 ):
     """Export CVC/RTI-ready PDF compliance dossier."""
-    raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED, detail="Report generation not yet implemented")
+    from pipeline.reports.dossier import DossierGenerator
+
+    # 1. Fetch bidder
+    b_stmt = select(Bidder).where(Bidder.id == bidder_id)
+    b_res = await session.execute(b_stmt)
+    bidder = b_res.scalar_one_or_none()
+    if not bidder:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Bidder '{bidder_id}' not found.",
+        )
+
+    # 2. Fetch tender
+    tender_dict = {"nit_number": "CPCL/TENDER/2026", "title": "Goods Procurement"}
+    if bidder.tender_id:
+        t_stmt = select(Tender).where(Tender.id == bidder.tender_id)
+        t_res = await session.execute(t_stmt)
+        tender = t_res.scalar_one_or_none()
+        if tender:
+            tender_dict = {
+                "nit_number": getattr(tender, "nit_no", "CPCL/TENDER/2026"),
+                "title": tender.title,
+            }
+
+    # 3. Fetch findings
+    f_stmt = select(Finding).where(Finding.bidder_id == bidder_id)
+    f_res = await session.execute(f_stmt)
+    findings = f_res.scalars().all()
+    findings_dicts = [
+        {
+            "rule_id": f.rule_id,
+            "status": f.status,
+            "title": f.title,
+            "explanation": f.explanation,
+            "evidence": f.evidence or [],
+        }
+        for f in findings
+    ]
+
+    # 4. Fetch decisions
+    dec_stmt = select(Decision).where(Decision.bidder_id == bidder_id)
+    dec_res = await session.execute(dec_stmt)
+    decisions = dec_res.scalars().all()
+    dec_dicts = [
+        {
+            "action": d.action,
+            "reason": d.reason,
+            "created_at": d.created_at.strftime("%Y-%m-%d %H:%M:%S UTC") if d.created_at else "",
+        }
+        for d in decisions
+    ]
+
+    # 5. Fetch audit head
+    audit_res = await AuditService.verify_chain(session)
+    chain_head = audit_res.get("chain_head", "")
+
+    bidder_dict = {
+        "canonical_name": bidder.canonical_name or bidder.declared_name,
+        "declared_name": bidder.declared_name,
+        "pan": getattr(bidder, "pan", None) or "NOT DECLARED",
+        "gstin": getattr(bidder, "gstin", None) or "NOT DECLARED",
+        "risk_score": bidder.risk_score or 0,
+        "risk_band": bidder.risk_band or "LOW",
+        "review_state": bidder.review_state or "PENDING",
+    }
+
+    generator = DossierGenerator()
+    pdf_bytes = generator.generate_bidder_dossier(
+        tender=tender_dict,
+        bidder=bidder_dict,
+        findings=findings_dicts,
+        chain_head=chain_head,
+        decisions=dec_dicts,
+    )
+
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'inline; filename="dossier_{bidder_id}.pdf"'},
+    )
 
 
 @api_router.get("/tenders/{tender_id}/report.pdf", tags=["Reports"])
 async def export_tender_report(
     tender_id: uuid.UUID,
     current_user: Annotated[User, Depends(get_current_user)],
+    session: Annotated[AsyncSession, Depends(get_db_session)],
 ):
     """Export tender-level compliance evaluation report."""
-    raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED, detail="Report generation not yet implemented")
+    from pipeline.reports.dossier import DossierGenerator
+
+    t_stmt = select(Tender).where(Tender.id == tender_id)
+    t_res = await session.execute(t_stmt)
+    tender = t_res.scalar_one_or_none()
+    if not tender:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Tender '{tender_id}' not found.",
+        )
+
+    tender_dict = {
+        "nit_number": getattr(tender, "nit_no", "CPCL/TENDER/2026"),
+        "title": tender.title,
+        "estimated_value": float(tender.estimated_value) if tender.estimated_value else 0.0,
+        "bid_due_date": str(tender.bid_due_date) if tender.bid_due_date else "",
+    }
+
+    matrix_data = await TenderService.get_compliance_matrix(session, tender_id)
+    audit_res = await AuditService.verify_chain(session)
+    chain_head = audit_res.get("chain_head", "")
+
+    generator = DossierGenerator()
+    pdf_bytes = generator.generate_tender_report(
+        tender=tender_dict,
+        matrix=matrix_data,
+        chain_head=chain_head,
+    )
+
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'inline; filename="tender_report_{tender_id}.pdf"'},
+    )
 
 
 # 9. Registry Verification

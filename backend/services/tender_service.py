@@ -237,3 +237,47 @@ class TenderService:
             logger.warning("Audit logging warning on update_tender %s: %s", tender_id, exc)
 
         return await TenderService.get_tender(session, tender_id)
+
+    @staticmethod
+    async def get_compliance_matrix(
+        session: AsyncSession,
+        tender_id: uuid.UUID,
+    ) -> dict[str, Any]:
+        """Build compliance matrix data containing criteria and participating bidders."""
+        c_stmt = select(Criterion).where(Criterion.tender_id == tender_id).order_by(Criterion.sort_order.asc())
+        c_res = await session.execute(c_stmt)
+        criteria = c_res.scalars().all()
+
+        b_stmt = select(Bidder).where(Bidder.tender_id == tender_id).order_by(Bidder.created_at.asc())
+        b_res = await session.execute(b_stmt)
+        bidders = b_res.scalars().all()
+
+        crit_out = [
+            {
+                "id": str(c.id),
+                "code": c.code,
+                "title": c.title,
+                "sort_order": c.sort_order,
+            }
+            for c in criteria
+        ]
+
+        bidders_out = []
+        for b in bidders:
+            bidders_out.append(
+                {
+                    "id": str(b.id),
+                    "name": b.canonical_name or b.declared_name,
+                    "status": b.overall_status,
+                    "risk_score": b.risk_score,
+                    "risk_band": b.risk_band,
+                    "cells": [],
+                }
+            )
+
+        return {
+            "tender_id": str(tender_id),
+            "criteria": crit_out,
+            "bidders": bidders_out,
+        }
+

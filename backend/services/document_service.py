@@ -203,3 +203,46 @@ class DocumentService:
                 detail=f"Document with ID '{doc_id}' not found.",
             )
         return doc
+
+    @staticmethod
+    async def render_document_page(
+        session: AsyncSession,
+        doc_id: uuid.UUID,
+        page_no: int,
+        dpi: int = 150,
+    ) -> bytes:
+        """Render a specific 1-indexed page of a PDF document to raster PNG bytes."""
+        doc = await DocumentService.get_document(session, doc_id)
+        doc_path = Path(doc.storage_path)
+        if not doc_path.exists():
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Document storage file not found at '{doc.storage_path}'.",
+            )
+
+        try:
+            import fitz
+            from pipeline.pdf.renderer import PDFRenderer
+
+            doc_fitz = fitz.open(str(doc_path))
+            total_pages = len(doc_fitz)
+            if page_no < 1 or page_no > total_pages:
+                doc_fitz.close()
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f"Page {page_no} out of bounds for document with {total_pages} pages.",
+                )
+            page = doc_fitz[page_no - 1]
+            renderer = PDFRenderer(default_dpi=dpi)
+            png_bytes = renderer.render_page_bytes(page, dpi=dpi)
+            doc_fitz.close()
+            return png_bytes
+        except HTTPException:
+            raise
+        except Exception as exc:
+            logger.error("Error rendering page %d of document %s: %s", page_no, doc_id, exc, exc_info=True)
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Failed to render document page: {exc}",
+            )
+
