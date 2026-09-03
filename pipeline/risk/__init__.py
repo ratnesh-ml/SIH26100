@@ -1,6 +1,13 @@
 """Risk Assessment and Anomaly Forensics Subsystem."""
 
 from pipeline.risk.anomaly import AnomalyDetector, AnomalyResult, DocumentAnomaly
+from pipeline.risk.graph import (
+    BidderLinkGraph,
+    BidderPairLink,
+    CrossBidderGraphBuilder,
+    GraphEdge,
+    GraphNode,
+)
 from pipeline.risk.scorer import RiskBreakdown, RiskFactor, RiskScorer
 
 __all__ = [
@@ -10,4 +17,9 @@ __all__ = [
     "RiskScorer",
     "RiskBreakdown",
     "RiskFactor",
+    "CrossBidderGraphBuilder",
+    "BidderLinkGraph",
+    "GraphNode",
+    "GraphEdge",
+    "BidderPairLink",
 ]

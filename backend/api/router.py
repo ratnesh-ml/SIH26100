@@ -46,11 +46,13 @@ from backend.schemas import (
     RiskProfileOut,
     AuditEventOut,
     AuditVerifyOut,
+    BidderLinkGraphOut,
 )
 from backend.services.tender_service import TenderService
 from backend.services.bidder_service import BidderService
 from backend.services.document_service import DocumentService
 from backend.services.job_service import JobService
+from pipeline.risk.graph import CrossBidderGraphBuilder
 
 logger = logging.getLogger("vigilbid.api")
 api_router = APIRouter()
@@ -575,3 +577,49 @@ async def check_registry(
             detail=f"Unsupported registry kind '{kind}'. Supported: gstin, pan, udyam, cin",
         )
     return res.to_dict()
+
+
+# 10. Cross-Bidder Link Graph Endpoints
+@api_router.get("/tenders/{tender_id}/graph", response_model=BidderLinkGraphOut, tags=["Risk & Collusion"])
+async def get_tender_bidder_graph(
+    tender_id: uuid.UUID,
+    current_user: Annotated[User, Depends(require_role(UserRole.OFFICER, UserRole.EVALUATOR, UserRole.VIGILANCE, UserRole.ADMIN))],
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+):
+    """Retrieve the Cross-Bidder Link Graph for all bidders attached to a tender."""
+    tender = await TenderService.get_tender_by_id(session, tender_id)
+    if not tender:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Tender not found")
+
+    bidders_data: list[dict[str, Any]] = []
+    if hasattr(tender, "bidders") and tender.bidders:
+        for b in tender.bidders:
+            b_dict = {
+                "bidder_id": str(b.id),
+                "company_name": b.canonical_name or b.declared_name,
+                "pan": b.pan,
+                "gstin": b.gstin,
+                "risk_score": b.risk_score or 0,
+                "risk_band": b.risk_band or "LOW",
+            }
+            if hasattr(b, "profile") and isinstance(b.profile, dict):
+                b_dict.update(b.profile)
+            bidders_data.append(b_dict)
+
+    builder = CrossBidderGraphBuilder()
+    graph = builder.build_graph(bidders_data, tender_id=str(tender_id))
+    return graph.to_dict()
+
+
+@api_router.post("/risk/graph", response_model=BidderLinkGraphOut, tags=["Risk & Collusion"])
+async def compute_cross_bidder_graph(
+    payload: dict[str, Any],
+    current_user: Annotated[User, Depends(require_role(UserRole.OFFICER, UserRole.EVALUATOR, UserRole.VIGILANCE, UserRole.ADMIN))],
+):
+    """Compute deterministic Cross-Bidder Link Graph from raw bidder metadata payload."""
+    bidders_data = payload.get("bidders", [])
+    tender_id = payload.get("tender_id")
+    builder = CrossBidderGraphBuilder()
+    graph = builder.build_graph(bidders_data, tender_id=tender_id)
+    return graph.to_dict()
+

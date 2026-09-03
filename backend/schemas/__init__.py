@@ -36,6 +36,13 @@ from backend.schemas.finding import EvidenceItem, FindingOut, DecisionCreate, De
 from backend.schemas.document import DocumentSummary, RejectedFileOut, IngestionResponse
 from backend.schemas.job import JobState, StepStatus, JobStatus
 from backend.schemas.audit import AuditEventOut, AuditVerifyOut
+from backend.schemas.graph import (
+    GraphNodeOut,
+    GraphEdgeOut,
+    BidderPairLinkOut,
+    GraphSummaryOut,
+    BidderLinkGraphOut,
+)
 
 __all__ = [
     "ErrorDetail",
@@ -80,4 +87,10 @@ __all__ = [
     "JobStatus",
     "AuditEventOut",
     "AuditVerifyOut",
+    "GraphNodeOut",
+    "GraphEdgeOut",
+    "BidderPairLinkOut",
+    "GraphSummaryOut",
+    "BidderLinkGraphOut",
 ]
+

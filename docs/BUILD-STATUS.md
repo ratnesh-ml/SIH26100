@@ -1,8 +1,8 @@
 # VigilBid (SIH26100) — Build Status & Transition Baseline
 
-**Document Version:** 2.10.0  
+**Document Version:** 2.11.0  
 **Date:** September 2026  
-**Status:** Phase 22 Complete — Document Anomaly Signals & Adversarial Hardening Operational  
+**Status:** Phase 23 Complete — Deterministic Cross-Bidder Link Graph & Collusion Detection Operational  
 **Target:** SIH Grand Finale — Problem Statement SIH26100 (CPCL / Ministry of Petroleum & Natural Gas)
 
 ---
@@ -40,6 +40,7 @@ In public procurement under GFR 2017 and CVC guidelines, procurement officers ma
 | **Compliance Rules Engine Documentation**| ✅ Completed (100%) | Complete YAML rule schema, precedence hierarchy, and evaluation semantics in `docs/RULE-ENGINE.md`. |
 | **Risk Scoring & Anomaly Forensics Documentation**| ✅ Completed (100%) | Complete driver point allocations, bands, and non-accusatory vocabulary in `docs/RISK-ENGINE.md`. |
 | **Document Anomaly Signals Documentation**| ✅ Completed (100%) | Complete forensic signals, hidden text, and adversarial injection defense in `docs/ANOMALIES.md`. |
+| **Cross-Bidder Link Graph Documentation**| ✅ Completed (100%) | Complete NetworkX deterministic link graph, CVC related-party heuristics, and REST APIs in `docs/GRAPH.md`. |
 | **Containerization & Compose** | ✅ Completed (100%) | `docker-compose.yml`, `backend/Dockerfile`, `frontend/Dockerfile`, `.dockerignore`. |
 | **Database Connectivity Engine** | ✅ Completed (100%) | `backend/core/database.py` with async SQLAlchemy 2.0 engine, async sessionmaker, and DB connection probe. |
 | **PostgreSQL Schema & Models** | ✅ Completed (100%) | All 18 locked tables defined with UUIDs, BigIntegers, JSONB, foreign keys, and indexes. |
@@ -61,15 +62,16 @@ In public procurement under GFR 2017 and CVC guidelines, procurement officers ma
 | **Tender Requirement Extraction Engine** | ✅ Completed (100%) | `pipeline/extraction/tender.py`: deterministic rule templates extracting turnover thresholds, net worth, mandatory registrations, OEM Annexure-I, Make in India % requirements, Land Border Rule 144(xi), EMD guarantees, MSE Udyam exemptions, and validity constraints from tender NITs and JSON templates. |
 | **Compliance Rules Evaluation Engine** | ✅ Completed (100%) | `pipeline/compliance/engine.py`: deterministic YAML rule evaluation (`rules/cpcl_goods_v1.yaml`), versioning (`1.0`), rule conditions (`applies_when`), strict precedence hierarchy (`FAIL > REVIEW > WARN > PASS`), `RuleFindingResult`, and `BidderComplianceSummary`. |
 | **Risk Scoring & Anomaly Forensics Engine** | ✅ Completed (100%) | `pipeline/risk/scorer.py` and `pipeline/risk/anomaly.py`: transparent 0-100 risk composite, risk bands (`LOW`, `MEDIUM`, `HIGH`), ranked risk drivers, and forensic scanners (PDF producer, timestamp inversion, incremental updates, microscopic text, white-on-white text, prompt injection, cross-bidder collusion links). |
+| **Cross-Bidder Link Graph Engine & APIs** | ✅ Completed (100%) | `pipeline/risk/graph.py` and REST APIs (`GET /api/v1/tenders/{id}/graph`, `POST /api/v1/risk/graph`): deterministic NetworkX graph construction mapping shared directors, phone numbers, emails, addresses, bank accounts, PDF authors, metadata, and near-duplicate text with CVC-aligned related-party citations. |
 | **Job Status & Pipeline REST APIs** | ✅ Completed (100%) | `GET /api/v1/jobs/{id}`, `GET /api/v1/bidders/{id}/jobs`, `POST /api/v1/jobs/{id}/process` live with 11-step progress tracking. |
 | **Live Health Probe Endpoint** | ✅ Completed (100%) | `/health` actively probes database status, dialect, and latency. |
 | **Background Worker Process** | ✅ Completed (100%) | `worker.py` and `backend/workers/job_worker.py` with DB readiness check, queue poll cycle, and graceful signal shutdown. |
 | **Frontend Production Build** | ✅ Completed (100%) | Vite + React 18 + TypeScript builds cleanly (`dist/` created in 38s) with dark mode and API client. |
-| **Automated Tests & Startup Verification** | ✅ Completed (100%) | 225 pytest unit, auth, tender, bidder, ingest, PDF, OCR, job pipeline, classifier, extraction, normalization, validation, entity resolution, registry, cross-document verification, tender extraction, compliance rules, risk scoring, and document anomaly tests passing, `scripts/verify_structure.py` passing with 0 warnings. |
+| **Automated Tests & Startup Verification** | ✅ Completed (100%) | 237 pytest unit, auth, tender, bidder, ingest, PDF, OCR, job pipeline, classifier, extraction, normalization, validation, entity resolution, registry, cross-document verification, tender extraction, compliance rules, risk scoring, document anomaly, and cross-bidder graph tests passing, `scripts/verify_structure.py` passing with 0 warnings. |
 | **Project Automation Tooling** | ✅ Completed (100%) | Single-command deployment (`docker compose up --build`), `Makefile`, and `scripts/dev.ps1`. |
-| **Synthetic Demo Dataset (`seed/`)** | 🔄 Ready for Generation | `template_tender.json` created; 4+1 generator script pending Phase 23. |
+| **Synthetic Demo Dataset (`seed/`)** | 🔄 Ready for Generation | `template_tender.json` created; 4+1 generator script pending Phase 24. |
 
-**Current Repo Baseline:** Document Anomaly Signals and Adversarial Detection Engine is operational, detecting producer changes, inverted modification timestamps, incremental revisions, microscopic/white-on-white hidden text, adversarial prompt injection patterns, and near-duplicate document similarities. Adversarial injection attempts are detected and refused. All 225 automated tests pass.
+**Current Repo Baseline:** Cross-Bidder Link Graph subsystem is fully operational, constructing deterministic NetworkX graphs from bidder submission metadata, identifying shared attributes (directors, phones, emails, addresses, bank accounts, PDF authors, creation dates, near-duplicate text), computing collusion clusters, and exposing REST APIs for frontend force-directed visualization. All 237 automated tests pass.
 
 ---
 
@@ -211,8 +213,8 @@ In public procurement under GFR 2017 and CVC guidelines, procurement officers ma
 
 ## 8. Next Recommended Step
  
-**Execute Phase 23 (Synthetic Demo Dataset Generator & 4+1 Demo Bidders Testbed):**
+**Execute Phase 24 (Synthetic Demo Dataset Generator & 4+1 Demo Bidders Testbed):**
 1. Implement synthetic bidder document generator (`seed/generate_demo_docs.py`) to produce the 4+1 demo bidder PDFs (scanned + digital) and ground truth fixtures.
 2. Generate synthetic bidder packages: Bidder A (Clean PASS), Bidder B (Name variation / MSE abbreviation REVIEW), Bidder C (Hard PAN-GSTIN mismatch / Debarred FAIL), Bidder D (Adversarial prompt injection / Collusion link HIGH risk), and Bidder E (Border country unapproved REVIEW).
 3. Validate end-to-end evaluation pipeline and compliance dossiers across all 5 testbed packages.
-4. Begin Phase 23 implementation per timeline in `docs/05`.
+4. Begin Phase 24 implementation per timeline in `docs/05`.
