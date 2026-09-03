@@ -18,7 +18,10 @@ from backend.schemas import (
     TokenResponse,
     UserOut,
     TenderCreate,
+    TenderUpdate,
+    TenderSummary,
     TenderDetail,
+    TenderListResponse,
     ComplianceMatrix,
     BidderDetail,
     FindingOut,
@@ -29,6 +32,7 @@ from backend.schemas import (
     AuditEventOut,
     AuditVerifyOut,
 )
+from backend.services.tender_service import TenderService
 
 logger = logging.getLogger("vigilbid.api")
 api_router = APIRouter()
@@ -83,32 +87,71 @@ async def logout(token: Annotated[TokenPayload, Depends(get_current_token_payloa
 
 
 # 2. Tender Endpoints
-@api_router.get("/tenders", tags=["Tenders"])
+@api_router.get("/tenders", response_model=TenderListResponse, tags=["Tenders"])
 async def list_tenders(
     page: int = Query(1, ge=1),
     limit: int = Query(20, ge=1, le=100),
+    status: Optional[str] = Query(None),
     current_user: Annotated[User, Depends(get_current_user)] = None,
+    session: Annotated[AsyncSession, Depends(get_db_session)] = None,
 ):
     """List tenders with status and bidder counts."""
-    return {"items": [], "total": 0, "page": page, "limit": limit, "pages": 0}
+    result = await TenderService.list_tenders(session, page=page, limit=limit, status_filter=status)
+    items_out = []
+    for t in result["items"]:
+        items_out.append(
+            TenderSummary(
+                id=t.id,
+                nit_no=t.nit_no,
+                title=t.title,
+                portal=t.portal,
+                status=t.status,
+                estimated_value=t.estimated_value,
+                bid_due_date=t.bid_due_date,
+                bidder_count=len(t.bidders) if hasattr(t, "bidders") and t.bidders else 0,
+                created_at=t.created_at,
+            )
+        )
+    return TenderListResponse(
+        items=items_out,
+        total=result["total"],
+        page=result["page"],
+        limit=result["limit"],
+        pages=result["pages"],
+    )
 
 
-@api_router.post("/tenders", response_model=TenderDetail, tags=["Tenders"])
+@api_router.post("/tenders", response_model=TenderDetail, status_code=status.HTTP_201_CREATED, tags=["Tenders"])
 async def create_tender(
     payload: TenderCreate,
     current_user: Annotated[User, Depends(require_role(UserRole.OFFICER, UserRole.ADMIN))],
+    session: Annotated[AsyncSession, Depends(get_db_session)],
 ):
     """Create tender and initialize criteria from CPCL template."""
-    raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED, detail="Tender creation not yet implemented")
+    tender = await TenderService.create_tender(session, payload, current_user.id)
+    return tender
 
 
 @api_router.get("/tenders/{tender_id}", response_model=TenderDetail, tags=["Tenders"])
 async def get_tender(
     tender_id: uuid.UUID,
     current_user: Annotated[User, Depends(get_current_user)],
+    session: Annotated[AsyncSession, Depends(get_db_session)],
 ):
     """Get tender details and criteria."""
-    raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED, detail="Tender detail not yet implemented")
+    return await TenderService.get_tender(session, tender_id)
+
+
+@api_router.patch("/tenders/{tender_id}", response_model=TenderDetail, tags=["Tenders"])
+@api_router.put("/tenders/{tender_id}", response_model=TenderDetail, tags=["Tenders"])
+async def update_tender(
+    tender_id: uuid.UUID,
+    payload: TenderUpdate,
+    current_user: Annotated[User, Depends(require_role(UserRole.OFFICER, UserRole.ADMIN))],
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+):
+    """Update tender metadata or lifecycle status."""
+    return await TenderService.update_tender(session, tender_id, payload)
 
 
 @api_router.get("/tenders/{tender_id}/matrix", response_model=ComplianceMatrix, tags=["Tenders"])

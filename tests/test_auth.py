@@ -27,34 +27,50 @@ for u_data in DEV_USERS:
 
 
 class MockAsyncSession:
-    """Mock async SQLAlchemy session resolving mock users by email or UUID."""
+    """Mock async SQLAlchemy session resolving mock users and tenders."""
+
+    def __init__(self):
+        self.tenders = {}
+
+    def add(self, obj):
+        if hasattr(obj, "id"):
+            obj.criteria = getattr(obj, "criteria", [])
+            obj.bidders = getattr(obj, "bidders", [])
+            obj.created_at = datetime.now(timezone.utc)
+            self.tenders[obj.id] = obj
 
     async def execute(self, stmt):
         result_mock = MagicMock()
-        # Inspect where clause if present
         stmt_str = str(stmt).lower()
-        matched_user = None
+        matched_obj = None
 
         if "where users.email" in stmt_str:
-            # Extract email parameter from statement params
             params = stmt.compile().params
-            email_val = None
             for key, val in params.items():
                 if isinstance(val, str) and "@" in val:
-                    email_val = val.lower().strip()
+                    matched_obj = MOCK_USERS.get(val.lower().strip())
                     break
-            if email_val and email_val in MOCK_USERS:
-                matched_user = MOCK_USERS[email_val]
 
         elif "where users.id" in stmt_str:
             params = stmt.compile().params
             for key, val in params.items():
                 for u in MOCK_USERS.values():
                     if u.id == val or str(u.id) == str(val):
-                        matched_user = u
+                        matched_obj = u
                         break
 
-        result_mock.scalar_one_or_none.return_value = matched_user
+        elif "where tenders.nit_no" in stmt_str:
+            matched_obj = None
+
+        elif "where tenders.id" in stmt_str:
+            params = stmt.compile().params
+            for key, val in params.items():
+                for t in self.tenders.values():
+                    if t.id == val or str(t.id) == str(val):
+                        matched_obj = t
+                        break
+
+        result_mock.scalar_one_or_none.return_value = matched_obj
         return result_mock
 
     async def commit(self):
@@ -183,7 +199,7 @@ def test_get_me_expired_token(auth_client: TestClient):
 # =========================================================================
 
 def test_rbac_officer_allowed_tender_creation(auth_client: TestClient):
-    """Officer role is authorized to access tender creation (endpoint returns 501 scaffold, NOT 403)."""
+    """Officer role is authorized to access tender creation (endpoint returns 201 Created, NOT 403)."""
     login_res = auth_client.post(
         "/api/v1/auth/login",
         json={"email": "officer@cpcl.gov.in", "password": "Officer@CPCL2026!"},
@@ -203,8 +219,9 @@ def test_rbac_officer_allowed_tender_creation(auth_client: TestClient):
             "requires_oem": True,
         },
     )
-    # Passed RBAC check! (Returns 501 Not Implemented because creation logic belongs to next phase)
-    assert response.status_code == 501
+    # Passed RBAC check and tender created successfully
+    assert response.status_code == 201
+    assert response.json()["nit_no"] == "CPCL/TEST/2026/01"
 
 
 def test_rbac_vigilance_forbidden_tender_creation(auth_client: TestClient):

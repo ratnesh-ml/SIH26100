@@ -50,10 +50,17 @@ class User(Base, UUIDPrimaryKeyMixin, TimestampMixin):
 
 class Tender(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     __tablename__ = "tenders"
+    __table_args__ = (
+        CheckConstraint(
+            "status IN ('DRAFT', 'ACTIVE', 'EVALUATING', 'CLOSED', 'ARCHIVED')",
+            name="check_tender_status",
+        ),
+    )
 
     nit_no: Mapped[str] = mapped_column(String(100), unique=True, index=True, nullable=False)
     title: Mapped[str] = mapped_column(String(500), nullable=False)
     portal: Mapped[str] = mapped_column(String(50), default="GeM")
+    status: Mapped[str] = mapped_column(String(50), default="ACTIVE", server_default="ACTIVE")
     estimated_value: Mapped[Optional[float]] = mapped_column(Numeric(16, 2), nullable=True)
     bid_due_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
     mse_applicable: Mapped[bool] = mapped_column(Boolean, default=True)

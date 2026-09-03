@@ -1,8 +1,8 @@
 # VigilBid (SIH26100) — Build Status & Transition Baseline
 
-**Document Version:** 1.4.0  
+**Document Version:** 1.5.0  
 **Date:** September 2026  
-**Status:** Phase 06 Complete — Authentication & Role-Based Authorization Operational  
+**Status:** Phase 07 Complete — Tender Management & REST APIs Operational  
 **Target:** SIH Grand Finale — Problem Statement SIH26100 (CPCL / Ministry of Petroleum & Natural Gas)
 
 ---
@@ -37,14 +37,15 @@ In public procurement under GFR 2017 and CVC guidelines, procurement officers ma
 | **Alembic Migrations Framework** | ✅ Completed (100%) | `alembic.ini`, `alembic/env.py`, initial revision `0001_initial_schema.py` tested against fresh DB. |
 | **Authentication & RBAC System** | ✅ Completed (100%) | PBKDF2 password hashing, JWT HS256, login, me, logout, RoleChecker, 4 core roles. |
 | **Development User Seeding** | ✅ Completed (100%) | `seed/seed_users.py` with PBKDF2 hashed accounts for officer, evaluator, vigilance, and admin. |
+| **Tender Management & REST APIs** | ✅ Completed (100%) | `POST/GET/PATCH /api/v1/tenders`, database persistence, criteria cloning, pagination, input validation. |
 | **Live Health Probe Endpoint** | ✅ Completed (100%) | `/health` actively probes database status, dialect, and latency. |
 | **Background Worker Process** | ✅ Completed (100%) | `worker.py` and `backend/workers/job_worker.py` with DB readiness check and graceful signal shutdown. |
 | **Frontend Production Build** | ✅ Completed (100%) | Vite + React 18 + TypeScript builds cleanly (`dist/` created in 38s) with dark mode and API client. |
-| **Automated Tests & Startup Verification** | ✅ Completed (100%) | 52 pytest unit and security tests passing, `scripts/verify_structure.py` passing with 0 warnings. |
+| **Automated Tests & Startup Verification** | ✅ Completed (100%) | 60 pytest unit, auth, and tender tests passing, `scripts/verify_structure.py` passing with 0 warnings. |
 | **Project Automation Tooling** | ✅ Completed (100%) | Single-command deployment (`docker compose up --build`), `Makefile`, and `scripts/dev.ps1`. |
-| **Synthetic Demo Dataset (`seed/`)** | 🔄 Ready for Generation | `template_tender.json` created; 4+1 generator script pending Phase 07. |
+| **Synthetic Demo Dataset (`seed/`)** | 🔄 Ready for Generation | `template_tender.json` created; 4+1 generator script pending Phase 08. |
 
-**Current Repo Baseline:** Authentication, JWT lifecycle, and role-based access control (Procurement Officer, Evaluator, Vigilance, Administrator) are fully operational and verified by 52 automated tests. Sensitive endpoints enforce RBAC with HTTP 403 Forbidden.
+**Current Repo Baseline:** Full Tender Management is operational with REST endpoints for creation, listing, retrieval, and updates. Tenders feature unique NIT identifiers, financial thresholds, bid due dates, lifecycle statuses (`DRAFT`, `ACTIVE`, `EVALUATING`, `CLOSED`, `ARCHIVED`), and automatic criteria cloning from CPCL templates. All endpoints are guarded by RBAC and verified by 60 automated tests.
 
 ---
 
@@ -186,8 +187,8 @@ In public procurement under GFR 2017 and CVC guidelines, procurement officers ma
 
 ## 8. Next Recommended Step
  
-**Execute Phase 07 (Synthetic Demo Dataset Generator & Pipeline Ingestion):**
+**Execute Phase 08 (Synthetic Demo Dataset Generator & Pipeline Ingestion):**
 1. Implement synthetic bidder document generator (`seed/generate_demo_docs.py`) to produce the 4+1 demo bidder PDFs (scanned + digital) and ground truth fixtures.
 2. Wire the 11-step pipeline runner into the PostgreSQL `jobs` table polling loop in `backend/workers/job_worker.py`.
 3. Test end-to-end ingestion and rule evaluation of the demo bidder packages against tender criteria.
-4. Begin Phase 07 implementation per timeline in `docs/05`.
+4. Begin Phase 08 implementation per timeline in `docs/05`.

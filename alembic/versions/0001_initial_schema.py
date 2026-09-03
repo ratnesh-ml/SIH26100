@@ -40,6 +40,7 @@ def upgrade() -> None:
         sa.Column('nit_no', sa.String(length=100), nullable=False),
         sa.Column('title', sa.String(length=500), nullable=False),
         sa.Column('portal', sa.String(length=50), nullable=False, server_default='GeM'),
+        sa.Column('status', sa.String(length=50), nullable=False, server_default='ACTIVE'),
         sa.Column('estimated_value', sa.Numeric(precision=16, scale=2), nullable=True),
         sa.Column('bid_due_date', sa.Date(), nullable=True),
         sa.Column('mse_applicable', sa.Boolean(), nullable=False, server_default='true'),
@@ -47,6 +48,7 @@ def upgrade() -> None:
         sa.Column('requires_oem', sa.Boolean(), nullable=False, server_default='true'),
         sa.Column('created_by', sa.Uuid(), nullable=False),
         sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
+        sa.CheckConstraint("status IN ('DRAFT', 'ACTIVE', 'EVALUATING', 'CLOSED', 'ARCHIVED')", name='check_tender_status'),
         sa.ForeignKeyConstraint(['created_by'], ['users.id'], ondelete='RESTRICT'),
         sa.PrimaryKeyConstraint('id'),
     )
