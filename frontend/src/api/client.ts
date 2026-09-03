@@ -11,6 +11,8 @@ import {
   TenderListResponse,
   UploadPackageResponse,
   ComplianceMatrix,
+  DecisionOut,
+  CompleteReviewResponse,
   JobStatus,
   User,
 } from '../types';
@@ -255,5 +257,52 @@ export async function triggerJobProcessing(jobId: string): Promise<JobStatus> {
 export async function fetchBidderJobs(bidderId: string): Promise<JobStatus[]> {
   return request<JobStatus[]>(`${API_BASE}/bidders/${bidderId}/jobs`);
 }
+
+// 7. Human Review & Decisions
+export async function recordFindingDecision(
+  findingId: string,
+  action: string,
+  reason?: string,
+  resultingStatus?: string
+): Promise<DecisionOut> {
+  return request<DecisionOut>(`${API_BASE}/findings/${findingId}/decision`, {
+    method: 'POST',
+    body: JSON.stringify({
+      action,
+      reason,
+      resulting_status: resultingStatus,
+    }),
+  });
+}
+
+export async function fetchFindingDecisions(findingId: string): Promise<DecisionOut[]> {
+  return request<DecisionOut[]>(`${API_BASE}/findings/${findingId}/decisions`);
+}
+
+export async function fetchBidderDecisions(bidderId: string): Promise<DecisionOut[]> {
+  return request<DecisionOut[]>(`${API_BASE}/bidders/${bidderId}/decisions`);
+}
+
+export async function completeBidderReview(bidderId: string): Promise<CompleteReviewResponse> {
+  return request<CompleteReviewResponse>(`${API_BASE}/bidders/${bidderId}/complete-review`, {
+    method: 'POST',
+  });
+}
+
+export async function fetchDocumentPageBlob(docId: string, pageNo = 1, dpi = 150): Promise<string> {
+  const token = getStoredToken();
+  const headers: Record<string, string> = {};
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  const response = await fetch(`${API_BASE}/documents/${docId}/pages/${pageNo}.png?dpi=${dpi}`, { headers });
+  if (!response.ok) {
+    throw new Error(`Failed to load page image (HTTP ${response.status})`);
+  }
+  const blob = await response.blob();
+  return URL.createObjectURL(blob);
+}
+
+
 
 

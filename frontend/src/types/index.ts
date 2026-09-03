@@ -142,11 +142,46 @@ export interface BidderDetail {
 }
 
 export interface EvidenceRef {
+  document?: string;
   document_id?: string;
+  page?: number;
   page_no?: number;
-  bbox?: number[];
-  quote?: string;
+  field?: string;
   field_name?: string;
+  quote?: string;
+  value?: string;
+  bounding_box?: Record<string, any>;
+  bbox?: Record<string, any> | number[];
+  source?: string;
+  method?: string;
+  confidence?: number;
+}
+
+export interface DecisionOut {
+  id: string;
+  finding_id?: string | null;
+  bidder_id: string;
+  bid_id?: string | null;
+  actor_id: string;
+  actor_name?: string | null;
+  actor_role?: string | null;
+  action: string;
+  reason?: string | null;
+  resulting_status: string;
+  machine_recommendation?: string | null;
+  audit_ref?: string | null;
+  created_at: string;
+}
+
+export interface CompleteReviewResponse {
+  status: string;
+  message: string;
+  bidder_id: string;
+  review_state: string;
+  overall_status: string;
+  bid_id?: string | null;
+  bid_status?: string | null;
+  decisions_count: number;
 }
 
 export interface FindingOut {
@@ -158,7 +193,13 @@ export interface FindingOut {
   status: FindingStatus;
   title: string;
   explanation: string;
+  citation?: Record<string, any>;
   confidence?: number;
+  extracted?: Record<string, any>;
+  expected?: Record<string, any>;
+  machine_recommendation?: string;
+  latest_decision?: DecisionOut | null;
+  is_resolved?: boolean;
   evidence?: EvidenceRef[];
   created_at?: string;
 }

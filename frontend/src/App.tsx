@@ -167,6 +167,7 @@ export default function App() {
             {activeView === 'bidder-detail' && selectedBidderId && (
               <BidderDetailView
                 bidderId={selectedBidderId}
+                currentUser={currentUser}
                 onBack={() => setActiveView('bidders')}
                 onOpenPipeline={(jId, bId) => {
                   setActiveJobId(jId);
