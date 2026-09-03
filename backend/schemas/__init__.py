@@ -33,6 +33,7 @@ from backend.schemas.bid import (
     BidListResponse,
 )
 from backend.schemas.finding import EvidenceItem, FindingOut, DecisionCreate, DecisionOut
+from backend.schemas.document import DocumentSummary, RejectedFileOut, IngestionResponse
 from backend.schemas.job import StepStatus, JobStatus
 from backend.schemas.audit import AuditEventOut, AuditVerifyOut
 
@@ -67,6 +68,9 @@ __all__ = [
     "RiskDriverOut",
     "AnomalySignalOut",
     "RiskProfileOut",
+    "DocumentSummary",
+    "RejectedFileOut",
+    "IngestionResponse",
     "EvidenceItem",
     "FindingOut",
     "DecisionCreate",

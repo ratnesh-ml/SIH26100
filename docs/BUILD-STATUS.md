@@ -1,8 +1,8 @@
 # VigilBid (SIH26100) — Build Status & Transition Baseline
 
-**Document Version:** 1.6.0  
+**Document Version:** 1.7.0  
 **Date:** September 2026  
-**Status:** Phase 08 Complete — Bidder Management, Tender Attachment & Bid Lifecycles Operational  
+**Status:** Phase 09 Complete — Document Ingestion, Zip Safety & Storage Operational  
 **Target:** SIH Grand Finale — Problem Statement SIH26100 (CPCL / Ministry of Petroleum & Natural Gas)
 
 ---
@@ -31,6 +31,7 @@ In public procurement under GFR 2017 and CVC guidelines, procurement officers ma
 | **Repository Structure Documentation** | ✅ Completed (100%) | Detailed directory layout in `docs/REPOSITORY-STRUCTURE.md`. |
 | **Database Architecture Documentation** | ✅ Completed (100%) | Detailed schema specification in `docs/DATABASE.md`. |
 | **Authentication & RBAC Documentation** | ✅ Completed (100%) | Detailed security and role matrix in `docs/AUTH.md`. |
+| **Ingestion Security Policy Documentation** | ✅ Completed (100%) | Detailed threat model, zip-bomb, and traversal defense in `docs/SECURITY.md`. |
 | **Containerization & Compose** | ✅ Completed (100%) | `docker-compose.yml`, `backend/Dockerfile`, `frontend/Dockerfile`, `.dockerignore`. |
 | **Database Connectivity Engine** | ✅ Completed (100%) | `backend/core/database.py` with async SQLAlchemy 2.0 engine, async sessionmaker, and DB connection probe. |
 | **PostgreSQL Schema & Models** | ✅ Completed (100%) | All 18 locked tables defined with UUIDs, BigIntegers, JSONB, foreign keys, and indexes. |
@@ -39,14 +40,15 @@ In public procurement under GFR 2017 and CVC guidelines, procurement officers ma
 | **Development User Seeding** | ✅ Completed (100%) | `seed/seed_users.py` with PBKDF2 hashed accounts for officer, evaluator, vigilance, and admin. |
 | **Tender Management & REST APIs** | ✅ Completed (100%) | `POST/GET/PATCH /api/v1/tenders`, database persistence, criteria cloning, pagination, input validation. |
 | **Bidder & Bid Management** | ✅ Completed (100%) | `POST/GET/PATCH /api/v1/bidders`, `POST/GET /api/v1/tenders/{id}/bidders`, `POST/GET/PATCH /api/v1/bids`, Fernet credential encryption, masked profiles, bid status lifecycles. |
+| **Document Ingestion & Storage Safety** | ✅ Completed (100%) | `POST /api/v1/bidders/{id}/documents`, `GET /documents/{id}`, magic byte verification (`%PDF-`), ZIP safety (ratio 100:1, max 200 files), path traversal defense, SHA-256 CAS storage, deduplication. |
 | **Live Health Probe Endpoint** | ✅ Completed (100%) | `/health` actively probes database status, dialect, and latency. |
 | **Background Worker Process** | ✅ Completed (100%) | `worker.py` and `backend/workers/job_worker.py` with DB readiness check and graceful signal shutdown. |
 | **Frontend Production Build** | ✅ Completed (100%) | Vite + React 18 + TypeScript builds cleanly (`dist/` created in 38s) with dark mode and API client. |
-| **Automated Tests & Startup Verification** | ✅ Completed (100%) | 69 pytest unit, auth, tender, and bidder tests passing, `scripts/verify_structure.py` passing with 0 warnings. |
+| **Automated Tests & Startup Verification** | ✅ Completed (100%) | 78 pytest unit, auth, tender, bidder, and ingestion tests passing, `scripts/verify_structure.py` passing with 0 warnings. |
 | **Project Automation Tooling** | ✅ Completed (100%) | Single-command deployment (`docker compose up --build`), `Makefile`, and `scripts/dev.ps1`. |
-| **Synthetic Demo Dataset (`seed/`)** | 🔄 Ready for Generation | `template_tender.json` created; 4+1 generator script pending Phase 09. |
+| **Synthetic Demo Dataset (`seed/`)** | 🔄 Ready for Generation | `template_tender.json` created; 4+1 generator script pending Phase 10. |
 
-**Current Repo Baseline:** Full Bidder and Bid Management is operational with dedicated endpoints for vendor master profiles, tender registration/attachment, and bid evaluation status lifecycles (`PENDING`, `SUBMITTED`, `UNDER_EVALUATION`, `QUALIFIED`, `NOT_QUALIFIED`, `DISQUALIFIED`, `WITHDRAWN`). Sensitive tax and business credentials (PAN, GSTIN) are encrypted with Fernet at rest and masked in responses. All 69 automated tests pass.
+**Current Repo Baseline:** Document Ingestion is fully operational with standalone PDF and ZIP package processing. Ingestion features magic-byte verification, zip bomb protection, path-traversal blocking, SHA-256 fingerprinting, per-bidder deduplication, and write-once content-addressable storage. All 78 automated tests pass.
 
 ---
 
@@ -188,8 +190,8 @@ In public procurement under GFR 2017 and CVC guidelines, procurement officers ma
 
 ## 8. Next Recommended Step
  
-**Execute Phase 09 (Synthetic Demo Dataset Generator & Pipeline Ingestion):**
+**Execute Phase 10 (Synthetic Demo Dataset Generator & Pipeline Worker):**
 1. Implement synthetic bidder document generator (`seed/generate_demo_docs.py`) to produce the 4+1 demo bidder PDFs (scanned + digital) and ground truth fixtures.
 2. Wire the 11-step pipeline runner into the PostgreSQL `jobs` table polling loop in `backend/workers/job_worker.py`.
 3. Test end-to-end ingestion and rule evaluation of the demo bidder packages against tender criteria.
-4. Begin Phase 09 implementation per timeline in `docs/05`.
+4. Begin Phase 10 implementation per timeline in `docs/05`.

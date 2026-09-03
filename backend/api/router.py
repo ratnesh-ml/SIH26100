@@ -3,7 +3,8 @@
 import logging
 from typing import Annotated, Any, Optional
 import uuid
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
+from fastapi.responses import FileResponse
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -34,6 +35,8 @@ from backend.schemas import (
     BidStatusUpdate,
     BidOut,
     BidListResponse,
+    DocumentSummary,
+    IngestionResponse,
     FindingOut,
     DecisionCreate,
     DecisionOut,
@@ -44,6 +47,7 @@ from backend.schemas import (
 )
 from backend.services.tender_service import TenderService
 from backend.services.bidder_service import BidderService
+from backend.services.document_service import DocumentService
 
 logger = logging.getLogger("vigilbid.api")
 api_router = APIRouter()
@@ -306,6 +310,65 @@ async def complete_review(
 ):
     """Mark bidder evaluation as complete once all findings have decisions."""
     raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED, detail="Review completion not yet implemented")
+
+
+@api_router.post("/bidders/{bidder_id}/documents", response_model=IngestionResponse, status_code=status.HTTP_201_CREATED, tags=["Documents"])
+async def upload_documents(
+    bidder_id: uuid.UUID,
+    files: list[UploadFile] = File(..., description="PDF or ZIP archives containing PDFs"),
+    current_user: Annotated[User, Depends(require_role(UserRole.OFFICER, UserRole.ADMIN))] = None,
+    session: Annotated[AsyncSession, Depends(get_db_session)] = None,
+):
+    """Safely ingest PDF documents or ZIP packages with zip bomb protection and deduplication."""
+    doc_service = DocumentService()
+    return await doc_service.ingest_uploaded_files(session, bidder_id, files)
+
+
+@api_router.get("/bidders/{bidder_id}/documents", response_model=list[DocumentSummary], tags=["Documents"])
+async def list_bidder_documents(
+    bidder_id: uuid.UUID,
+    current_user: Annotated[User, Depends(get_current_user)],
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+):
+    """List all ingested documents for a specific bidder."""
+    return await DocumentService.list_bidder_documents(session, bidder_id)
+
+
+@api_router.get("/documents/{doc_id}", response_model=DocumentSummary, tags=["Documents"])
+async def get_document(
+    doc_id: uuid.UUID,
+    current_user: Annotated[User, Depends(get_current_user)],
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+):
+    """Retrieve document metadata and fingerprint."""
+    doc = await DocumentService.get_document(session, doc_id)
+    return DocumentSummary(
+        id=doc.id,
+        bidder_id=doc.bidder_id,
+        original_filename=doc.original_filename,
+        sha256=doc.sha256,
+        mime=doc.mime,
+        page_count=doc.page_count,
+        doc_type=doc.doc_type,
+        storage_path=doc.storage_path,
+        created_at=doc.created_at,
+    )
+
+
+@api_router.get("/documents/{doc_id}/download", tags=["Documents"])
+async def download_document(
+    doc_id: uuid.UUID,
+    current_user: Annotated[User, Depends(get_current_user)],
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+):
+    """Download original document safely with attachment disposition."""
+    doc = await DocumentService.get_document(session, doc_id)
+    return FileResponse(
+        path=doc.storage_path,
+        filename=doc.original_filename,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{doc.original_filename}"'},
+    )
 
 
 # 4. Jobs & Pipeline Status
