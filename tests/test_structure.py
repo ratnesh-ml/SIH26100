@@ -21,6 +21,7 @@ REQUIRED_MODULES = [
     "backend.workers.job_worker",
     "backend.main",
     # Pipeline subsystems
+    "pipeline.pdf",
     "pipeline.ocr.textifier",
     "pipeline.document_processing.ingest",
     "pipeline.document_processing.classifier",
