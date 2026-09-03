@@ -1,6 +1,7 @@
 /* VigilBid blueprint viewer: loads the markdown parts, renders them, builds a TOC. */
 (function () {
   const PARTS = [
+    { id: 'part-status', file: 'docs/BUILD-STATUS.md', label: 'Build Status & Baseline' },
     { id: 'part-00', file: 'docs/00-research-audit.md', label: '00 · Research Audit' },
     { id: 'part-01', file: 'docs/01-understanding-requirements-architecture.md', label: '01–04 · Understanding → Architecture' },
     { id: 'part-02', file: 'docs/02-ai-docai-rag-er-compliance-risk.md', label: '05–10 · AI, DocAI, RAG, ER, Rules, Risk' },

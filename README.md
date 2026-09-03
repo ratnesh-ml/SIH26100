@@ -16,13 +16,15 @@ This repository is the **single source of truth** for a 3-person SIH Grand Final
 - ✅ **15–20** Synthetic demo dataset (1 tender, 4+1 bidders), mock government-API strategy, security (incl. indirect prompt injection), DevOps, MVP cut line, 3-person team architecture with cross-ownership
 - ✅ **21–25** Dependency graph / critical path, hour-by-hour 36-h plan, per-person checklists with DoD, skill-gap analysis, Git & project management
 - ✅ **26–32** 6.5-min demo script, "one screen that wins" spec, 32 judge attack questions, claim-defense table, final tech lock, final technical specification, winning strategy
+- ✅ **Build Status & Transition Baseline** (`docs/BUILD-STATUS.md`) — current implementation status, architecture, known risks, unresolved decisions, and next steps
 - ✅ Web viewer with TOC (`index.html`, `css/style.css`, `js/main.js`)
 
 ## Entry points
 | Path | Purpose |
 |---|---|
+| `docs/BUILD-STATUS.md` | **Read this for current status & handover** — implementation status, architecture baseline, next steps |
 | `index.html` | Browsable blueprint (loads all `docs/*.md`, builds TOC, deep-linkable `#section` anchors) |
-| `docs/00-research-audit.md` | Read this first — what in the research is trustworthy |
+| `docs/00-research-audit.md` | Read this first for research verification — what in the research is trustworthy |
 | `docs/01-…` → `docs/06-…` | Sections 01–32 in order |
 | `research/sih26100-research-dump.txt` | Original research input (unchanged) |
 
