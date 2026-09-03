@@ -1,8 +1,8 @@
 # VigilBid (SIH26100) — Build Status & Transition Baseline
 
-**Document Version:** 1.2.0  
+**Document Version:** 1.3.0  
 **Date:** September 2026  
-**Status:** Phase 04 Complete — Local Development Environment & Services Operational  
+**Status:** Phase 05 Complete — PostgreSQL Schema, Alembic Migrations & User Seeding Operational  
 **Target:** SIH Grand Finale — Problem Statement SIH26100 (CPCL / Ministry of Petroleum & Natural Gas)
 
 ---
@@ -29,17 +29,20 @@ In public procurement under GFR 2017 and CVC guidelines, procurement officers ma
 | **Architecture & Specifications** | ✅ Completed (100%) | Complete in `docs/00` through `docs/06` (32 detailed sections). |
 | **Architecture Lock & Contracts** | ✅ Completed (100%) | Locked in `docs/ARCHITECTURE-LOCK.md` & `docs/INTERFACE-CONTRACTS.md`. |
 | **Repository Structure Documentation** | ✅ Completed (100%) | Detailed directory layout in `docs/REPOSITORY-STRUCTURE.md`. |
+| **Database Architecture Documentation** | ✅ Completed (100%) | Detailed schema specification in `docs/DATABASE.md`. |
 | **Containerization & Compose** | ✅ Completed (100%) | `docker-compose.yml`, `backend/Dockerfile`, `frontend/Dockerfile`, `.dockerignore`. |
 | **Database Connectivity Engine** | ✅ Completed (100%) | `backend/core/database.py` with async SQLAlchemy 2.0 engine, async sessionmaker, and DB connection probe. |
+| **PostgreSQL Schema & Models** | ✅ Completed (100%) | All 17 locked tables defined with UUIDs, BigIntegers, JSONB, foreign keys, and indexes. |
+| **Alembic Migrations Framework** | ✅ Completed (100%) | `alembic.ini`, `alembic/env.py`, initial revision `0001_initial_schema.py` tested against fresh DB. |
+| **Development User Seeding** | ✅ Completed (100%) | `seed/seed_users.py` with PBKDF2 hashed accounts for officer, approver, auditor, and admin. |
 | **Live Health Probe Endpoint** | ✅ Completed (100%) | `/health` actively probes database status, dialect, and latency. |
 | **Background Worker Process** | ✅ Completed (100%) | `worker.py` and `backend/workers/job_worker.py` with DB readiness check and graceful signal shutdown. |
 | **Frontend Production Build** | ✅ Completed (100%) | Vite + React 18 + TypeScript builds cleanly (`dist/` created in 38s) with dark mode and API client. |
-| **Automated Tests & Startup Verification** | ✅ Completed (100%) | 38 pytest unit tests passing, `scripts/verify_structure.py` passing with 0 warnings. |
+| **Automated Tests & Startup Verification** | ✅ Completed (100%) | 40 pytest unit tests passing, `scripts/verify_structure.py` passing with 0 warnings. |
 | **Project Automation Tooling** | ✅ Completed (100%) | Single-command deployment (`docker compose up --build`), `Makefile`, and `scripts/dev.ps1`. |
-| **Database Migrations (`alembic`)** | 🔄 Ready for Migrations | 17 models defined; Alembic migration environment pending Phase 05. |
-| **Synthetic Demo Dataset (`seed/`)** | 🔄 Ready for Generation | `template_tender.json` created; 4+1 generator script pending Phase 05. |
+| **Synthetic Demo Dataset (`seed/`)** | 🔄 Ready for Generation | `template_tender.json` created; 4+1 generator script pending Phase 06. |
 
-**Current Repo Baseline:** The local development environment is fully operational with repeatable single-command Docker deployment and host-mode fallback. All 4 services (PostgreSQL 16, FastAPI backend, Vite frontend, and pipeline worker) are configured and verified.
+**Current Repo Baseline:** The PostgreSQL schema and Alembic migration framework are fully operational and verified against fresh databases. All 17 tables, foreign keys, check constraints, composite indexes, and development seed users are active and tested.
 
 ---
 
@@ -181,8 +184,8 @@ In public procurement under GFR 2017 and CVC guidelines, procurement officers ma
 
 ## 8. Next Recommended Step
  
-**Execute Phase 05 (Database Migrations, Seed Generation & Pipeline Ingestion):**
-1. Initialize Alembic migrations environment and generate initial PostgreSQL schema migration for all 17 tables.
-2. Implement synthetic bidder document generator (`seed/generate_demo_docs.py`) to produce the 4+1 demo bidder PDFs and ground truth fixtures.
-3. Wire the 11-step pipeline runner into the PostgreSQL `jobs` table polling loop.
-4. Begin Phase 05 implementation per timeline in `docs/05`.
+**Execute Phase 06 (Synthetic Demo Dataset Generator & Pipeline Ingestion):**
+1. Implement synthetic bidder document generator (`seed/generate_demo_docs.py`) to produce the 4+1 demo bidder PDFs (scanned + digital) and ground truth fixtures.
+2. Wire the 11-step pipeline runner into the PostgreSQL `jobs` table polling loop in `backend/workers/job_worker.py`.
+3. Test end-to-end ingestion and rule evaluation of the demo bidder packages against tender criteria.
+4. Begin Phase 06 implementation per timeline in `docs/05`.

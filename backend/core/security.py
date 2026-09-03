@@ -46,3 +46,24 @@ def decrypt_identifier(token: bytes) -> str:
     """Decrypt sensitive identifier at rest."""
     cipher = get_fernet_cipher()
     return cipher.decrypt(token).decode()
+
+
+def get_password_hash(password: str) -> str:
+    """Hash a plaintext password using PBKDF2-HMAC-SHA256 with a unique salt."""
+    import secrets
+    import hashlib
+    salt = secrets.token_hex(16)
+    hashed = hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), salt.encode("utf-8"), 100000)
+    return f"pbkdf2:sha256:100000${salt}${hashed.hex()}"
+
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    """Verify plaintext password against PBKDF2 hash."""
+    import hashlib
+    import hmac
+    try:
+        algorithm, salt, hash_hex = hashed_password.split("$")
+        calculated = hashlib.pbkdf2_hmac("sha256", plain_password.encode("utf-8"), salt.encode("utf-8"), 100000)
+        return hmac.compare_digest(calculated.hex(), hash_hex)
+    except Exception:
+        return False
