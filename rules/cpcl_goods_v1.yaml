@@ -3,90 +3,323 @@ template_name: "cpcl_goods_v1"
 description: "Chennai Petroleum Corporation Limited Goods Tender Eligibility & Technical Compliance Rules"
 
 rules:
-  # 1. Identity & Registration
+  # =========================================================================
+  # 1. Identity & Registration Rules
+  # =========================================================================
   - id: "R-ID-01"
-    category: "Identity"
+    version: "1.0"
+    category: "HARD"
+    functional_category: "Identity"
     title: "GSTIN Checksum & Format Validation"
-    clause: "GFR 2017 Rule 144 / GST Act Sec 22"
-    severity: "FAIL"
+    clause: "GFR 2017 Rule 144 / GST Act Sec 22 / CGST Rules 2017 Rule 10"
+    applies_when: "tender.requires_gst"
+    inputs: ["gstin"]
+    evaluator: "gstin_checksum"
+    on_true: "PASS"
+    on_false: "FAIL"
+    on_missing: "REVIEW"
+    citation:
+      source: "CGST Rules 2017, Rule 10 / GSTIN Mod-36 Checksum Spec"
+      kb: "gst-structure"
     description: "Validates 15-character GSTIN structure and mod-36 checksum."
 
   - id: "R-ID-02"
-    category: "Identity"
+    version: "1.0"
+    category: "HARD"
+    functional_category: "Identity"
     title: "PAN Card Parity with GSTIN"
     clause: "Income Tax Act 1961 Sec 139A / GST Rules"
-    severity: "FAIL"
+    applies_when: "tender.requires_gst and tender.requires_pan"
+    inputs: ["pan", "gstin"]
+    evaluator: "pan_gstin_linkage"
+    on_true: "PASS"
+    on_false: "FAIL"
+    on_missing: "REVIEW"
+    citation:
+      source: "Income Tax Act 1961 Sec 139A & GSTN-CBDT Data Sharing Framework"
+      kb: "pan-gstin-linkage"
     description: "Ensures PAN embedded in characters 3-12 of GSTIN matches declared PAN card."
 
   - id: "R-ID-03"
-    category: "Identity"
+    version: "1.0"
+    category: "SOFT"
+    functional_category: "Identity"
     title: "Udyam Registration Active Verification"
     clause: "MSMED Act 2006 Sec 7 / Gazette Notification S.O. 2119(E)"
-    severity: "WARN"
-    description: "Checks active status of Udyam registration for MSE exemption claims."
+    applies_when: "bidder.claims_mse"
+    inputs: ["udyam_no"]
+    evaluator: "udyam_validation"
+    on_true: "PASS"
+    on_false: "FAIL"
+    on_missing: "REVIEW"
+    citation:
+      source: "Ministry of MSME Gazette Notification S.O. 2119(E) dated 26-06-2020"
+      kb: "udyam-verification"
+    description: "Checks active status and structural validity of Udyam registration."
 
-  # 2. Financial Standing
+  - id: "R-GST-01"
+    version: "1.0"
+    category: "HARD"
+    functional_category: "Identity"
+    title: "GSTIN Checksum & Structure"
+    clause: "CGST Rules 2017 Rule 10"
+    applies_when: "tender.requires_gst"
+    inputs: ["gstin"]
+    evaluator: "gstin_checksum"
+    on_true: "PASS"
+    on_false: "FAIL"
+    on_missing: "REVIEW"
+    citation:
+      source: "CGST Rules 2017 Rule 10"
+      kb: "gst-structure"
+    description: "Validates 15-character GSTIN structure and check digit."
+
+  - id: "R-GST-02"
+    version: "1.0"
+    category: "HARD"
+    functional_category: "Identity"
+    title: "GSTIN Embedded PAN Linkage"
+    clause: "PAN-GSTIN Statutory Framework"
+    applies_when: "tender.requires_gst"
+    inputs: ["gstin", "pan"]
+    evaluator: "pan_gstin_linkage"
+    on_true: "PASS"
+    on_false: "FAIL"
+    on_missing: "REVIEW"
+    citation:
+      source: "CGST Act 2017 Section 25(6)"
+      kb: "pan-gstin-linkage"
+    description: "Characters 3 to 12 of GSTIN must exactly equal the 10-character PAN."
+
+  - id: "R-PAN-01"
+    version: "1.0"
+    category: "HARD"
+    functional_category: "Identity"
+    title: "PAN Format & Structure Validation"
+    clause: "Income Tax Rules 1962 Rule 114"
+    applies_when: "tender.requires_pan"
+    inputs: ["pan"]
+    evaluator: "pan_checksum_format"
+    on_true: "PASS"
+    on_false: "FAIL"
+    on_missing: "REVIEW"
+    citation:
+      source: "Income Tax Rules 1962 Rule 114"
+      kb: "pan-structure"
+    description: "Validates 10-character PAN syntax and entity classification 4th character."
+
+  - id: "R-UDY-01"
+    version: "1.0"
+    category: "HARD"
+    functional_category: "Identity"
+    title: "Udyam Certificate Structure"
+    clause: "MSMED Act 2006"
+    applies_when: "bidder.claims_mse"
+    inputs: ["udyam_no"]
+    evaluator: "udyam_validation"
+    on_true: "PASS"
+    on_false: "FAIL"
+    on_missing: "REVIEW"
+    citation:
+      source: "MSMED Act 2006 Section 7"
+      kb: "udyam-verification"
+    description: "Validates UDYAM-XX-00-0000000 format."
+
+  - id: "R-UDY-02"
+    version: "1.0"
+    category: "HARD"
+    functional_category: "Identity"
+    title: "Udyam MSE Category Exemption Eligibility"
+    clause: "Public Procurement Policy for MSEs Order 2012"
+    applies_when: "bidder.claims_mse"
+    inputs: ["enterprise_category"]
+    evaluator: "udyam_category_mse_benefits"
+    on_true: "PASS"
+    on_false: "FAIL"
+    on_missing: "REVIEW"
+    citation:
+      source: "Public Procurement Policy for MSEs Order 2012 Section 4"
+      kb: "mse-order-2012"
+    description: "Fails if enterprise is Medium category claiming Micro/Small exemption."
+
+  # =========================================================================
+  # 2. Financial Standing Rules
+  # =========================================================================
   - id: "R-FIN-01"
-    category: "Financial"
+    version: "1.0"
+    category: "HARD"
+    functional_category: "Financial"
     title: "Average Annual Turnover Threshold"
     clause: "CPCL BEC Clause 3.1"
-    severity: "FAIL"
-    description: "Calculates average 3-year turnover against tender estimated value requirement (30%)."
+    applies_when: "always"
+    inputs: ["average_turnover_inr", "min_turnover_threshold_inr"]
+    evaluator: "turnover_threshold"
+    on_true: "PASS"
+    on_false: "FAIL"
+    on_missing: "REVIEW"
+    citation:
+      source: "CPCL BEC Clause 3.1 / Manual on Procurement of Goods 2017"
+      kb: "turnover-criteria"
+    description: "Calculates average 3-year turnover against tender estimated value requirement."
 
   - id: "R-FIN-02"
-    category: "Financial"
+    version: "1.0"
+    category: "HARD"
+    functional_category: "Financial"
     title: "Net Worth Positive Requirement"
     clause: "CPCL BEC Clause 3.2"
-    severity: "FAIL"
+    applies_when: "always"
+    inputs: ["net_worth_inr"]
+    evaluator: "net_worth_positive"
+    on_true: "PASS"
+    on_false: "FAIL"
+    on_missing: "REVIEW"
+    citation:
+      source: "CPCL BEC Clause 3.2"
+      kb: "financial-solvency"
     description: "Ensures net worth in latest audited balance sheet is positive."
 
   - id: "R-FIN-03"
-    category: "Financial"
+    version: "1.0"
+    category: "SOFT"
+    functional_category: "Financial"
     title: "ICAI UDIN Validation"
     clause: "ICAI Council Mandate 2019"
-    severity: "WARN"
-    description: "Verifies 18-digit Unique Document Identification Number on CA turnover certificate."
+    applies_when: "always"
+    inputs: ["udin"]
+    evaluator: "udin_validation"
+    on_true: "PASS"
+    on_false: "WARN"
+    on_missing: "WARN"
+    citation:
+      source: "ICAI Council Gazette Notification on UDIN Mandate 2019"
+      kb: "udin-mandate"
+    description: "Verifies 18-digit Unique Document Identification Number on CA certificate."
 
-  # 3. Regulatory Declarations
+  # =========================================================================
+  # 3. Regulatory Declarations Rules
+  # =========================================================================
   - id: "R-REG-01"
-    category: "Regulatory"
+    version: "1.0"
+    category: "HARD"
+    functional_category: "Regulatory"
     title: "Make in India (PPP-MII) Local Content Declaration"
     clause: "DPIIT Order P-45021/2/2017-PP (BE-II)"
-    severity: "FAIL"
-    description: "Verifies minimum local content percentage (>=50% for Class-I, >=20% for Class-II)."
+    applies_when: "always"
+    inputs: ["local_content_pct", "min_local_content_pct"]
+    evaluator: "make_in_india"
+    on_true: "PASS"
+    on_false: "FAIL"
+    on_missing: "REVIEW"
+    citation:
+      source: "Public Procurement (Preference to Make in India) Order 2017"
+      kb: "ppp-mii-order"
+    description: "Verifies minimum local content percentage (>=50% for Class-I)."
 
   - id: "R-REG-02"
-    category: "Regulatory"
+    version: "1.0"
+    category: "HARD"
+    functional_category: "Regulatory"
     title: "Land Border Sharing Rule 144(xi) Declaration"
     clause: "DoE OM F.No.6/18/2019-PPD"
-    severity: "FAIL"
+    applies_when: "always"
+    inputs: ["has_land_border_decl", "land_border_origin", "has_competent_reg"]
+    evaluator: "land_border_144xi"
+    on_true: "PASS"
+    on_false: "FAIL"
+    on_missing: "REVIEW"
+    citation:
+      source: "DoE OM F.No.6/18/2019-PPD / GFR 2017 Rule 144(xi)"
+      kb: "land-border-rule-144xi"
     description: "Ensures mandatory signed certificate regarding land border restrictions is present."
 
   - id: "R-REG-03"
-    category: "Regulatory"
+    version: "1.0"
+    category: "HARD"
+    functional_category: "Regulatory"
     title: "CPPP / GeM Debarment Check"
     clause: "GFR 2017 Rule 151 / CVC Guidelines"
-    severity: "FAIL"
-    description: "Verifies entity and directors are not blacklisted or debarred on Central Public Procurement Portal."
+    applies_when: "always"
+    inputs: ["debarment_status"]
+    evaluator: "debarment_check"
+    on_true: "PASS"
+    on_false: "FAIL"
+    on_missing: "REVIEW"
+    citation:
+      source: "GFR 2017 Rule 151 / CVC Office Order No. 02/02/17"
+      kb: "debarment-guidelines"
+    description: "Verifies entity is not blacklisted or debarred on Central Public Procurement Portal."
 
-  # 4. Technical & Commercial
+  # =========================================================================
+  # 4. Technical & Commercial Rules
+  # =========================================================================
   - id: "R-TEC-01"
-    category: "Technical"
+    version: "1.0"
+    category: "HARD"
+    functional_category: "Technical"
     title: "OEM Manufacturer Authorization"
     clause: "CPCL BEC Clause 4.1"
-    severity: "FAIL"
+    applies_when: "tender.requires_oem"
+    inputs: ["is_oem", "has_oem_auth", "oem_auth_references_tender"]
+    evaluator: "oem_authorization"
+    on_true: "PASS"
+    on_false: "FAIL"
+    on_missing: "REVIEW"
+    citation:
+      source: "CPCL BEC Clause 4.1 / GeM GTC Clause 4.15"
+      kb: "oem-authorization"
     description: "Validates authorized dealership / distributorship letter from original manufacturer."
 
   - id: "R-TEC-02"
-    category: "Technical"
+    version: "1.0"
+    category: "HUMAN"
+    functional_category: "Technical"
     title: "Past Performance & Similar Work Orders"
     clause: "CPCL BEC Clause 4.2"
-    severity: "REVIEW"
+    applies_when: "always"
+    inputs: ["has_completion_cert", "order_value_inr"]
+    evaluator: "past_performance"
+    on_true: "PASS"
+    on_false: "REVIEW"
+    on_missing: "REVIEW"
+    citation:
+      source: "CPCL BEC Clause 4.2"
+      kb: "technical-experience"
     description: "Evaluates completion certificates against single/two order threshold requirements."
 
   - id: "R-COM-01"
-    category: "Commercial"
+    version: "1.0"
+    category: "HARD"
+    functional_category: "Commercial"
     title: "Earnest Money Deposit (EMD) Proof or MSE Exemption"
     clause: "GFR 2017 Rule 170"
-    severity: "FAIL"
+    applies_when: "always"
+    inputs: ["is_mse_exempt", "emd_paid_inr", "emd_required_inr"]
+    evaluator: "emd_or_mse_exemption"
+    on_true: "PASS"
+    on_false: "FAIL"
+    on_missing: "FAIL"
+    citation:
+      source: "GFR 2017 Rule 170 / Public Procurement Policy for MSEs 2012"
+      kb: "emd-requirements"
     description: "Confirms valid BG/DD transaction receipt or valid MSE/Udyam exemption certificate."
+
+  # =========================================================================
+  # 5. Mandatory Document Presence Rules
+  # =========================================================================
+  - id: "R-DOC-01"
+    version: "1.0"
+    category: "HARD"
+    functional_category: "Documentation"
+    title: "Form GST REG-06 Certificate Presence"
+    clause: "CPCL Tender Mandatory Document List"
+    applies_when: "tender.requires_gst"
+    inputs: ["submitted_document_types"]
+    evaluator: "document_presence"
+    on_true: "PASS"
+    on_false: "REVIEW"
+    on_missing: "REVIEW"
+    citation:
+      source: "CPCL BEC Document Submission List Item 1"
+      kb: "doc-checklist"
+    description: "Ensures Form GST REG-06 is submitted in bidder package."

@@ -5,8 +5,11 @@ from pipeline.compliance.cross_verifier import (
     VerificationFinding,
 )
 from pipeline.compliance.engine import (
+    BidderComplianceSummary,
     ComplianceEngine,
     RuleFindingResult,
+    calculate_precedence,
+    get_recommendation_for_status,
 )
 
 __all__ = [
@@ -14,4 +17,7 @@ __all__ = [
     "VerificationFinding",
     "ComplianceEngine",
     "RuleFindingResult",
+    "BidderComplianceSummary",
+    "calculate_precedence",
+    "get_recommendation_for_status",
 ]

@@ -315,3 +315,17 @@ def validate_address(addr: Optional[str]) -> ValidationResult:
         error_message=None,
         normalized_value=clean,
     )
+
+
+def validate_udin(udin: Optional[str]) -> ValidationResult:
+    """Validate 18-character ICAI Unique Document Identification Number."""
+    if not udin:
+        return ValidationResult(is_valid=False, error_message="UDIN cannot be empty")
+    udin_clean = re.sub(r"[^A-Z0-9]", "", str(udin).upper())
+    if not re.match(r"^[0-9]{2}[0-9]{6}[A-Z]{6}[0-9]{4}$", udin_clean):
+        return ValidationResult(
+            is_valid=False,
+            error_message=f"UDIN '{udin}' does not match standard 18-character ICAI structure",
+        )
+    return ValidationResult(is_valid=True, error_message=None, normalized_value=udin_clean)
+

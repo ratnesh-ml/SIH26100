@@ -1,8 +1,8 @@
 # VigilBid (SIH26100) — Build Status & Transition Baseline
 
-**Document Version:** 2.7.0  
+**Document Version:** 2.8.0  
 **Date:** September 2026  
-**Status:** Phase 19 Complete — Tender Requirement Extraction Engine Operational  
+**Status:** Phase 20 Complete — Compliance Rules Engine Operational  
 **Target:** SIH Grand Finale — Problem Statement SIH26100 (CPCL / Ministry of Petroleum & Natural Gas)
 
 ---
@@ -37,6 +37,7 @@ In public procurement under GFR 2017 and CVC guidelines, procurement officers ma
 | **Field Extraction Specification Documentation** | ✅ Completed (100%) | Complete field schema, validators, normalizers, and audit contract in `docs/EXTRACTION.md`. |
 | **Field Normalization & Validation Documentation**| ✅ Completed (100%) | Complete normalization rules, validators, and anti-collision safeguards in `docs/NORMALIZATION.md`. |
 | **Government Registry Abstraction Documentation**| ✅ Completed (100%) | Complete RegistryProvider interface, result shape, and simulation policy in `docs/REGISTRY.md`. |
+| **Compliance Rules Engine Documentation**| ✅ Completed (100%) | Complete YAML rule schema, precedence hierarchy, and evaluation semantics in `docs/RULE-ENGINE.md`. |
 | **Containerization & Compose** | ✅ Completed (100%) | `docker-compose.yml`, `backend/Dockerfile`, `frontend/Dockerfile`, `.dockerignore`. |
 | **Database Connectivity Engine** | ✅ Completed (100%) | `backend/core/database.py` with async SQLAlchemy 2.0 engine, async sessionmaker, and DB connection probe. |
 | **PostgreSQL Schema & Models** | ✅ Completed (100%) | All 18 locked tables defined with UUIDs, BigIntegers, JSONB, foreign keys, and indexes. |
@@ -56,15 +57,16 @@ In public procurement under GFR 2017 and CVC guidelines, procurement officers ma
 | **Government Registry Abstraction & Mock Provider**| ✅ Completed (100%) | `pipeline/registry_adapters/`: `RegistryProvider` interface, `RegistryResult` standard shape (`found`, `status`, `data`, `source`, `fetched_at`, `latency_ms`), fixture-backed simulation (`gstin.json`, `pan.json`, `udyam.json`, `cin.json`, `debarment.json`), 300-800ms artificial latency for demo fan-out, and transparent `"Source: Simulated registry (demo)"` disclosure across UI/API. |
 | **Cross-Document Verification Engine** | ✅ Completed (100%) | `pipeline/compliance/cross_verifier.py`: comprehensive verification across PAN ↔ GST, GST ↔ Udyam, Company ↔ GST/Udyam, Identity ↔ Registry, and Registration ↔ Document Dates. Outputs check ID, expected relationship, actual values, confidence, status (`PASS`, `FAIL`, `WARN`, `REVIEW`), and conservative non-fraud narratives. |
 | **Tender Requirement Extraction Engine** | ✅ Completed (100%) | `pipeline/extraction/tender.py`: deterministic rule templates extracting turnover thresholds, net worth, mandatory registrations, OEM Annexure-I, Make in India % requirements, Land Border Rule 144(xi), EMD guarantees, MSE Udyam exemptions, and validity constraints from tender NITs and JSON templates. |
+| **Compliance Rules Evaluation Engine** | ✅ Completed (100%) | `pipeline/compliance/engine.py`: deterministic YAML rule evaluation (`rules/cpcl_goods_v1.yaml`), versioning (`1.0`), rule conditions (`applies_when`), strict precedence hierarchy (`FAIL > REVIEW > WARN > PASS`), `RuleFindingResult`, and `BidderComplianceSummary`. |
 | **Job Status & Pipeline REST APIs** | ✅ Completed (100%) | `GET /api/v1/jobs/{id}`, `GET /api/v1/bidders/{id}/jobs`, `POST /api/v1/jobs/{id}/process` live with 11-step progress tracking. |
 | **Live Health Probe Endpoint** | ✅ Completed (100%) | `/health` actively probes database status, dialect, and latency. |
 | **Background Worker Process** | ✅ Completed (100%) | `worker.py` and `backend/workers/job_worker.py` with DB readiness check, queue poll cycle, and graceful signal shutdown. |
 | **Frontend Production Build** | ✅ Completed (100%) | Vite + React 18 + TypeScript builds cleanly (`dist/` created in 38s) with dark mode and API client. |
-| **Automated Tests & Startup Verification** | ✅ Completed (100%) | 188 pytest unit, auth, tender, bidder, ingest, PDF, OCR, job pipeline, classifier, extraction, normalization, validation, entity resolution, registry, cross-document verification, and tender requirement extraction tests passing, `scripts/verify_structure.py` passing with 0 warnings. |
+| **Automated Tests & Startup Verification** | ✅ Completed (100%) | 198 pytest unit, auth, tender, bidder, ingest, PDF, OCR, job pipeline, classifier, extraction, normalization, validation, entity resolution, registry, cross-document verification, tender extraction, and compliance rules engine tests passing, `scripts/verify_structure.py` passing with 0 warnings. |
 | **Project Automation Tooling** | ✅ Completed (100%) | Single-command deployment (`docker compose up --build`), `Makefile`, and `scripts/dev.ps1`. |
-| **Synthetic Demo Dataset (`seed/`)** | 🔄 Ready for Generation | `template_tender.json` created; 4+1 generator script pending Phase 20. |
+| **Synthetic Demo Dataset (`seed/`)** | 🔄 Ready for Generation | `template_tender.json` created; 4+1 generator script pending Phase 21. |
 
-**Current Repo Baseline:** Tender Requirement Extraction is operational, identifying structured procurement criteria (turnover minimum, mandatory registrations, OEM authorization, MII local content %, EMD amount, MSE exemptions, and validity constraints) from tender documents and templates without generic LLM dependencies. All 188 automated tests pass.
+**Current Repo Baseline:** Compliance Rules Engine is fully operational, deterministically evaluating YAML rules (`cpcl_goods_v1.yaml`), enforcing strict status precedence (`FAIL > REVIEW > WARN > PASS`), generating clause citations and evidence provenance, and compiling bidder evaluation summaries. All 198 automated tests pass.
 
 ---
 
@@ -206,8 +208,8 @@ In public procurement under GFR 2017 and CVC guidelines, procurement officers ma
 
 ## 8. Next Recommended Step
  
-**Execute Phase 20 (Full Rule Engine Execution & Compliance Finding Aggregation):**
+**Execute Phase 21 (Risk Scoring Engine & Anomaly Detection Signals):**
 1. Implement synthetic bidder document generator (`seed/generate_demo_docs.py`) to produce the 4+1 demo bidder PDFs (scanned + digital) and ground truth fixtures.
-2. Build Full Rule Engine Execution (`pipeline/compliance/engine.py`) evaluating the 34 rules in `rules/cpcl_goods_v1.yaml` with finding aggregations.
-3. Validate overall bidder compliance status (`PASS`, `WARN`, `REVIEW`, `FAIL`) per criterion against ground truth.
-4. Begin Phase 20 implementation per timeline in `docs/05`.
+2. Build Risk Scorer (`pipeline/risk/scorer.py`) and Anomaly Detector (`pipeline/risk/anomaly.py`) evaluating the 12 weighted risk signals from `rules/risk_weights.yaml`.
+3. Validate overall bidder risk composite scores and top risk drivers against ground truth.
+4. Begin Phase 21 implementation per timeline in `docs/05`.
