@@ -306,20 +306,24 @@ class Decision(Base, UUIDPrimaryKeyMixin, TimestampMixin):
         Index("ix_decisions_bidder_id", "bidder_id"),
         Index("ix_decisions_finding_id", "finding_id"),
         CheckConstraint(
-            "action IN ('ACCEPT', 'OVERRIDE', 'CLARIFY', 'CONCUR', 'DISSENT')",
+            "action IN ('ACCEPT', 'REJECT', 'OVERRIDE', 'CLARIFY', 'REQUEST_CLARIFICATION', 'CONCUR', 'DISSENT')",
             name="check_decision_action",
         ),
     )
 
-    finding_id: Mapped[uuid.UUID] = mapped_column(UUID_TYPE, ForeignKey("findings.id"), nullable=False)
+    finding_id: Mapped[Optional[uuid.UUID]] = mapped_column(UUID_TYPE, ForeignKey("findings.id"), nullable=True)
     bidder_id: Mapped[uuid.UUID] = mapped_column(UUID_TYPE, ForeignKey("bidders.id"), nullable=False)
+    bid_id: Mapped[Optional[uuid.UUID]] = mapped_column(UUID_TYPE, ForeignKey("bids.id"), nullable=True)
     actor_id: Mapped[uuid.UUID] = mapped_column(UUID_TYPE, ForeignKey("users.id"), nullable=False)
-    action: Mapped[str] = mapped_column(String(50), nullable=False)  # ACCEPT, OVERRIDE, CLARIFY, CONCUR, DISSENT
+    action: Mapped[str] = mapped_column(String(50), nullable=False)  # ACCEPT, REJECT, OVERRIDE, CLARIFY, REQUEST_CLARIFICATION, CONCUR, DISSENT
     reason: Mapped[str] = mapped_column(Text, nullable=False)
     resulting_status: Mapped[str] = mapped_column(String(50), nullable=False)
+    machine_recommendation: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
+    audit_ref: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
 
-    finding: Mapped["Finding"] = relationship("Finding", back_populates="decisions")
+    finding: Mapped[Optional["Finding"]] = relationship("Finding", back_populates="decisions")
     bidder: Mapped["Bidder"] = relationship("Bidder", back_populates="decisions")
+    bid: Mapped[Optional["Bid"]] = relationship("Bid")
     actor: Mapped["User"] = relationship("User", back_populates="decisions")
 
 

@@ -30,7 +30,7 @@ class FindingOut(BaseModel):
     bidder_id: uuid.UUID
     criterion_id: Optional[uuid.UUID] = None
     rule_id: str
-    rule_version: str
+    rule_version: Optional[str] = "1.0"
     status: str  # PASS, WARN, REVIEW, FAIL, INFO
     title: str
     explanation: str
@@ -39,22 +39,48 @@ class FindingOut(BaseModel):
     confidence: Optional[float] = None
     extracted: Optional[dict[str, Any]] = None
     expected: Optional[dict[str, Any]] = None
+    machine_recommendation: Optional[str] = None
+    latest_decision: Optional["DecisionOut"] = None
+    is_resolved: bool = False
     created_at: datetime
 
 
 class DecisionCreate(BaseModel):
-    action: str  # ACCEPT, OVERRIDE, CLARIFY, CONCUR, DISSENT
-    reason: str
+    action: str  # ACCEPT, REJECT, REQUEST_CLARIFICATION, OVERRIDE
+    reason: Optional[str] = None
+    resulting_status: Optional[str] = None
+
+
+class BidDecisionCreate(BaseModel):
+    action: str  # ACCEPT, REJECT, REQUEST_CLARIFICATION, OVERRIDE
+    reason: Optional[str] = None
+    resulting_status: Optional[str] = None
 
 
 class DecisionOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: uuid.UUID
-    finding_id: uuid.UUID
+    finding_id: Optional[uuid.UUID] = None
     bidder_id: uuid.UUID
+    bid_id: Optional[uuid.UUID] = None
     actor_id: uuid.UUID
+    actor_name: Optional[str] = None
+    actor_role: Optional[str] = None
     action: str
-    reason: str
+    reason: Optional[str] = None
     resulting_status: str
+    machine_recommendation: Optional[str] = None
+    audit_ref: Optional[str] = None
     created_at: datetime
+
+
+class CompleteReviewResponse(BaseModel):
+    status: str
+    message: str
+    bidder_id: uuid.UUID
+    review_state: str
+    overall_status: str
+    bid_id: Optional[uuid.UUID] = None
+    bid_status: Optional[str] = None
+    decisions_count: int = 0

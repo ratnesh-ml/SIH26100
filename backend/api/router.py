@@ -1,5 +1,6 @@
 """Root API Router for VigilBid v1 Endpoints."""
 
+from datetime import datetime, timezone
 import logging
 from typing import Annotated, Any, Optional
 import uuid
@@ -42,7 +43,9 @@ from backend.schemas import (
     IngestionResponse,
     FindingOut,
     DecisionCreate,
+    BidDecisionCreate,
     DecisionOut,
+    CompleteReviewResponse,
     JobStatus,
     StepStatus,
     RiskProfileOut,
@@ -54,6 +57,7 @@ from backend.services.tender_service import TenderService
 from backend.services.bidder_service import BidderService
 from backend.services.document_service import DocumentService
 from backend.services.job_service import JobService
+from backend.services.decision_service import DecisionService
 from pipeline.risk.graph import CrossBidderGraphBuilder
 
 logger = logging.getLogger("vigilbid.api")
@@ -310,13 +314,7 @@ async def retag_document(
     raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED, detail="Retagging not yet implemented")
 
 
-@api_router.post("/bidders/{bidder_id}/complete-review", tags=["Bidders"])
-async def complete_review(
-    bidder_id: uuid.UUID,
-    current_user: Annotated[User, Depends(require_role(UserRole.OFFICER))],
-):
-    """Mark bidder evaluation as complete once all findings have decisions."""
-    raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED, detail="Review completion not yet implemented")
+
 
 
 @api_router.post("/bidders/{bidder_id}/documents", response_model=IngestionResponse, status_code=status.HTTP_201_CREATED, tags=["Documents"])
@@ -480,15 +478,69 @@ async def trigger_job_ocr_only(
 async def list_findings(
     bidder_id: uuid.UUID,
     status: Optional[str] = None,
+    pending: bool = Query(False, description="Filter for unresolved pending findings"),
     current_user: Annotated[User, Depends(get_current_user)] = None,
     session: Annotated[AsyncSession, Depends(get_db_session)] = None,
 ):
-    """List findings for a bidder with evidence bounding boxes."""
-    stmt = select(Finding).where(Finding.bidder_id == bidder_id)
-    if status:
-        stmt = stmt.where(Finding.status == status.upper())
-    res = await session.execute(stmt)
-    return list(res.scalars().all())
+    """List findings for a bidder with evidence bounding boxes, decision history, and resolution status."""
+    if pending:
+        findings = await DecisionService.get_pending_findings(session, bidder_id)
+    else:
+        stmt = (
+            select(Finding)
+            .options(selectinload(Finding.decisions).selectinload(Decision.actor))
+            .where(Finding.bidder_id == bidder_id)
+        )
+        if status:
+            stmt = stmt.where(Finding.status == status.upper())
+        res = await session.execute(stmt)
+        findings = list(res.scalars().all())
+
+    results = []
+    for f in findings:
+        decisions_list = getattr(f, "decisions", []) or []
+        latest_dec = None
+        if decisions_list:
+            sorted_decs = sorted(decisions_list, key=lambda d: getattr(d, "created_at", None) or datetime.min)
+            last = sorted_decs[-1]
+            latest_dec = DecisionOut(
+                id=last.id,
+                finding_id=last.finding_id,
+                bidder_id=last.bidder_id,
+                bid_id=last.bid_id,
+                actor_id=last.actor_id,
+                actor_name=last.actor.full_name if getattr(last, "actor", None) else None,
+                actor_role=last.actor.role if getattr(last, "actor", None) else None,
+                action=last.action,
+                reason=last.reason,
+                resulting_status=last.resulting_status,
+                machine_recommendation=last.machine_recommendation or f.status,
+                audit_ref=last.audit_ref,
+                created_at=last.created_at or datetime.now(timezone.utc),
+            )
+        is_res = (f.status == "PASS") or (latest_dec is not None and latest_dec.action in ("ACCEPT", "OVERRIDE", "REJECT"))
+        results.append(
+            FindingOut(
+                id=f.id,
+                bidder_id=f.bidder_id,
+                criterion_id=f.criterion_id,
+                rule_id=f.rule_id,
+                rule_version=getattr(f, "rule_version", None) or "1.0",
+                status=f.status,
+                title=f.title,
+                explanation=f.explanation,
+                citation=f.citation,
+                evidence=f.evidence,
+                confidence=float(f.confidence) if f.confidence is not None else None,
+                extracted=f.extracted,
+                expected=f.expected,
+                machine_recommendation=latest_dec.machine_recommendation if latest_dec else f.status,
+                latest_decision=latest_dec,
+                is_resolved=is_res,
+                created_at=f.created_at or datetime.now(timezone.utc),
+            )
+        )
+    return results
 
 
 @api_router.post("/findings/{finding_id}/decision", response_model=DecisionOut, tags=["Findings"])
@@ -498,59 +550,70 @@ async def record_decision(
     current_user: Annotated[User, Depends(require_role(UserRole.OFFICER, UserRole.EVALUATOR, UserRole.APPROVER))],
     session: Annotated[AsyncSession, Depends(get_db_session)],
 ):
-    """Record officer decision (ACCEPT/OVERRIDE/CLARIFY/CONCUR/DISSENT) and persist audit event."""
-    stmt = select(Finding).where(Finding.id == finding_id)
-    res = await session.execute(stmt)
-    finding = res.scalar_one_or_none()
-    if not finding:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Finding '{finding_id}' not found")
+    """Record officer decision (ACCEPT/REJECT/REQUEST_CLARIFICATION/OVERRIDE) with reason validation."""
+    return await DecisionService.record_finding_decision(session, finding_id, payload, current_user)
 
-    old_status = finding.status
-    action_upper = payload.action.upper()
-    if action_upper == "OVERRIDE":
-        resulting_status = "PASS" if old_status in ("FAIL", "WARN", "REVIEW") else "REVIEW"
-    elif action_upper == "ACCEPT":
-        resulting_status = old_status
-    elif action_upper in ("CLARIFY", "DISSENT"):
-        resulting_status = "REVIEW"
-    elif action_upper == "CONCUR":
-        resulting_status = old_status
-    else:
-        resulting_status = old_status
 
-    decision = Decision(
-        id=uuid.uuid4(),
-        finding_id=finding_id,
-        bidder_id=finding.bidder_id,
-        actor_id=current_user.id,
-        action=action_upper,
-        reason=payload.reason,
-        resulting_status=resulting_status,
-    )
-    session.add(decision)
-    finding.status = resulting_status
-    await session.commit()
-    await session.refresh(decision)
+@api_router.get("/findings/{finding_id}/decisions", response_model=list[DecisionOut], tags=["Findings"])
+async def get_finding_decisions(
+    finding_id: uuid.UUID,
+    current_user: Annotated[User, Depends(get_current_user)],
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+):
+    """Retrieve decision history for a specific finding."""
+    return await DecisionService.get_decision_history(session, finding_id=finding_id)
 
-    # Record in cryptographic hash-chained audit log
-    try:
-        await AuditService.record_event(
-            session=session,
-            action=f"DECISION_{action_upper}",
-            target_type="finding",
-            target_id=str(finding_id),
-            actor_id=current_user.id,
-            role=current_user.role,
-            previous_state={"status": old_status},
-            new_state={"status": resulting_status},
-            reason=payload.reason,
-            evidence_reference=finding.evidence,
-            payload={"bidder_id": str(finding.bidder_id), "decision_id": str(decision.id)},
-        )
-    except Exception as exc:
-        logger.warning("Audit logging warning on decision %s: %s", decision.id, exc)
 
-    return decision
+@api_router.get("/bidders/{bidder_id}/decisions", response_model=list[DecisionOut], tags=["Decisions"])
+async def get_bidder_decisions(
+    bidder_id: uuid.UUID,
+    current_user: Annotated[User, Depends(get_current_user)],
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+):
+    """Retrieve all decision history across findings and bids for a bidder."""
+    return await DecisionService.get_decision_history(session, bidder_id=bidder_id)
+
+
+@api_router.post("/bidders/{bidder_id}/complete-review", response_model=CompleteReviewResponse, tags=["Bidders"])
+async def complete_bidder_review(
+    bidder_id: uuid.UUID,
+    current_user: Annotated[User, Depends(require_role(UserRole.OFFICER, UserRole.APPROVER, UserRole.ADMIN))],
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+):
+    """Finalize bidder evaluation once all mandatory findings are decided."""
+    return await DecisionService.complete_review_for_bidder(session, bidder_id, current_user)
+
+
+# 5b. Bid-Level Decisions & Complete-Review
+@api_router.post("/bids/{bid_id}/decision", response_model=DecisionOut, tags=["Bids"])
+async def record_bid_decision(
+    bid_id: uuid.UUID,
+    payload: BidDecisionCreate,
+    current_user: Annotated[User, Depends(require_role(UserRole.OFFICER, UserRole.EVALUATOR, UserRole.APPROVER))],
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+):
+    """Record officer evaluation decision on a specific bid (/api/v1/bids/{id}/decision)."""
+    return await DecisionService.record_bid_decision(session, bid_id, payload, current_user)
+
+
+@api_router.get("/bids/{bid_id}/decisions", response_model=list[DecisionOut], tags=["Bids"])
+async def get_bid_decisions(
+    bid_id: uuid.UUID,
+    current_user: Annotated[User, Depends(get_current_user)],
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+):
+    """Retrieve decision history for a specific bid."""
+    return await DecisionService.get_decision_history(session, bid_id=bid_id)
+
+
+@api_router.post("/bids/{bid_id}/complete-review", response_model=CompleteReviewResponse, tags=["Bids"])
+async def complete_bid_review(
+    bid_id: uuid.UUID,
+    current_user: Annotated[User, Depends(require_role(UserRole.OFFICER, UserRole.APPROVER, UserRole.ADMIN))],
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+):
+    """Finalize evaluation review for a bid, ensuring no unresolved mandatory findings remain."""
+    return await DecisionService.complete_review_for_bid(session, bid_id, current_user)
 
 
 # 6. Risk Profile & Graph
