@@ -1,0 +1,22 @@
+[
+  {
+    "pan": "AAACD9876K",
+    "name": "COROMANDEL ENGINEERING WORKS",
+    "authority": "Ministry of Petroleum and Natural Gas / CPPP",
+    "order_number": "CPPP/DEB/2023/881",
+    "period_from": "2023-01-15",
+    "period_to": "2025-01-15",
+    "reason": "Non-performance and submission of manipulated experience certificates",
+    "source": "Simulated registry (demo)"
+  },
+  {
+    "pan": "XYZAB9999F",
+    "name": "BLACKWOOD INFRASTRUCTURE PRIVATE LIMITED",
+    "authority": "Central Public Procurement Portal (CPPP)",
+    "order_number": "DEB/CPPP/2022/402",
+    "period_from": "2022-06-01",
+    "period_to": "2024-06-01",
+    "reason": "Default in contract execution and failure to furnish performance security",
+    "source": "Simulated registry (demo)"
+  }
+]

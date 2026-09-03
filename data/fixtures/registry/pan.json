@@ -1,0 +1,27 @@
+{
+  "AABCC1234F": {
+    "pan": "AABCC1234F",
+    "name": "APEX INDUSTRIAL SOLUTIONS PRIVATE LIMITED",
+    "entity_type": "Company",
+    "status": "VALID",
+    "category": "Domestic Company",
+    "aadhaar_seeding_status": "Not Applicable",
+    "incorporation_date": "2012-04-15"
+  },
+  "AAACD9876K": {
+    "pan": "AAACD9876K",
+    "name": "COROMANDEL ENGINEERING WORKS",
+    "entity_type": "Firm / Partnership",
+    "status": "VALID",
+    "category": "Partnership Firm",
+    "incorporation_date": "2015-06-20"
+  },
+  "AABCS1234D": {
+    "pan": "AABCS1234D",
+    "name": "SRI KAVERI ENGINEERING WORKS",
+    "entity_type": "Firm / Partnership",
+    "status": "VALID",
+    "category": "Partnership Firm",
+    "incorporation_date": "2017-09-10"
+  }
+}

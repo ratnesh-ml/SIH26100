@@ -1,0 +1,44 @@
+{
+  "33AABCC1234F1Z5": {
+    "gstin": "33AABCC1234F1Z5",
+    "legal_name": "APEX INDUSTRIAL SOLUTIONS PRIVATE LIMITED",
+    "trade_name": "Apex Solutions",
+    "status": "ACTIVE",
+    "taxpayer_type": "Regular",
+    "registration_date": "2017-07-01",
+    "state": "Tamil Nadu",
+    "state_code": "33",
+    "address": "Plot 45, Manali Industrial Estate, Chennai, Tamil Nadu, 600068",
+    "pan": "AABCC1234F",
+    "filing_status": {
+      "gstr1": "Filed up to date",
+      "gstr3b": "Filed up to date"
+    }
+  },
+  "33AAACD9876K1Z9": {
+    "gstin": "33AAACD9876K1Z9",
+    "legal_name": "COROMANDEL ENGINEERING WORKS",
+    "trade_name": "Coromandel Engineering",
+    "status": "CANCELLED",
+    "taxpayer_type": "Regular",
+    "registration_date": "2018-04-10",
+    "cancellation_date": "2023-03-12",
+    "cancellation_reason": "Suo-moto cancelled for continuous non-filing of returns",
+    "state": "Tamil Nadu",
+    "state_code": "33",
+    "address": "No. 18, Ennore High Road, Thiruvottiyur, Chennai 600019",
+    "pan": "AAACD9876K"
+  },
+  "27AABCS1234D1Z2": {
+    "gstin": "27AABCS1234D1Z2",
+    "legal_name": "SRI KAVERI ENGINEERING WORKS",
+    "trade_name": "Kaveri Engineering",
+    "status": "ACTIVE",
+    "taxpayer_type": "Regular",
+    "registration_date": "2019-08-15",
+    "state": "Maharashtra",
+    "state_code": "27",
+    "address": "Plot 12, Wagle Industrial Estate, Thane, Maharashtra, 400604",
+    "pan": "AABCS1234D"
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "UDYAM-TN-01-0012345": {
+    "udyam_no": "UDYAM-TN-01-0012345",
+    "name": "APEX INDUSTRIAL SOLUTIONS PRIVATE LIMITED",
+    "status": "ACTIVE",
+    "enterprise_type": "SMALL",
+    "major_activity": "MANUFACTURING",
+    "registration_date": "2020-08-12",
+    "state": "Tamil Nadu",
+    "district": "Chennai",
+    "pan": "AABCC1234F",
+    "dic": "Chennai",
+    "nic_codes": ["28110", "28120"]
+  },
+  "UDYAM-MH-02-0044556": {
+    "udyam_no": "UDYAM-MH-02-0044556",
+    "name": "DELTA ADVISORS LLP",
+    "status": "ACTIVE",
+    "enterprise_type": "MEDIUM",
+    "major_activity": "SERVICES",
+    "registration_date": "2021-02-18",
+    "state": "Maharashtra",
+    "district": "Mumbai",
+    "pan": "AABCD5678F",
+    "dic": "Mumbai",
+    "nic_codes": ["70200"]
+  }
+}

@@ -14,6 +14,7 @@ from backend.api.deps import get_current_token_payload, get_current_user, requir
 from backend.auth.jwt import TokenPayload
 from backend.auth.rbac import UserRole
 from backend.models.entities import User
+from pipeline.registry_adapters import get_registry_provider
 from backend.schemas import (
     LoginRequest,
     TokenResponse,
@@ -537,11 +538,40 @@ async def export_tender_report(
 
 
 # 9. Registry Verification
+@api_router.get("/registry/debarment", tags=["Registry"])
+async def check_registry_debarment(
+    current_user: Annotated[User, Depends(require_role(UserRole.OFFICER, UserRole.EVALUATOR, UserRole.VIGILANCE, UserRole.ADMIN))],
+    pan: Optional[str] = Query(default=None),
+    name: Optional[str] = Query(default=None),
+    gstin: Optional[str] = Query(default=None),
+    cin: Optional[str] = Query(default=None),
+):
+    """Query national debarment and blacklist records."""
+    provider = get_registry_provider()
+    result = await provider.check_debarment(name=name, pan=pan, gstin=gstin, cin=cin)
+    return result.to_dict()
+
+
 @api_router.get("/registry/{kind}/{value}", tags=["Registry"])
 async def check_registry(
     kind: str,
     value: str,
-    current_user: Annotated[User, Depends(require_role(UserRole.OFFICER, UserRole.ADMIN))],
+    current_user: Annotated[User, Depends(require_role(UserRole.OFFICER, UserRole.EVALUATOR, UserRole.VIGILANCE, UserRole.ADMIN))],
 ):
-    """Query mock/real registry verification provider."""
-    return {"status": "MOCK_ACTIVE", "kind": kind, "value": value}
+    """Query statutory registry verification provider (GST, PAN, Udyam, CIN)."""
+    provider = get_registry_provider()
+    kind_lower = kind.strip().lower()
+    if kind_lower in ("gst", "gstin"):
+        res = await provider.verify_gstin(value)
+    elif kind_lower == "pan":
+        res = await provider.verify_pan(value)
+    elif kind_lower in ("udyam", "msme"):
+        res = await provider.verify_udyam(value)
+    elif kind_lower in ("cin", "mca"):
+        res = await provider.verify_cin(value)
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Unsupported registry kind '{kind}'. Supported: gstin, pan, udyam, cin",
+        )
+    return res.to_dict()

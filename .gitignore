@@ -42,6 +42,8 @@ data/storage/*
 !data/storage/.gitkeep
 data/fixtures/*
 !data/fixtures/.gitkeep
+!data/fixtures/registry/
+!data/fixtures/registry/*
 *.log
 
 # Large binary archives
