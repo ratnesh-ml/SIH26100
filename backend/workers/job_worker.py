@@ -75,13 +75,13 @@ class JobWorker:
             logger.info("Worker loop terminated cleanly.")
 
     async def poll_cycle(self) -> Optional[Job]:
-        """Single polling cycle: claims next QUEUED job and executes the OCR processing step."""
+        """Single polling cycle: claims next QUEUED job and executes the full 11-step pipeline."""
         try:
             async with self.session_maker() as session:
                 job = await self.job_service.claim_next_job(session)
                 if job:
-                    logger.info("Worker claimed Job %s for Bidder %s. Executing OCR processing...", job.id, job.bidder_id)
-                    processed_job = await self.job_service.process_job_ocr(session, job.id)
+                    logger.info("Worker claimed Job %s for Bidder %s. Executing full pipeline...", job.id, job.bidder_id)
+                    processed_job = await self.job_service.process_job_full_pipeline(session, job.id)
                     logger.info("Worker finished Job %s with status: %s", processed_job.id, processed_job.status)
                     return processed_job
         except Exception as exc:
@@ -91,7 +91,7 @@ class JobWorker:
     async def process_single_job(self, job_id: uuid.UUID) -> Job:
         """Process a specific job directly by ID without waiting for the polling loop."""
         async with self.session_maker() as session:
-            return await self.job_service.process_job_ocr(session, job_id)
+            return await self.job_service.process_job_full_pipeline(session, job_id)
 
     async def stop(self):
         """Signal worker to gracefully shut down."""

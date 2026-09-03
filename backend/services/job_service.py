@@ -1,6 +1,7 @@
-"""Job Service orchestrating processing jobs, status lifecycles, queue claims, and OCR pipeline execution."""
+"""Job Service orchestrating processing jobs, status lifecycles, queue claims, and full pipeline execution."""
 
 from datetime import datetime, timezone
+import hashlib
 import logging
 from pathlib import Path
 from typing import Any, Optional
@@ -10,13 +11,26 @@ from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.models.entities import Bidder, Document, DocumentPage, ExtractedField, Job
+from backend.models.entities import (
+    AnomalySignal,
+    Bidder,
+    Document,
+    DocumentPage,
+    ExtractedField,
+    Finding,
+    Job,
+    RiskDriver,
+    VerificationEvent,
+)
 from backend.schemas.job import JobState, StepStatus
 from pipeline.document_processing.classifier import DocumentType, RuleBasedDocumentClassifier
 from pipeline.extraction.registry import extract_document_fields
 from pipeline.ocr.factory import get_ocr_provider
 from pipeline.ocr.interface import OCRProvider
 from pipeline.pdf.processor import PDFProcessor
+from pipeline.runner import PipelineContext, PipelineRunner, StepExecutionResult
+from pipeline.registry_adapters import get_registry_provider
+from pipeline.registry_adapters.base import RegistryProvider
 
 logger = logging.getLogger("vigilbid.services.job")
 
@@ -299,8 +313,8 @@ class JobService:
                     s["ended_at"] = now_iso
             job.steps = current_steps
             job.current_step = 4
-            job.status = JobState.DONE.value
-            job.ended_at = datetime.now(timezone.utc)
+            # NOTE: Do not mark DONE here — full pipeline continues in process_job_full_pipeline
+            job.status = JobState.PROCESSING.value
             await session.commit()
             if hasattr(session, "refresh"):
                 await session.refresh(job)
@@ -321,3 +335,289 @@ class JobService:
             if hasattr(session, "refresh"):
                 await session.refresh(job)
             return job
+
+    async def process_job_full_pipeline(
+        self,
+        session: AsyncSession,
+        job_id: uuid.UUID,
+    ) -> Job:
+        """Execute all 11 pipeline steps: OCR + normalization + entity resolution + verification + compliance + anomalies + risk + evidence.
+
+        This is the primary entry point for complete bidder evaluation.
+        Steps 1-4 are handled by process_job_ocr.
+        Steps 5-11 run via PipelineRunner and persist results to the database.
+        """
+        # Step 1-4: Run OCR pipeline first
+        job = await self.process_job_ocr(session, job_id)
+        if job.status == JobState.FAILED.value:
+            return job
+
+        current_steps = list(job.steps or DEFAULT_PIPELINE_STEPS)
+
+        try:
+            # ---- Build PipelineContext from DB state ----
+            doc_stmt = select(Document).where(Document.bidder_id == job.bidder_id)
+            doc_res = await session.execute(doc_stmt)
+            docs = list(doc_res.scalars().all())
+
+            bidder_stmt = select(Bidder).where(Bidder.id == job.bidder_id)
+            bidder_res = await session.execute(bidder_stmt)
+            bidder = bidder_res.scalar_one_or_none()
+
+            # Collect extracted fields from DB
+            all_extracted_fields: dict[str, dict[str, Any]] = {}
+            pipeline_docs: list[dict[str, Any]] = []
+
+            for doc in docs:
+                doc_id_str = str(doc.id)
+
+                # Load extracted fields
+                field_stmt = select(ExtractedField).where(ExtractedField.document_id == doc.id)
+                field_res = await session.execute(field_stmt)
+                fields = list(field_res.scalars().all())
+
+                doc_fields: dict[str, Any] = {}
+                for f in fields:
+                    doc_fields[f.field_name] = {
+                        "value": f.value,
+                        "normalized_value": f.value_norm,
+                        "confidence": float(f.confidence) if f.confidence else 1.0,
+                        "page": f.page_no,
+                        "bbox": f.bbox,
+                        "method": f.method,
+                        "raw": f.raw,
+                    }
+                all_extracted_fields[doc_id_str] = doc_fields
+
+                # Load pages text for pipeline context
+                page_stmt = select(DocumentPage).where(
+                    DocumentPage.document_id == doc.id
+                ).order_by(DocumentPage.page_no)
+                page_res = await session.execute(page_stmt)
+                pages = list(page_res.scalars().all())
+
+                pages_data = []
+                for p in pages:
+                    pages_data.append({
+                        "page_no": p.page_no,
+                        "text": p.text or "",
+                    })
+
+                pipeline_docs.append({
+                    "id": doc_id_str,
+                    "filename": doc.original_filename,
+                    "doc_type": doc.doc_type or "UNKNOWN",
+                    "page_count": doc.page_count,
+                    "pages_data": pages_data,
+                    "metadata": doc.metadata_fields or {},
+                    "sha256": doc.sha256,
+                    "text_source": doc.text_source or "text_layer",
+                })
+
+            ctx = PipelineContext(
+                tender_id=str(bidder.tender_id) if bidder and bidder.tender_id else "unknown",
+                bidder_id=str(job.bidder_id),
+                job_id=str(job_id),
+                documents=pipeline_docs,
+                extracted_fields=all_extracted_fields,
+                metadata={
+                    "declared_name": bidder.declared_name if bidder else "Bidder",
+                    "company_name": bidder.canonical_name or (bidder.declared_name if bidder else "Bidder"),
+                },
+            )
+
+            # ---- Initialize PipelineRunner ----
+            registry_provider = get_registry_provider()
+            runner = PipelineRunner(
+                ocr_provider=self.ocr_provider,
+                registry_provider=registry_provider,
+            )
+
+            # ---- Step 5: Normalization ----
+            self._update_step_status(current_steps, 5, "RUNNING")
+            job.steps = current_steps
+            job.current_step = 5
+            await session.commit()
+
+            norm_result = runner.step_07_normalization(ctx)
+            self._update_step_status(current_steps, 5, norm_result.status)
+
+            # ---- Step 6: Entity Resolution ----
+            self._update_step_status(current_steps, 6, "RUNNING")
+            job.steps = current_steps
+            job.current_step = 6
+            await session.commit()
+
+            er_result = runner.step_08_entity_resolution(ctx)
+            self._update_step_status(current_steps, 6, er_result.status)
+
+            # Persist canonical entity to bidder record
+            if bidder and ctx.canonical_entity:
+                bidder.canonical_name = ctx.canonical_entity.get("canonical_name", bidder.declared_name)
+                bidder.entity_confidence = ctx.canonical_entity.get("confidence", 0.0)
+
+            # ---- Step 7: Government Registry Verification ----
+            self._update_step_status(current_steps, 7, "RUNNING")
+            job.steps = current_steps
+            job.current_step = 7
+            await session.commit()
+
+            gov_result = runner.step_09_government_verification(ctx)
+            self._update_step_status(current_steps, 7, gov_result.status)
+
+            # Persist verification events to DB
+            for reg_key, reg_data in ctx.registry_results.items():
+                if isinstance(reg_data, dict):
+                    ve = VerificationEvent(
+                        bidder_id=job.bidder_id,
+                        verifier=reg_key,
+                        provider=reg_data.get("source", "mock"),
+                        request={"identifier": reg_key},
+                        response=reg_data,
+                        status="FOUND" if reg_data.get("found") else "NOT_FOUND",
+                    )
+                    session.add(ve)
+
+            # ---- Step 8: Compliance Rules ----
+            self._update_step_status(current_steps, 8, "RUNNING")
+            job.steps = current_steps
+            job.current_step = 8
+            await session.commit()
+
+            # Run tender requirement checks first (step 10 of runner)
+            runner.step_10_tender_requirement_checks(ctx)
+            # Then compliance rules (step 11 of runner)
+            compliance_result = runner.step_11_compliance_rules(ctx)
+            self._update_step_status(current_steps, 8, compliance_result.status)
+
+            # Persist findings to DB
+            for f_data in ctx.findings:
+                finding = Finding(
+                    id=uuid.uuid4(),
+                    bidder_id=job.bidder_id,
+                    rule_id=f_data.get("rule_id", "UNKNOWN"),
+                    rule_version=f_data.get("rule_version", "1.0"),
+                    status=f_data.get("status", "REVIEW"),
+                    title=f_data.get("title", "Compliance Finding"),
+                    explanation=f_data.get("explanation", ""),
+                    citation=f_data.get("citation"),
+                    evidence=f_data.get("evidence"),
+                    confidence=f_data.get("confidence"),
+                    extracted=f_data.get("extracted"),
+                    expected=f_data.get("expected"),
+                )
+                session.add(finding)
+
+            # ---- Step 9: Anomaly Scanning ----
+            self._update_step_status(current_steps, 9, "RUNNING")
+            job.steps = current_steps
+            job.current_step = 9
+            await session.commit()
+
+            anomaly_result = runner.step_12_anomalies(ctx)
+            self._update_step_status(current_steps, 9, anomaly_result.status)
+
+            # Persist anomaly signals to DB
+            for a_data in ctx.anomalies:
+                if isinstance(a_data, dict):
+                    anomaly = AnomalySignal(
+                        bidder_id=job.bidder_id,
+                        code=a_data.get("type", "UNKNOWN"),
+                        severity=a_data.get("severity", "LOW"),
+                        points=a_data.get("points", 0),
+                        description=a_data.get("description", ""),
+                        evidence=a_data.get("evidence"),
+                    )
+                    session.add(anomaly)
+
+            # ---- Step 10: Risk Scoring ----
+            self._update_step_status(current_steps, 10, "RUNNING")
+            job.steps = current_steps
+            job.current_step = 10
+            await session.commit()
+
+            risk_result = runner.step_13_risk_scoring(ctx)
+            self._update_step_status(current_steps, 10, risk_result.status)
+
+            # Persist risk to bidder and risk drivers
+            if bidder and ctx.risk_profile:
+                bidder.risk_score = int(ctx.risk_profile.get("composite_score", 0))
+                bidder.risk_band = ctx.risk_profile.get("risk_band", "LOW")
+
+                for driver in ctx.risk_profile.get("drivers", []):
+                    if isinstance(driver, dict):
+                        rd = RiskDriver(
+                            bidder_id=job.bidder_id,
+                            driver=driver.get("description", driver.get("driver", "Risk factor")),
+                            points=driver.get("points", 0),
+                            source_ref=driver.get("source_ref"),
+                        )
+                        session.add(rd)
+
+            # ---- Step 11: Evidence Packaging ----
+            self._update_step_status(current_steps, 11, "RUNNING")
+            job.steps = current_steps
+            job.current_step = 11
+            await session.commit()
+
+            evidence_result = runner.step_14_findings_and_evidence(ctx)
+            self._update_step_status(current_steps, 11, evidence_result.status)
+
+            # Derive overall bidder status from compliance findings
+            if bidder:
+                statuses = [f.get("status", "REVIEW") for f in ctx.findings]
+                if any(s == "FAIL" for s in statuses):
+                    bidder.overall_status = "FAIL"
+                elif any(s == "REVIEW" for s in statuses):
+                    bidder.overall_status = "REVIEW"
+                elif any(s == "WARN" for s in statuses):
+                    bidder.overall_status = "WARN"
+                elif statuses:
+                    bidder.overall_status = "PASS"
+
+            # Mark job as DONE
+            job.steps = current_steps
+            job.current_step = 11
+            job.status = JobState.DONE.value
+            job.ended_at = datetime.now(timezone.utc)
+            await session.commit()
+            if hasattr(session, "refresh"):
+                await session.refresh(job)
+
+            logger.info(
+                "Job %s full pipeline complete: %d findings, %d anomalies, risk=%d/%s",
+                job.id,
+                len(ctx.findings),
+                len(ctx.anomalies),
+                ctx.risk_profile.get("composite_score", 0),
+                ctx.risk_profile.get("risk_band", "?"),
+            )
+            return job
+
+        except Exception as exc:
+            logger.error("Job %s failed during full pipeline: %s", job_id, exc, exc_info=True)
+            for s in current_steps:
+                if s.get("status") == "RUNNING":
+                    s["status"] = "FAILED"
+                    s["ended_at"] = datetime.now(timezone.utc).isoformat()
+            job.steps = current_steps
+            job.status = JobState.FAILED.value
+            job.error = str(exc)
+            job.ended_at = datetime.now(timezone.utc)
+            await session.commit()
+            if hasattr(session, "refresh"):
+                await session.refresh(job)
+            return job
+
+    @staticmethod
+    def _update_step_status(steps: list[dict[str, Any]], step_number: int, status: str) -> None:
+        """Update a step's status in the steps list."""
+        now_iso = datetime.now(timezone.utc).isoformat()
+        for s in steps:
+            if s.get("step_number") == step_number:
+                s["status"] = status
+                if status == "RUNNING":
+                    s["started_at"] = now_iso
+                elif status in ("DONE", "FAILED"):
+                    s["ended_at"] = now_iso
+                break

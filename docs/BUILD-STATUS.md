@@ -1,8 +1,8 @@
 # VigilBid (SIH26100) — Build Status & Transition Baseline
 
-**Document Version:** 2.13.0  
+**Document Version:** 2.14.0  
 **Date:** September 2026  
-**Status:** Phase 25 Complete — Connected End-to-End Processing Pipeline Operational  
+**Status:** Phase 25 Complete — Full Pipeline Connected to Backend Service Layer & Worker  
 **Target:** SIH Grand Finale — Problem Statement SIH26100 (CPCL / Ministry of Petroleum & Natural Gas)
 
 ---
@@ -53,7 +53,7 @@ In public procurement under GFR 2017 and CVC guidelines, procurement officers ma
 | **Document Ingestion & Storage Safety** | ✅ Completed (100%) | `POST /api/v1/bidders/{id}/documents`, `GET /documents/{id}`, magic byte verification (`%PDF-`), ZIP safety (ratio 100:1, max 200 files), path traversal defense, SHA-256 CAS storage, deduplication. |
 | **PDF Processing & Rendering Layer** | ✅ Completed (100%) | `pipeline/pdf/` with PyMuPDF text-layer first extraction, bounding-box words, document metadata, active script forensics, on-disk cached rendering, CLI inspection, and DB persistence. |
 | **OCR Abstraction & Unlimited-OCR Adapter** | ✅ Completed (100%) | Stable `OCRProvider` interface, `UnlimitedOCRAdapter` (with retries, CPU/GPU awareness, failure handling), and architecture-approved `FallbackOCRAdapter` for local dev/CPU execution. |
-| **Processing Jobs & Worker Pipeline** | ✅ Completed (100%) | `backend/services/job_service.py` and `backend/workers/job_worker.py`: end-to-end pipeline connecting Upload → Job Creation (QUEUED) → Worker Claim (PROCESSING) → Page Extraction → OCR Execution → Persistence → Status (DONE/FAILED). |
+| **Processing Jobs & Worker Pipeline** | ✅ Completed (100%) | `backend/services/job_service.py` and `backend/workers/job_worker.py`: full 11-step pipeline connecting Upload → Job Creation (QUEUED) → Worker Claim (PROCESSING) → Classification → OCR → Field Extraction → Normalization → Entity Resolution → Government Registry Verification → Compliance Rules → Anomaly Scanning → Risk Scoring → Evidence Packaging → DB Persistence (findings, anomalies, risk_drivers, verification_events) → Status (DONE/FAILED). |
 | **Document Classification Engine** | ✅ Completed (100%) | `pipeline/document_processing/classifier.py`: deterministic statutory anchors (Form GST REG-06, PAN, Udyam, UDIN turnover, ITR-V, OEM Annexure-I, Integrity Pact, MII, Land Border, Startup DPIIT, Debarment), keyword density, filename heuristics, multi-page scanning, and fallback to UNKNOWN with evidentiary audit trail. |
 | **Structured Field Extraction Engine** | ✅ Completed (100%) | `pipeline/extraction/`: deterministic extractors for GST REG-06 (GSTIN, legal/trade names, constitution, address, date, status, PAN), PAN card, Udyam MSME, and CA Turnover certificates (multi-year turnover, UDIN, CA name), with Mod-36 checksum, ISO-date normalization, and INR turnover parsing. |
 | **Field Normalization & Anti-Collision Engine** | ✅ Completed (100%) | `pipeline/entity_resolution/`: validators for PAN, GSTIN, Udyam, dates, turnover INR, company names, addresses; whitespace, punctuation, company suffixes, and anti-collision logic preventing false merges of unrelated companies. |
@@ -66,15 +66,16 @@ In public procurement under GFR 2017 and CVC guidelines, procurement officers ma
 | **Cross-Bidder Link Graph Engine & APIs** | ✅ Completed (100%) | `pipeline/risk/graph.py` and REST APIs (`GET /api/v1/tenders/{id}/graph`, `POST /api/v1/risk/graph`): deterministic NetworkX graph construction mapping shared directors, phone numbers, emails, addresses, bank accounts, PDF authors, metadata, and near-duplicate text with CVC-aligned related-party citations. |
 | **Evidence Modeling & Provenance Subsystem** | ✅ Completed (100%) | `pipeline/evidence/highlighter.py`: stable `EvidenceItem` contract (document, page, field, quote, bounding box, source, method, confidence), responsive CSS percentages, multi-document split traces (`EvidenceTrace`), and visual highlight styling. |
 | **Connected End-to-End Processing Pipeline** | ✅ Completed (100%) | `pipeline/runner.py`: 14 explicit named steps (`upload_and_registration`, `page_extraction`, `text_extraction`, `ocr_fallback`, `classification`, `field_extraction`, `normalization`, `entity_resolution`, `government_verification`, `tender_requirement_checks`, `compliance_rules`, `anomalies`, `risk_scoring`, `findings_and_evidence`), automatic retries, fail-safe degradation, backward-compatible aliases (`step_01_ingest` through `step_11_explain`), tested end-to-end with demo bidder package. |
-| **Job Status & Pipeline REST APIs** | ✅ Completed (100%) | `GET /api/v1/jobs/{id}`, `GET /api/v1/bidders/{id}/jobs`, `POST /api/v1/jobs/{id}/process` live with 11-step progress tracking. |
+| **Full Pipeline Backend Integration** | ✅ Completed (100%) | `job_service.process_job_full_pipeline()`: connects PipelineRunner to DB persistence. After OCR/extraction (steps 1-4), runs normalization, entity resolution, government registry verification, compliance rules, anomaly scanning, risk scoring, and evidence packaging (steps 5-11). Persists Finding, AnomalySignal, RiskDriver, VerificationEvent records. Updates Bidder canonical_name, entity_confidence, risk_score, risk_band, overall_status. Worker calls full pipeline automatically. |
+| **Job Status & Pipeline REST APIs** | ✅ Completed (100%) | `GET /api/v1/jobs/{id}`, `GET /api/v1/bidders/{id}/jobs`, `POST /api/v1/jobs/{id}/process` (full 11-step pipeline), `POST /api/v1/jobs/{id}/process-ocr` (OCR-only fallback) with 11-step progress tracking. |
 | **Live Health Probe Endpoint** | ✅ Completed (100%) | `/health` actively probes database status, dialect, and latency. |
 | **Background Worker Process** | ✅ Completed (100%) | `worker.py` and `backend/workers/job_worker.py` with DB readiness check, queue poll cycle, and graceful signal shutdown. |
 | **Frontend Production Build** | ✅ Completed (100%) | Vite + React 18 + TypeScript builds cleanly (`dist/` created in 38s) with dark mode and API client. |
-| **Automated Tests & Startup Verification** | ✅ Completed (100%) | 259 pytest unit, auth, tender, bidder, ingest, PDF, OCR, job pipeline, classifier, extraction, normalization, validation, entity resolution, registry, cross-document verification, tender extraction, compliance rules, risk scoring, document anomaly, cross-bidder graph, evidence model, and connected pipeline runner tests passing, `scripts/verify_structure.py` passing with 0 warnings. |
+| **Automated Tests & Startup Verification** | ✅ Completed (100%) | 277 pytest unit, auth, tender, bidder, ingest, PDF, OCR, job pipeline, classifier, extraction, normalization, validation, entity resolution, registry, cross-document verification, tender extraction, compliance rules, risk scoring, document anomaly, cross-bidder graph, evidence model, connected pipeline runner, and full pipeline integration tests passing, `scripts/verify_structure.py` passing with 0 warnings. |
 | **Project Automation Tooling** | ✅ Completed (100%) | Single-command deployment (`docker compose up --build`), `Makefile`, and `scripts/dev.ps1`. |
 | **Synthetic Demo Dataset (`seed/`)** | 🔄 Ready for Generation | `template_tender.json` created; 4+1 generator script pending Phase 26. |
 
-**Current Repo Baseline:** Stable Evidence Model and Provenance Subsystem is fully operational, guaranteeing that every compliance finding, verification check, forensic anomaly, and risk factor links back to verifiable evidence with page, field, quote, and responsive CSS bounding box overlays. All 248 automated tests pass.
+**Current Repo Baseline:** Full 11-step processing pipeline is connected end-to-end from document upload through findings, anomalies, risk scoring, and evidence packaging. The job worker automatically executes the complete pipeline and persists all results (findings, anomalies, risk drivers, verification events) to the database. All 277 automated tests pass.
 
 ---
 
@@ -216,9 +217,10 @@ In public procurement under GFR 2017 and CVC guidelines, procurement officers ma
 
 ## 8. Next Recommended Step
  
-**Execute Phase 26 (Synthetic Demo Dataset Generator & 4+1 Demo Bidders Testbed):**
-1. Implement synthetic bidder document generator (`seed/generate_demo_docs.py`) to produce the 4+1 demo bidder PDFs (scanned + digital) and ground truth fixtures.
-2. Generate synthetic bidder packages: Bidder A (Clean PASS), Bidder B (Name variation / MSE abbreviation REVIEW), Bidder C (Hard PAN-GSTIN mismatch / Debarred FAIL), Bidder D (Adversarial prompt injection / Collusion link HIGH risk), and Bidder E (Border country unapproved REVIEW).
-3. Validate end-to-end evaluation pipeline and compliance dossiers across all 5 testbed packages.
-4. Begin Phase 26 implementation per timeline in `docs/05`.
+**Execute Phase 26 (Audit Trail with Hash-Chain Integrity):**
+1. Implement complete audit event recording for all important actions (officer decisions, pipeline runs, status changes).
+2. Implement SHA-256 hash-chained audit log with previous_hash, current_hash, and chain verification endpoint.
+3. Add tests for normal chain, tampered event, broken previous hash, and valid chain verification.
+4. Implement `GET /audit/trail` and `POST /audit/verify` endpoints with real data.
+5. Begin Phase 26 implementation per timeline in `docs/05`.
 

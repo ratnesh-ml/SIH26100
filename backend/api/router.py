@@ -435,7 +435,29 @@ async def trigger_job_processing(
     current_user: Annotated[User, Depends(require_role(UserRole.OFFICER, UserRole.ADMIN))],
     session: Annotated[AsyncSession, Depends(get_db_session)],
 ):
-    """Trigger or re-trigger OCR processing for a specific job."""
+    """Trigger full 11-step pipeline processing for a specific job."""
+    job_service = JobService()
+    job = await job_service.process_job_full_pipeline(session, job_id)
+    return JobStatus(
+        id=job.id,
+        bidder_id=job.bidder_id,
+        status=job.status,
+        current_step=job.current_step,
+        steps=[StepStatus(**s) for s in (job.steps or [])],
+        error=job.error,
+        created_at=job.created_at,
+        started_at=job.started_at,
+        ended_at=job.ended_at,
+    )
+
+
+@api_router.post("/jobs/{job_id}/process-ocr", response_model=JobStatus, tags=["Jobs"])
+async def trigger_job_ocr_only(
+    job_id: uuid.UUID,
+    current_user: Annotated[User, Depends(require_role(UserRole.OFFICER, UserRole.ADMIN))],
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+):
+    """Trigger OCR-only processing (steps 1-4) for a specific job."""
     job_service = JobService()
     job = await job_service.process_job_ocr(session, job_id)
     return JobStatus(
