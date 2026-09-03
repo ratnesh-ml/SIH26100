@@ -34,6 +34,7 @@ MOCK_BIDDERS: dict[uuid.UUID, Bidder] = {}
 MOCK_DOCUMENTS: dict[uuid.UUID, Document] = {}
 MOCK_PAGES: list[DocumentPage] = []
 MOCK_JOBS: dict[uuid.UUID, Job] = {}
+MOCK_FIELDS = []
 
 
 class MockJobSession:
@@ -55,6 +56,8 @@ class MockJobSession:
         elif isinstance(obj, Bidder):
             MOCK_BIDDERS[obj.id] = obj
             obj.created_at = getattr(obj, "created_at", None) or datetime.now(timezone.utc)
+        else:
+            MOCK_FIELDS.append(obj)
 
     async def commit(self):
         pass

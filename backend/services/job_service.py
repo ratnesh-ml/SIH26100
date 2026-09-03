@@ -10,9 +10,10 @@ from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.models.entities import Bidder, Document, DocumentPage, Job
+from backend.models.entities import Bidder, Document, DocumentPage, ExtractedField, Job
 from backend.schemas.job import JobState, StepStatus
-from pipeline.document_processing.classifier import RuleBasedDocumentClassifier
+from pipeline.document_processing.classifier import DocumentType, RuleBasedDocumentClassifier
+from pipeline.extraction.registry import extract_document_fields
 from pipeline.ocr.factory import get_ocr_provider
 from pipeline.ocr.interface import OCRProvider
 from pipeline.pdf.processor import PDFProcessor
@@ -262,23 +263,48 @@ class JobService:
                 doc.text_source = "ocr" if has_ocr_pages else "text_layer"
                 doc.ocr_conf = round(avg_conf, 3)
 
-            # Mark Step 2 (Classification) and Step 3 (OCR) as DONE
+                # Step 4: Extract structured fields if document type is supported
+                try:
+                    doc_type_enum = DocumentType(doc.doc_type)
+                    extracted_fields = extract_document_fields(
+                        doc_type=doc_type_enum,
+                        pages=[p.to_dict() for p in process_result.pages],
+                        source_document=doc.original_filename,
+                    )
+                    for dto in extracted_fields:
+                        val_to_hash = dto.normalized_value or dto.value or ""
+                        val_hash = hashlib.sha256(val_to_hash.encode("utf-8")).hexdigest()
+                        field_rec = ExtractedField(
+                            document_id=doc.id,
+                            field_name=dto.field_name,
+                            value=dto.value,
+                            value_norm=dto.normalized_value,
+                            raw=dto.raw,
+                            page_no=dto.page,
+                            bbox=dto.bbox,
+                            confidence=dto.confidence,
+                            method=dto.extraction_method,
+                            value_hash=val_hash,
+                        )
+                        session.add(field_rec)
+                    logger.info("Extracted %d structured fields from doc %s (%s)", len(extracted_fields), doc.id, doc.doc_type)
+                except Exception as field_err:
+                    logger.warning("Field extraction warning on doc %s: %s", doc.id, field_err)
+
+            # Mark Step 2 (Classification), Step 3 (OCR), and Step 4 (Field Extraction) as DONE
             now_iso = datetime.now(timezone.utc).isoformat()
             for s in current_steps:
-                if s.get("step_number") == 2:
-                    s["status"] = "DONE"
-                    s["ended_at"] = now_iso
-                elif s.get("step_number") == 3:
+                if s.get("step_number") in (2, 3, 4):
                     s["status"] = "DONE"
                     s["ended_at"] = now_iso
             job.steps = current_steps
-            job.current_step = 3
+            job.current_step = 4
             job.status = JobState.DONE.value
             job.ended_at = datetime.now(timezone.utc)
             await session.commit()
             if hasattr(session, "refresh"):
                 await session.refresh(job)
-            logger.info("Job %s successfully completed Classification and OCR processing", job.id)
+            logger.info("Job %s successfully completed Classification, OCR, and Field Extraction", job.id)
             return job
 
         except Exception as exc:
