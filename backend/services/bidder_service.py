@@ -13,6 +13,7 @@ from backend.core.security import encrypt_identifier, decrypt_identifier
 from backend.models.entities import Bidder, Bid, Tender
 from backend.schemas.bidder import BidderCreate, BidderUpdate, BidderProfile
 from backend.schemas.bid import BidCreate, AttachBidderRequest, BidStatusUpdate, BidOut
+from backend.services.audit_service import AuditService
 
 logger = logging.getLogger("vigilbid.services.bidder")
 
@@ -68,6 +69,22 @@ class BidderService:
         )
         session.add(bidder)
         await session.commit()
+
+        try:
+            await AuditService.record_event(
+                session=session,
+                action="CREATE_BIDDER",
+                target_type="bidder",
+                target_id=str(bidder_id),
+                actor_id=None,
+                role="officer",
+                previous_state=None,
+                new_state={"declared_name": bidder.declared_name, "canonical_name": canonical},
+                reason="Bidder master profile registered",
+                payload={"declared_name": bidder.declared_name, "tender_id": str(payload.tender_id) if payload.tender_id else None},
+            )
+        except Exception as exc:
+            logger.warning("Audit logging warning on create_bidder %s: %s", bidder_id, exc)
 
         return await BidderService.get_bidder(session, bidder_id)
 
@@ -204,6 +221,8 @@ class BidderService:
                 detail=f"Bidder with ID '{bidder_id}' not found.",
             )
 
+        old_state = {"declared_name": bidder.declared_name, "canonical_name": bidder.canonical_name}
+
         update_data = payload.model_dump(exclude_unset=True)
         for key, value in update_data.items():
             if key == "declared_name" and value:
@@ -213,6 +232,23 @@ class BidderService:
                 setattr(bidder, key, value)
 
         await session.commit()
+
+        try:
+            await AuditService.record_event(
+                session=session,
+                action="UPDATE_BIDDER",
+                target_type="bidder",
+                target_id=str(bidder_id),
+                actor_id=None,
+                role="officer",
+                previous_state=old_state,
+                new_state={"declared_name": bidder.declared_name, "canonical_name": bidder.canonical_name},
+                reason="Bidder profile updated",
+                payload={"declared_name": bidder.declared_name},
+            )
+        except Exception as exc:
+            logger.warning("Audit logging warning on update_bidder %s: %s", bidder_id, exc)
+
         return await BidderService.get_bidder(session, bidder_id)
 
     @staticmethod
@@ -295,6 +331,23 @@ class BidderService:
             bidder.tender_id = tender_id
 
         await session.commit()
+
+        try:
+            await AuditService.record_event(
+                session=session,
+                action="ATTACH_BIDDER",
+                target_type="bid",
+                target_id=str(bid_id),
+                actor_id=None,
+                role="officer",
+                previous_state=None,
+                new_state={"bid_number": bid_number, "status": "SUBMITTED", "tender_id": str(tender_id)},
+                reason="Bidder formally attached to tender",
+                payload={"tender_id": str(tender_id), "bidder_id": str(bidder.id), "bid_number": bid_number},
+            )
+        except Exception as exc:
+            logger.warning("Audit logging warning on attach_bidder %s: %s", bid_id, exc)
+
         return await BidderService.get_bid(session, bid_id)
 
     @staticmethod
@@ -480,6 +533,24 @@ class BidderService:
         if not bid:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Bid with ID '{bid_id}' not found.")
 
+        old_status = bid.status
         bid.status = payload.status.upper()
         await session.commit()
+
+        try:
+            await AuditService.record_event(
+                session=session,
+                action="UPDATE_BID_STATUS",
+                target_type="bid",
+                target_id=str(bid_id),
+                actor_id=None,
+                role="officer",
+                previous_state={"status": old_status},
+                new_state={"status": bid.status},
+                reason=payload.reason or "Bid evaluation lifecycle status updated",
+                payload={"tender_id": str(bid.tender_id), "bidder_id": str(bid.bidder_id), "bid_number": bid.bid_number},
+            )
+        except Exception as exc:
+            logger.warning("Audit logging warning on update_bid_status %s: %s", bid_id, exc)
+
         return await BidderService.get_bid(session, bid_id)

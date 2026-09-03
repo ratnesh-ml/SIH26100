@@ -31,6 +31,7 @@ from pipeline.pdf.processor import PDFProcessor
 from pipeline.runner import PipelineContext, PipelineRunner, StepExecutionResult
 from pipeline.registry_adapters import get_registry_provider
 from pipeline.registry_adapters.base import RegistryProvider
+from backend.services.audit_service import AuditService
 
 logger = logging.getLogger("vigilbid.services.job")
 
@@ -88,6 +89,23 @@ class JobService:
         await session.commit()
         if hasattr(session, "refresh"):
             await session.refresh(job)
+
+        try:
+            await AuditService.record_event(
+                session=session,
+                action="JOB_CREATED",
+                target_type="job",
+                target_id=str(job.id),
+                actor_id=None,
+                role="system",
+                previous_state=None,
+                new_state={"status": job.status, "current_step": job.current_step},
+                reason="Evaluation job queued for processing",
+                payload={"bidder_id": str(bidder_id)},
+            )
+        except Exception as exc:
+            logger.warning("Audit logging warning on job %s: %s", job.id, exc)
+
         logger.info("Created processing Job %s for Bidder %s in state %s", job.id, bidder_id, job.status)
         return job
 
@@ -583,6 +601,27 @@ class JobService:
             await session.commit()
             if hasattr(session, "refresh"):
                 await session.refresh(job)
+
+            try:
+                await AuditService.record_event(
+                    session=session,
+                    action="EVALUATION_PIPELINE_COMPLETE",
+                    target_type="bidder",
+                    target_id=str(job.bidder_id),
+                    actor_id=None,
+                    role="system",
+                    previous_state={"status": "PROCESSING"},
+                    new_state={
+                        "overall_status": bidder.overall_status if bidder else "UNKNOWN",
+                        "risk_score": bidder.risk_score if bidder else 0,
+                        "risk_band": bidder.risk_band if bidder else "LOW",
+                    },
+                    reason="Full 11-step evaluation pipeline executed successfully",
+                    evidence_reference=f"{len(ctx.findings)} findings, {len(ctx.anomalies)} anomalies",
+                    payload={"job_id": str(job.id), "findings_count": len(ctx.findings)},
+                )
+            except Exception as exc:
+                logger.warning("Audit logging warning on pipeline completion for job %s: %s", job.id, exc)
 
             logger.info(
                 "Job %s full pipeline complete: %d findings, %d anomalies, risk=%d/%s",

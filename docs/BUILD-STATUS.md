@@ -1,8 +1,8 @@
 # VigilBid (SIH26100) — Build Status & Transition Baseline
 
-**Document Version:** 2.14.0  
+**Document Version:** 2.15.0  
 **Date:** September 2026  
-**Status:** Phase 25 Complete — Full Pipeline Connected to Backend Service Layer & Worker  
+**Status:** Phase 26 Complete — Cryptographic Audit Trail with SHA-256 Hash-Chain Integrity Operational  
 **Target:** SIH Grand Finale — Problem Statement SIH26100 (CPCL / Ministry of Petroleum & Natural Gas)
 
 ---
@@ -68,14 +68,16 @@ In public procurement under GFR 2017 and CVC guidelines, procurement officers ma
 | **Connected End-to-End Processing Pipeline** | ✅ Completed (100%) | `pipeline/runner.py`: 14 explicit named steps (`upload_and_registration`, `page_extraction`, `text_extraction`, `ocr_fallback`, `classification`, `field_extraction`, `normalization`, `entity_resolution`, `government_verification`, `tender_requirement_checks`, `compliance_rules`, `anomalies`, `risk_scoring`, `findings_and_evidence`), automatic retries, fail-safe degradation, backward-compatible aliases (`step_01_ingest` through `step_11_explain`), tested end-to-end with demo bidder package. |
 | **Full Pipeline Backend Integration** | ✅ Completed (100%) | `job_service.process_job_full_pipeline()`: connects PipelineRunner to DB persistence. After OCR/extraction (steps 1-4), runs normalization, entity resolution, government registry verification, compliance rules, anomaly scanning, risk scoring, and evidence packaging (steps 5-11). Persists Finding, AnomalySignal, RiskDriver, VerificationEvent records. Updates Bidder canonical_name, entity_confidence, risk_score, risk_band, overall_status. Worker calls full pipeline automatically. |
 | **Job Status & Pipeline REST APIs** | ✅ Completed (100%) | `GET /api/v1/jobs/{id}`, `GET /api/v1/bidders/{id}/jobs`, `POST /api/v1/jobs/{id}/process` (full 11-step pipeline), `POST /api/v1/jobs/{id}/process-ocr` (OCR-only fallback) with 11-step progress tracking. |
+| **Cryptographic Audit Trail & Hash-Chaining** | ✅ Completed (100%) | `pipeline/audit/hasher.py` and `backend/services/audit_service.py`: Forward SHA-256 hash-chained immutable audit log (`audit_log` table) recording actor, timestamp, action, entity, previous state, new state, reason, and evidence reference. Automated event logging across tender creation/update, bidder registration/updates, document uploads, pipeline completions, and officer decisions. Cryptographic continuity verification (`GET /api/v1/audit/verify`, `POST /api/v1/audit/verify`) flagging any tampered payload or broken pointer. |
+| **Audit Trail REST APIs** | ✅ Completed (100%) | `GET /api/v1/tenders/{id}/audit`, `GET /api/v1/audit/trail`, `GET /api/v1/audit/verify`, `POST /api/v1/audit/verify` with role-based access control and pagination. |
 | **Live Health Probe Endpoint** | ✅ Completed (100%) | `/health` actively probes database status, dialect, and latency. |
 | **Background Worker Process** | ✅ Completed (100%) | `worker.py` and `backend/workers/job_worker.py` with DB readiness check, queue poll cycle, and graceful signal shutdown. |
 | **Frontend Production Build** | ✅ Completed (100%) | Vite + React 18 + TypeScript builds cleanly (`dist/` created in 38s) with dark mode and API client. |
-| **Automated Tests & Startup Verification** | ✅ Completed (100%) | 277 pytest unit, auth, tender, bidder, ingest, PDF, OCR, job pipeline, classifier, extraction, normalization, validation, entity resolution, registry, cross-document verification, tender extraction, compliance rules, risk scoring, document anomaly, cross-bidder graph, evidence model, connected pipeline runner, and full pipeline integration tests passing, `scripts/verify_structure.py` passing with 0 warnings. |
+| **Automated Tests & Startup Verification** | ✅ Completed (100%) | 293 pytest unit, auth, tender, bidder, ingest, PDF, OCR, job pipeline, classifier, extraction, normalization, validation, entity resolution, registry, cross-document verification, tender extraction, compliance rules, risk scoring, document anomaly, cross-bidder graph, evidence model, connected pipeline runner, full pipeline integration, and cryptographic audit hash-chain tests passing, `scripts/verify_structure.py` passing with 0 warnings. |
 | **Project Automation Tooling** | ✅ Completed (100%) | Single-command deployment (`docker compose up --build`), `Makefile`, and `scripts/dev.ps1`. |
 | **Synthetic Demo Dataset (`seed/`)** | 🔄 Ready for Generation | `template_tender.json` created; 4+1 generator script pending Phase 26. |
 
-**Current Repo Baseline:** Full 11-step processing pipeline is connected end-to-end from document upload through findings, anomalies, risk scoring, and evidence packaging. The job worker automatically executes the complete pipeline and persists all results (findings, anomalies, risk drivers, verification events) to the database. All 277 automated tests pass.
+**Current Repo Baseline:** Tamper-evident Cryptographic Audit Trail with forward SHA-256 hash-chaining is fully operational across the database, service layer, and REST API. Every mutating procurement action (tender creation, bidder registration, document ingestion, pipeline completion, officer decisions) generates an immutable, chained audit record. Chain verification detects any altered payload or broken sequence pointer. All 293 automated tests pass.
 
 ---
 
@@ -217,10 +219,10 @@ In public procurement under GFR 2017 and CVC guidelines, procurement officers ma
 
 ## 8. Next Recommended Step
  
-**Execute Phase 26 (Audit Trail with Hash-Chain Integrity):**
-1. Implement complete audit event recording for all important actions (officer decisions, pipeline runs, status changes).
-2. Implement SHA-256 hash-chained audit log with previous_hash, current_hash, and chain verification endpoint.
-3. Add tests for normal chain, tampered event, broken previous hash, and valid chain verification.
-4. Implement `GET /audit/trail` and `POST /audit/verify` endpoints with real data.
-5. Begin Phase 26 implementation per timeline in `docs/05`.
+**Execute Phase 27 (Human-in-the-Loop Review & Decision Lifecycle):**
+1. Implement formal decision states (Accept, Reject, Request clarification, Override with mandatory reason requirement).
+2. Implement endpoint `/api/v1/bids/{id}/decision` and decision history tracking.
+3. Implement `complete-review` validation preventing review completion while mandatory unresolved findings remain.
+4. Ensure officer decisions remain strictly separated from automated recommendations with full audit log linkage.
+5. Begin Phase 27 implementation per timeline in `docs/05`.
 

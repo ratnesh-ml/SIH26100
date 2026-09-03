@@ -12,6 +12,7 @@ from sqlalchemy.orm import selectinload
 
 from backend.models.entities import Tender, Criterion, Bidder
 from backend.schemas.tender import TenderCreate, TenderUpdate
+from backend.services.audit_service import AuditService
 
 logger = logging.getLogger("vigilbid.services.tender")
 
@@ -126,6 +127,23 @@ class TenderService:
 
         await session.commit()
 
+        # Audit event for tender creation
+        try:
+            await AuditService.record_event(
+                session=session,
+                action="CREATE_TENDER",
+                target_type="tender",
+                target_id=str(tender_id),
+                actor_id=creator_id,
+                role="officer",
+                previous_state=None,
+                new_state={"nit_no": payload.nit_no, "title": payload.title, "status": payload.status},
+                reason="Tender created and initialized with criteria",
+                payload={"nit_no": payload.nit_no, "title": payload.title},
+            )
+        except Exception as exc:
+            logger.warning("Audit logging warning on create_tender %s: %s", tender_id, exc)
+
         # 4. Return loaded tender with criteria
         return await TenderService.get_tender(session, tender_id)
 
@@ -194,10 +212,28 @@ class TenderService:
     ) -> Tender:
         """Update tender metadata or lifecycle status."""
         tender = await TenderService.get_tender(session, tender_id)
+        old_state = {"title": tender.title, "status": tender.status}
 
         update_data = payload.model_dump(exclude_unset=True)
         for key, value in update_data.items():
             setattr(tender, key, value)
 
         await session.commit()
+
+        try:
+            await AuditService.record_event(
+                session=session,
+                action="UPDATE_TENDER",
+                target_type="tender",
+                target_id=str(tender_id),
+                actor_id=None,
+                role="officer",
+                previous_state=old_state,
+                new_state={"title": tender.title, "status": tender.status},
+                reason="Tender metadata or status updated",
+                payload={"nit_no": tender.nit_no},
+            )
+        except Exception as exc:
+            logger.warning("Audit logging warning on update_tender %s: %s", tender_id, exc)
+
         return await TenderService.get_tender(session, tender_id)

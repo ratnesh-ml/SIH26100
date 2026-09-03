@@ -11,6 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from backend.core.config import settings
 from backend.models.entities import Bidder, Document
 from backend.schemas.document import DocumentSummary, RejectedFileOut, IngestionResponse
+from backend.services.audit_service import AuditService
 from backend.services.job_service import JobService
 from pipeline.document_processing.ingest import DocumentIngester
 
@@ -120,6 +121,25 @@ class DocumentService:
                 )
 
         await session.commit()
+
+        # Record audit events for accepted documents
+        for doc_item in accepted_docs:
+            try:
+                await AuditService.record_event(
+                    session=session,
+                    action="DOCUMENT_UPLOADED",
+                    target_type="document",
+                    target_id=str(doc_item.id),
+                    actor_id=None,
+                    role="officer",
+                    previous_state=None,
+                    new_state={"filename": doc_item.original_filename, "sha256": doc_item.sha256, "page_count": doc_item.page_count},
+                    reason="Document ingested with SHA-256 CAS verification",
+                    evidence_reference=f"sha256:{doc_item.sha256}",
+                    payload={"bidder_id": str(bidder_id), "original_filename": doc_item.original_filename},
+                )
+            except Exception as exc:
+                logger.warning("Audit logging warning on document %s: %s", doc_item.id, exc)
 
         # If files were accepted, create a processing Job in QUEUED state
         job_id = None

@@ -13,8 +13,10 @@ from backend.core.security import create_access_token, verify_password
 from backend.api.deps import get_current_token_payload, get_current_user, require_role
 from backend.auth.jwt import TokenPayload
 from backend.auth.rbac import UserRole
-from backend.models.entities import User
+from backend.models.entities import User, Decision, Finding
 from pipeline.registry_adapters import get_registry_provider
+from pipeline.audit.hasher import verify_chain_full
+from backend.services.audit_service import AuditService
 from backend.schemas import (
     LoginRequest,
     TokenResponse,
@@ -479,9 +481,14 @@ async def list_findings(
     bidder_id: uuid.UUID,
     status: Optional[str] = None,
     current_user: Annotated[User, Depends(get_current_user)] = None,
+    session: Annotated[AsyncSession, Depends(get_db_session)] = None,
 ):
     """List findings for a bidder with evidence bounding boxes."""
-    return []
+    stmt = select(Finding).where(Finding.bidder_id == bidder_id)
+    if status:
+        stmt = stmt.where(Finding.status == status.upper())
+    res = await session.execute(stmt)
+    return list(res.scalars().all())
 
 
 @api_router.post("/findings/{finding_id}/decision", response_model=DecisionOut, tags=["Findings"])
@@ -489,9 +496,61 @@ async def record_decision(
     finding_id: uuid.UUID,
     payload: DecisionCreate,
     current_user: Annotated[User, Depends(require_role(UserRole.OFFICER, UserRole.EVALUATOR, UserRole.APPROVER))],
+    session: Annotated[AsyncSession, Depends(get_db_session)],
 ):
-    """Record officer decision (ACCEPT/OVERRIDE/CLARIFY/CONCUR/DISSENT)."""
-    raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED, detail="Decision recording not yet implemented")
+    """Record officer decision (ACCEPT/OVERRIDE/CLARIFY/CONCUR/DISSENT) and persist audit event."""
+    stmt = select(Finding).where(Finding.id == finding_id)
+    res = await session.execute(stmt)
+    finding = res.scalar_one_or_none()
+    if not finding:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Finding '{finding_id}' not found")
+
+    old_status = finding.status
+    action_upper = payload.action.upper()
+    if action_upper == "OVERRIDE":
+        resulting_status = "PASS" if old_status in ("FAIL", "WARN", "REVIEW") else "REVIEW"
+    elif action_upper == "ACCEPT":
+        resulting_status = old_status
+    elif action_upper in ("CLARIFY", "DISSENT"):
+        resulting_status = "REVIEW"
+    elif action_upper == "CONCUR":
+        resulting_status = old_status
+    else:
+        resulting_status = old_status
+
+    decision = Decision(
+        id=uuid.uuid4(),
+        finding_id=finding_id,
+        bidder_id=finding.bidder_id,
+        actor_id=current_user.id,
+        action=action_upper,
+        reason=payload.reason,
+        resulting_status=resulting_status,
+    )
+    session.add(decision)
+    finding.status = resulting_status
+    await session.commit()
+    await session.refresh(decision)
+
+    # Record in cryptographic hash-chained audit log
+    try:
+        await AuditService.record_event(
+            session=session,
+            action=f"DECISION_{action_upper}",
+            target_type="finding",
+            target_id=str(finding_id),
+            actor_id=current_user.id,
+            role=current_user.role,
+            previous_state={"status": old_status},
+            new_state={"status": resulting_status},
+            reason=payload.reason,
+            evidence_reference=finding.evidence,
+            payload={"bidder_id": str(finding.bidder_id), "decision_id": str(decision.id)},
+        )
+    except Exception as exc:
+        logger.warning("Audit logging warning on decision %s: %s", decision.id, exc)
+
+    return decision
 
 
 # 6. Risk Profile & Graph
@@ -528,19 +587,54 @@ async def copilot_query(
 async def get_audit_trail(
     tender_id: uuid.UUID,
     page: int = Query(1, ge=1),
-    limit: int = Query(50, ge=1),
+    limit: int = Query(50, ge=1, le=200),
     current_user: Annotated[User, Depends(require_role(UserRole.VIGILANCE, UserRole.AUDITOR, UserRole.OFFICER, UserRole.EVALUATOR, UserRole.ADMIN))] = None,
+    session: Annotated[AsyncSession, Depends(get_db_session)] = None,
 ):
-    """Retrieve immutable audit trail events."""
-    return []
+    """Retrieve immutable audit trail events for a specific tender."""
+    events = await AuditService.get_audit_trail(session, tender_id=tender_id, page=page, limit=limit)
+    return [AuditEventOut.model_validate(e) for e in events]
+
+
+@api_router.get("/audit/trail", response_model=list[AuditEventOut], tags=["Audit"])
+async def get_global_audit_trail(
+    target_type: Optional[str] = Query(None),
+    target_id: Optional[str] = Query(None),
+    action: Optional[str] = Query(None),
+    page: int = Query(1, ge=1),
+    limit: int = Query(50, ge=1, le=200),
+    current_user: Annotated[User, Depends(require_role(UserRole.VIGILANCE, UserRole.AUDITOR, UserRole.OFFICER, UserRole.EVALUATOR, UserRole.ADMIN))] = None,
+    session: Annotated[AsyncSession, Depends(get_db_session)] = None,
+):
+    """Retrieve immutable global audit trail events with optional filtering."""
+    events = await AuditService.get_audit_trail(
+        session, target_type=target_type, target_id=target_id, action=action, page=page, limit=limit
+    )
+    return [AuditEventOut.model_validate(e) for e in events]
 
 
 @api_router.get("/audit/verify", response_model=AuditVerifyOut, tags=["Audit"])
 async def verify_audit_chain(
     current_user: Annotated[User, Depends(require_role(UserRole.VIGILANCE, UserRole.AUDITOR, UserRole.OFFICER, UserRole.ADMIN))],
+    session: Annotated[AsyncSession, Depends(get_db_session)],
 ):
-    """Verify cryptographic SHA-256 hash-chain integrity."""
-    return AuditVerifyOut(ok=True, length=0, first_broken_seq=None, head_hash="00" * 32)
+    """Verify cryptographic SHA-256 hash-chain integrity for all recorded events."""
+    res = await AuditService.verify_chain(session)
+    return AuditVerifyOut(**res)
+
+
+@api_router.post("/audit/verify", response_model=AuditVerifyOut, tags=["Audit"])
+async def verify_audit_chain_post(
+    current_user: Annotated[User, Depends(require_role(UserRole.VIGILANCE, UserRole.AUDITOR, UserRole.OFFICER, UserRole.ADMIN))],
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+    payload: Optional[list[dict[str, Any]]] = None,
+):
+    """Verify cryptographic SHA-256 hash-chain integrity via POST for external payloads or database log."""
+    if payload is not None:
+        res = verify_chain_full(payload)
+    else:
+        res = await AuditService.verify_chain(session)
+    return AuditVerifyOut(**res)
 
 
 @api_router.get("/bidders/{bidder_id}/report.pdf", tags=["Reports"])
