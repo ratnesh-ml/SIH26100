@@ -10,6 +10,7 @@ import {
   TenderDetail,
   TenderListResponse,
   UploadPackageResponse,
+  ComplianceMatrix,
   JobStatus,
   User,
 } from '../types';
@@ -117,6 +118,11 @@ export async function createTender(payload: TenderCreate): Promise<TenderDetail>
 export async function fetchTender(tenderId: string): Promise<TenderDetail> {
   return request<TenderDetail>(`${API_BASE}/tenders/${tenderId}`);
 }
+
+export async function fetchComplianceMatrix(tenderId: string): Promise<ComplianceMatrix> {
+  return request<ComplianceMatrix>(`${API_BASE}/tenders/${tenderId}/matrix`);
+}
+
 
 // 4. Bidders
 export async function fetchBidders(tenderId?: string, page = 1, limit = 20): Promise<BidderListResponse> {

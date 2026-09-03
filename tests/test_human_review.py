@@ -95,6 +95,7 @@ class MockReviewSession:
             if obj.bidder_id in MOCK_BIDDERS:
                 obj.bidder = MOCK_BIDDERS[obj.bidder_id]
         elif isinstance(obj, Decision):
+            obj._mock_insert_idx = len(MOCK_DECISIONS)
             MOCK_DECISIONS[obj.id] = obj
             obj.created_at = getattr(obj, "created_at", None) or datetime.now(timezone.utc)
             # Link actor if available
@@ -218,8 +219,11 @@ class MockReviewSession:
                 target_bidid = list(params.values())[0]
                 filtered = [d for d in filtered if str(d.bid_id) == str(target_bidid)]
 
-            # Order by created_at desc
-            filtered.sort(key=lambda d: getattr(d, "created_at", None) or datetime.min, reverse=True)
+            # Order by created_at desc with monotonic insert index tie-breaker
+            filtered.sort(
+                key=lambda d: (getattr(d, "created_at", None) or datetime.min, getattr(d, "_mock_insert_idx", 0)),
+                reverse=True,
+            )
             scalars_mock = MagicMock()
             scalars_mock.all.return_value = filtered
             result_mock.scalars.return_value = scalars_mock

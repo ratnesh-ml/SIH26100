@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ArrowLeft, RefreshCw, AlertCircle, Loader2, ShieldAlert, ArrowRight, UserCheck, FileCheck } from 'lucide-react';
+import { ArrowLeft, RefreshCw, AlertCircle, Loader2, ShieldAlert, ArrowRight, UserCheck, FileCheck, Table } from 'lucide-react';
 import { fetchBidders } from '../api/client';
 import { BidderSummary, TenderSummary } from '../types';
 
@@ -7,6 +7,7 @@ interface BidderListViewProps {
   selectedTender: TenderSummary | null;
   onBackToTenders: () => void;
   onSelectBidder: (bidder: BidderSummary) => void;
+  onViewMatrix?: () => void;
   onOpenUploadModal?: () => void;
   canUpload?: boolean;
 }
@@ -15,6 +16,7 @@ export const BidderListView: React.FC<BidderListViewProps> = ({
   selectedTender,
   onBackToTenders,
   onSelectBidder,
+  onViewMatrix,
   onOpenUploadModal,
   canUpload,
 }) => {
@@ -98,6 +100,16 @@ export const BidderListView: React.FC<BidderListViewProps> = ({
           >
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
           </button>
+
+          {selectedTender && onViewMatrix && (
+            <button
+              onClick={onViewMatrix}
+              className="py-2 px-3 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium text-xs flex items-center gap-1.5 transition-colors border border-slate-700"
+            >
+              <Table className="w-3.5 h-3.5 text-sky-400" />
+              <span>Compliance Matrix</span>
+            </button>
+          )}
 
           {canUpload && selectedTender && onOpenUploadModal && (
             <button

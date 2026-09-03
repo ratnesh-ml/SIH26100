@@ -188,9 +188,11 @@ async def update_tender(
 async def get_compliance_matrix(
     tender_id: uuid.UUID,
     current_user: Annotated[User, Depends(get_current_user)],
+    session: Annotated[AsyncSession, Depends(get_db_session)],
 ):
     """Compliance Matrix heatmap across all criteria and bidders."""
-    return ComplianceMatrix(tender_id=tender_id, criteria=[], bidders=[])
+    matrix_data = await TenderService.get_compliance_matrix(session, tender_id)
+    return ComplianceMatrix(**matrix_data)
 
 
 # 3. Bidder & Bid Endpoints

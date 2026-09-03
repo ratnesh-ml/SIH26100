@@ -4,7 +4,7 @@ import { User } from '../types';
 
 interface NavbarProps {
   currentUser: User | null;
-  activeView: 'tenders' | 'bidders' | 'bidder-detail';
+  activeView: 'tenders' | 'matrix' | 'bidders' | 'bidder-detail' | 'pipeline';
   onNavigate: (view: 'tenders' | 'bidders') => void;
   onLogout: () => void;
   healthStatus?: string;
@@ -17,6 +17,9 @@ export const Navbar: React.FC<NavbarProps> = ({
   onLogout,
   healthStatus,
 }) => {
+  const isTendersActive = activeView === 'tenders' || activeView === 'matrix';
+  const isBiddersActive = activeView === 'bidders' || activeView === 'bidder-detail' || activeView === 'pipeline';
+
   return (
     <header className="border-b border-slate-800 bg-slate-900/90 backdrop-blur px-6 py-3.5 flex items-center justify-between sticky top-0 z-40">
       <div className="flex items-center gap-6">
@@ -40,7 +43,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               onClick={() => onNavigate('tenders')}
               className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
-                activeView === 'tenders'
+                isTendersActive
                   ? 'bg-sky-500/15 text-sky-400 border border-sky-500/30'
                   : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
               }`}
@@ -50,7 +53,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               onClick={() => onNavigate('bidders')}
               className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
-                activeView === 'bidders' || activeView === 'bidder-detail'
+                isBiddersActive
                   ? 'bg-sky-500/15 text-sky-400 border border-sky-500/30'
                   : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
               }`}

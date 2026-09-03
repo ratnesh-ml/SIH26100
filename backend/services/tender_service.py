@@ -10,7 +10,7 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from backend.models.entities import Tender, Criterion, Bidder
+from backend.models.entities import Tender, Criterion, Bidder, Finding
 from backend.schemas.tender import TenderCreate, TenderUpdate
 from backend.services.audit_service import AuditService
 
@@ -243,7 +243,7 @@ class TenderService:
         session: AsyncSession,
         tender_id: uuid.UUID,
     ) -> dict[str, Any]:
-        """Build compliance matrix data containing criteria and participating bidders."""
+        """Build compliance matrix data containing criteria and participating bidders with mapped cells."""
         c_stmt = select(Criterion).where(Criterion.tender_id == tender_id).order_by(Criterion.sort_order.asc())
         c_res = await session.execute(c_stmt)
         criteria = c_res.scalars().all()
@@ -252,11 +252,24 @@ class TenderService:
         b_res = await session.execute(b_stmt)
         bidders = b_res.scalars().all()
 
+        bidder_ids = [b.id for b in bidders]
+        findings_by_bidder: dict[uuid.UUID, list[Finding]] = {b.id: [] for b in bidders}
+        if bidder_ids:
+            f_stmt = select(Finding).where(Finding.bidder_id.in_(bidder_ids))
+            f_res = await session.execute(f_stmt)
+            for f in f_res.scalars().all():
+                if f.bidder_id in findings_by_bidder:
+                    findings_by_bidder[f.bidder_id].append(f)
+
         crit_out = [
             {
                 "id": str(c.id),
+                "tender_id": str(c.tender_id),
                 "code": c.code,
                 "title": c.title,
+                "description": c.description,
+                "required_doc_types": c.required_doc_types or [],
+                "rule_ids": c.rule_ids or [],
                 "sort_order": c.sort_order,
             }
             for c in criteria
@@ -264,6 +277,26 @@ class TenderService:
 
         bidders_out = []
         for b in bidders:
+            b_findings = findings_by_bidder.get(b.id, [])
+            cells = []
+            for c in criteria:
+                matched_finding = None
+                for f in b_findings:
+                    if f.criterion_id == c.id:
+                        matched_finding = f
+                        break
+                    if c.rule_ids and f.rule_id in c.rule_ids:
+                        matched_finding = f
+                        break
+
+                cells.append(
+                    {
+                        "criterion_id": str(c.id),
+                        "status": matched_finding.status if matched_finding else "PENDING",
+                        "finding_id": str(matched_finding.id) if matched_finding else None,
+                    }
+                )
+
             bidders_out.append(
                 {
                     "id": str(b.id),
@@ -271,7 +304,7 @@ class TenderService:
                     "status": b.overall_status,
                     "risk_score": b.risk_score,
                     "risk_band": b.risk_band,
-                    "cells": [],
+                    "cells": cells,
                 }
             )
 

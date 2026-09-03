@@ -1,17 +1,19 @@
 import React, { useEffect, useState } from 'react';
-import { Plus, RefreshCw, FileText, Users, Calendar, AlertCircle, Loader2, ArrowRight } from 'lucide-react';
+import { Plus, RefreshCw, FileText, Users, Calendar, AlertCircle, Loader2, ArrowRight, Table } from 'lucide-react';
 import { fetchTenders } from '../api/client';
 import { TenderSummary, User } from '../types';
 
 interface TenderListViewProps {
   currentUser: User;
   onSelectTender: (tender: TenderSummary) => void;
+  onViewMatrix: (tender: TenderSummary) => void;
   onOpenCreateModal: () => void;
 }
 
 export const TenderListView: React.FC<TenderListViewProps> = ({
   currentUser,
   onSelectTender,
+  onViewMatrix,
   onOpenCreateModal,
 }) => {
   const [tenders, setTenders] = useState<TenderSummary[]>([]);
@@ -194,13 +196,24 @@ export const TenderListView: React.FC<TenderListViewProps> = ({
                       </span>
                     </td>
                     <td className="py-3.5 px-4 text-right">
-                      <button
-                        onClick={() => onSelectTender(t)}
-                        className="px-2.5 py-1 rounded bg-slate-800 hover:bg-sky-600 hover:text-white text-slate-300 transition-colors inline-flex items-center gap-1 font-medium"
-                      >
-                        <span>View Bidders</span>
-                        <ArrowRight className="w-3 h-3" />
-                      </button>
+                      <div className="flex items-center justify-end gap-2">
+                        <button
+                          onClick={() => onViewMatrix(t)}
+                          className="px-2.5 py-1 rounded bg-sky-600/15 hover:bg-sky-600 hover:text-white border border-sky-500/30 text-sky-400 transition-colors inline-flex items-center gap-1 font-medium text-xs"
+                          title="View Comparative Compliance Matrix"
+                        >
+                          <Table className="w-3 h-3" />
+                          <span>Matrix</span>
+                        </button>
+
+                        <button
+                          onClick={() => onSelectTender(t)}
+                          className="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors inline-flex items-center gap-1 font-medium text-xs"
+                        >
+                          <span>Bidders</span>
+                          <ArrowRight className="w-3 h-3" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}

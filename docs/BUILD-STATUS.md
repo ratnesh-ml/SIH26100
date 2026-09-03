@@ -1,8 +1,8 @@
 # VigilBid (SIH26100) — Build Status & Transition Baseline
 
-**Document Version:** 2.21.0  
+**Document Version:** 2.22.0  
 **Date:** September 2026  
-**Status:** Phase 32 Complete — Document Upload & 11-Step Pipeline Stepper Operational  
+**Status:** Phase 33 Complete — Bidder Compliance Matrix (Screen S3) Operational  
 **Target:** SIH Grand Finale — Problem Statement SIH26100 (CPCL / Ministry of Petroleum & Natural Gas)
 
 ---
@@ -78,11 +78,12 @@ In public procurement under GFR 2017 and CVC guidelines, procurement officers ma
 | **Background Worker Process** | ✅ Completed (100%) | `worker.py` and `backend/workers/job_worker.py` with DB readiness check, queue poll cycle, and graceful signal shutdown. |
 | **Frontend Foundation (React + TS + Vite)** | ✅ Completed (100%) | Production React 18 + TypeScript + Vite frontend connected to backend contracts: Login view with preset demo credentials, sticky Navbar with live DB health indicator, paginated Tender List with status filter, Tender Creation modal with PQC parameters, Bidder List with risk score indicators and qualification badges, and Bidder Detail Cockpit with statutory tax IDs, forensic risk drivers, deterministic findings, evidence citations, and CVC dossier PDF download. Builds in 2.70s. |
 | **Document Upload & Pipeline Stepper (S4/S5)** | ✅ Completed (100%) | Screen S4 (UploadModal) & Screen S5 (PipelineStepperView) wired to backend contracts: Drag-and-drop ZIP/PDF package upload with SHA-256 deduplication and validation, real-time 11-step forensic pipeline stepper (Classify, OCR, Extract, Normalize, Resolve, Verify, Rules, Anomalies, Risk, Dossier) with per-step execution status and durations, live 2s auto-polling, error state highlighting with retry action (`POST /jobs/{id}/process`), and ingested document filings table with inline document re-tagging dropdown (`POST /bidders/{id}/documents/{doc_id}/retag`). Builds in 3.01s. |
+| **Bidder Compliance Matrix (Screen S3)** | ✅ Completed (100%) | Screen S3 (ComplianceMatrixView) connected to actual backend API (`GET /tenders/{id}/matrix`): Bidder rows × criteria columns comparative evaluation heatmap, interactive PASS / WARN / REVIEW / FAIL status chips with deep linking to Bidder Cockpit, KPI status counters, composite risk score and band indicators, multi-dimensional filtering (overall status, risk level, bidder name text search), sorting by risk/name/status, sticky left column for wide displays, and CVC / GFR 2017 compliant legend. Builds in 3.24s. |
 | **Automated Tests & Startup Verification** | ✅ Completed (100%) | 338 pytest unit, auth, tender, bidder, ingest, PDF, OCR, job pipeline, classifier, extraction, normalization, validation, entity resolution, registry, cross-document verification, tender extraction, compliance rules, risk scoring, document anomaly, cross-bidder graph, evidence model, connected pipeline runner, full pipeline integration, cryptographic audit hash-chain, human-in-the-loop review, procurement RAG, procurement copilot, page image streaming, and CVC dossier report tests passing, `scripts/verify_structure.py` passing with 0 warnings. |
 | **Project Automation Tooling** | ✅ Completed (100%) | Single-command deployment (`docker compose up --build`), `Makefile`, and `scripts/dev.ps1`. |
 | **Synthetic Demo Dataset (`seed/`)** | 🔄 Ready for Generation | `template_tender.json` created; 4+1 generator script pending Phase 26. |
 
-**Current Repo Baseline:** The frontend application features an end-to-end document upload and forensic pipeline stepper experience connected directly to live backend jobs. Users can upload multi-file PDFs or compressed ZIP packages with drag-and-drop validation, monitor 11-step processing status in real time with auto-polling, inspect per-step durations and error states, trigger retries on failure, and re-classify ingested documents with automatic pipeline re-triggering. All 338 backend tests and frontend Vite production builds pass with zero errors.
+**Current Repo Baseline:** The frontend application features an operational Bidder Compliance Matrix (Screen S3) rendering real bidder rows × criteria columns comparative heatmaps directly from the backend database. Users can inspect status breakdown KPI counters, filter by qualification status or risk bands, search vendors, sort by composite risk or legal names, and click directly into granular finding cockpits. All 338 backend tests and frontend Vite production builds pass with zero errors.
 
 ---
 
@@ -224,8 +225,8 @@ In public procurement under GFR 2017 and CVC guidelines, procurement officers ma
 
 ## 8. Next Recommended Step
  
-**Execute Phase 33 (Synthetic Demo Dataset & Dossier Generation):**
+**Execute Phase 34 (Synthetic Demo Dataset & Dossier Generation):**
 1. Generate complete 4+1 demo bidder dataset (`B1` clean MSE, `B2` minor turnover gap, `B3` hard PAN-GSTIN mismatch, `B4` shell company / cross-bidder collusion, `B5` control).
 2. Validate end-to-end processing across all 5 bidders with live PDF dossiers.
-3. Prepare for Phase 33 demo flow alignment.
+3. Prepare for Phase 34 demo flow alignment.
 

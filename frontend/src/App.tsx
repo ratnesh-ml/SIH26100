@@ -8,6 +8,7 @@ import { BidderListView } from './components/BidderListView';
 import { BidderDetailView } from './components/BidderDetailView';
 import { UploadModal } from './components/UploadModal';
 import { PipelineStepperView } from './components/PipelineStepperView';
+import { ComplianceMatrixView } from './components/ComplianceMatrixView';
 import { BidderSummary, TenderDetail, TenderSummary, UploadPackageResponse, User } from './types';
 
 export default function App() {
@@ -16,7 +17,7 @@ export default function App() {
   const [initialLoading, setInitialLoading] = useState(true);
 
   // Navigation & View State
-  const [activeView, setActiveView] = useState<'tenders' | 'bidders' | 'bidder-detail' | 'pipeline'>('tenders');
+  const [activeView, setActiveView] = useState<'tenders' | 'matrix' | 'bidders' | 'bidder-detail' | 'pipeline'>('tenders');
   const [selectedTender, setSelectedTender] = useState<TenderSummary | null>(null);
   const [selectedBidderId, setSelectedBidderId] = useState<string | null>(null);
   const [activeJobId, setActiveJobId] = useState<string | null>(null);
@@ -102,7 +103,7 @@ export default function App() {
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-sky-500/20 selection:text-sky-300">
       <Navbar
         currentUser={currentUser}
-        activeView={activeView === 'pipeline' ? 'bidders' : activeView}
+        activeView={activeView}
         onNavigate={(view) => {
           if (view === 'bidders') {
             setSelectedTender(null);
@@ -128,7 +129,24 @@ export default function App() {
                 key={tenderListKey}
                 currentUser={currentUser}
                 onSelectTender={handleSelectTender}
+                onViewMatrix={(t) => {
+                  setSelectedTender(t);
+                  setActiveView('matrix');
+                }}
                 onOpenCreateModal={() => setIsCreateModalOpen(true)}
+              />
+            )}
+
+            {activeView === 'matrix' && selectedTender && (
+              <ComplianceMatrixView
+                tender={selectedTender}
+                onBack={() => setActiveView('tenders')}
+                onSelectBidder={(bId) => {
+                  setSelectedBidderId(bId);
+                  setActiveView('bidder-detail');
+                }}
+                onOpenUploadModal={() => handleOpenUploadForTender(selectedTender.id)}
+                canUpload={currentUser.role === 'officer' || currentUser.role === 'admin'}
               />
             )}
 
@@ -140,6 +158,7 @@ export default function App() {
                   setActiveView('tenders');
                 }}
                 onSelectBidder={handleSelectBidder}
+                onViewMatrix={selectedTender ? () => setActiveView('matrix') : undefined}
                 onOpenUploadModal={selectedTender ? () => handleOpenUploadForTender(selectedTender.id) : undefined}
                 canUpload={currentUser.role === 'officer' || currentUser.role === 'admin'}
               />

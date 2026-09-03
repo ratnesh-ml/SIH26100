@@ -68,6 +68,28 @@ export interface TenderDetail extends TenderSummary {
   created_by?: string;
 }
 
+export interface MatrixCell {
+  criterion_id: string;
+  status: FindingStatus;
+  finding_id?: string | null;
+}
+
+export interface BidderMatrixRow {
+  id: string;
+  name: string;
+  status: FindingStatus;
+  risk_score: number;
+  risk_band?: 'LOW' | 'MEDIUM' | 'HIGH';
+  cells: MatrixCell[];
+}
+
+export interface ComplianceMatrix {
+  tender_id: string;
+  criteria: CriterionOut[];
+  bidders: BidderMatrixRow[];
+}
+
+
 export interface BidderSummary {
   id: string;
   tender_id?: string;
