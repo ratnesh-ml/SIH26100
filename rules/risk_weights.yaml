@@ -1,0 +1,31 @@
+version: "1.0"
+description: "Transparent risk weight point allocations for VigilBid evaluation"
+
+weights:
+  identity_mismatch:
+    pan_gstin_mismatch: 35
+    unverified_debarment: 40
+    fuzzy_name_low_confidence: 20
+  financial_deficiency:
+    turnover_below_threshold: 25
+    negative_net_worth: 25
+    missing_ca_udin: 15
+  regulatory_non_compliance:
+    missing_land_border_decl: 30
+    insufficient_local_content: 25
+    missing_integrity_pact: 20
+  forensic_anomalies:
+    metadata_author_collision: 20
+    suspicious_incremental_xref: 15
+    prompt_injection_signal: 30
+
+bands:
+  low:
+    min: 0
+    max: 30
+  medium:
+    min: 31
+    max: 60
+  high:
+    min: 61
+    max: 100

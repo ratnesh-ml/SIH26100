@@ -1,0 +1,92 @@
+version: "1.0"
+template_name: "cpcl_goods_v1"
+description: "Chennai Petroleum Corporation Limited Goods Tender Eligibility & Technical Compliance Rules"
+
+rules:
+  # 1. Identity & Registration
+  - id: "R-ID-01"
+    category: "Identity"
+    title: "GSTIN Checksum & Format Validation"
+    clause: "GFR 2017 Rule 144 / GST Act Sec 22"
+    severity: "FAIL"
+    description: "Validates 15-character GSTIN structure and mod-36 checksum."
+
+  - id: "R-ID-02"
+    category: "Identity"
+    title: "PAN Card Parity with GSTIN"
+    clause: "Income Tax Act 1961 Sec 139A / GST Rules"
+    severity: "FAIL"
+    description: "Ensures PAN embedded in characters 3-12 of GSTIN matches declared PAN card."
+
+  - id: "R-ID-03"
+    category: "Identity"
+    title: "Udyam Registration Active Verification"
+    clause: "MSMED Act 2006 Sec 7 / Gazette Notification S.O. 2119(E)"
+    severity: "WARN"
+    description: "Checks active status of Udyam registration for MSE exemption claims."
+
+  # 2. Financial Standing
+  - id: "R-FIN-01"
+    category: "Financial"
+    title: "Average Annual Turnover Threshold"
+    clause: "CPCL BEC Clause 3.1"
+    severity: "FAIL"
+    description: "Calculates average 3-year turnover against tender estimated value requirement (30%)."
+
+  - id: "R-FIN-02"
+    category: "Financial"
+    title: "Net Worth Positive Requirement"
+    clause: "CPCL BEC Clause 3.2"
+    severity: "FAIL"
+    description: "Ensures net worth in latest audited balance sheet is positive."
+
+  - id: "R-FIN-03"
+    category: "Financial"
+    title: "ICAI UDIN Validation"
+    clause: "ICAI Council Mandate 2019"
+    severity: "WARN"
+    description: "Verifies 18-digit Unique Document Identification Number on CA turnover certificate."
+
+  # 3. Regulatory Declarations
+  - id: "R-REG-01"
+    category: "Regulatory"
+    title: "Make in India (PPP-MII) Local Content Declaration"
+    clause: "DPIIT Order P-45021/2/2017-PP (BE-II)"
+    severity: "FAIL"
+    description: "Verifies minimum local content percentage (>=50% for Class-I, >=20% for Class-II)."
+
+  - id: "R-REG-02"
+    category: "Regulatory"
+    title: "Land Border Sharing Rule 144(xi) Declaration"
+    clause: "DoE OM F.No.6/18/2019-PPD"
+    severity: "FAIL"
+    description: "Ensures mandatory signed certificate regarding land border restrictions is present."
+
+  - id: "R-REG-03"
+    category: "Regulatory"
+    title: "CPPP / GeM Debarment Check"
+    clause: "GFR 2017 Rule 151 / CVC Guidelines"
+    severity: "FAIL"
+    description: "Verifies entity and directors are not blacklisted or debarred on Central Public Procurement Portal."
+
+  # 4. Technical & Commercial
+  - id: "R-TEC-01"
+    category: "Technical"
+    title: "OEM Manufacturer Authorization"
+    clause: "CPCL BEC Clause 4.1"
+    severity: "FAIL"
+    description: "Validates authorized dealership / distributorship letter from original manufacturer."
+
+  - id: "R-TEC-02"
+    category: "Technical"
+    title: "Past Performance & Similar Work Orders"
+    clause: "CPCL BEC Clause 4.2"
+    severity: "REVIEW"
+    description: "Evaluates completion certificates against single/two order threshold requirements."
+
+  - id: "R-COM-01"
+    category: "Commercial"
+    title: "Earnest Money Deposit (EMD) Proof or MSE Exemption"
+    clause: "GFR 2017 Rule 170"
+    severity: "FAIL"
+    description: "Confirms valid BG/DD transaction receipt or valid MSE/Udyam exemption certificate."

@@ -1,0 +1,79 @@
+{
+  "nit_no": "CPCL/PROC/2026/G-8821",
+  "title": "Supply, Installation & Commissioning of High-Pressure Centrifugal Pumps for CPCL Manali Refinery",
+  "portal": "GeM",
+  "estimated_value": 45000000.00,
+  "bid_due_date": "2026-10-15",
+  "mse_applicable": true,
+  "mii_class_required": "Class-I",
+  "requires_oem": true,
+  "template": "cpcl_goods_v1",
+  "criteria": [
+    {
+      "code": "C-01",
+      "title": "GST & Legal Identity",
+      "description": "Valid GSTIN registration and PAN card parity",
+      "required_doc_types": ["GST_CERT", "PAN_CARD"],
+      "rule_ids": ["R-ID-01", "R-ID-02"],
+      "sort_order": 1
+    },
+    {
+      "code": "C-02",
+      "title": "Average Annual Turnover",
+      "description": "Minimum average annual turnover of Rs. 13.5 Crores (30% of estimated value) in last 3 FYs",
+      "threshold": {
+        "min_turnover_inr": 13500000.00,
+        "years": 3
+      },
+      "required_doc_types": ["CA_TURNOVER_CERT", "AUDITED_FINANCIALS"],
+      "rule_ids": ["R-FIN-01", "R-FIN-03"],
+      "sort_order": 2
+    },
+    {
+      "code": "C-03",
+      "title": "Net Worth Solvency",
+      "description": "Positive net worth as per audited balance sheet of immediately preceding FY",
+      "required_doc_types": ["AUDITED_FINANCIALS"],
+      "rule_ids": ["R-FIN-02"],
+      "sort_order": 3
+    },
+    {
+      "code": "C-04",
+      "title": "Make in India (PPP-MII) Local Content",
+      "description": "Class-I local supplier declaration with >= 50% local value addition",
+      "threshold": {
+        "min_percentage": 50.0
+      },
+      "required_doc_types": ["MII_DECLARATION"],
+      "rule_ids": ["R-REG-01"],
+      "sort_order": 4
+    },
+    {
+      "code": "C-05",
+      "title": "Land Border Sharing Rule 144(xi)",
+      "description": "Mandatory compliance certificate regarding beneficial ownership from countries sharing land border",
+      "required_doc_types": ["LAND_BORDER_DECL"],
+      "rule_ids": ["R-REG-02"],
+      "sort_order": 5
+    },
+    {
+      "code": "C-06",
+      "title": "OEM Manufacturer Authorization",
+      "description": "Tender-specific authorization letter from OEM pump manufacturer",
+      "required_doc_types": ["OEM_AUTH"],
+      "rule_ids": ["R-TEC-01"],
+      "sort_order": 6
+    },
+    {
+      "code": "C-07",
+      "title": "Earnest Money Deposit (EMD)",
+      "description": "EMD submission of Rs. 9,00,000 or valid MSE Udyam exemption certificate",
+      "threshold": {
+        "emd_amount_inr": 900000.00
+      },
+      "required_doc_types": ["EMD_PROOF", "UDYAM_CERT"],
+      "rule_ids": ["R-COM-01", "R-ID-03"],
+      "sort_order": 7
+    }
+  ]
+}

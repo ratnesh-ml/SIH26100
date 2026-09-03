@@ -1,48 +1,94 @@
-# VigilBid — SIH26100 Research-to-Execution Blueprint
+# VigilBid — AI-Powered GeM Tender Evaluation Platform (SIH26100)
 
-**Problem Statement:** SIH26100 — AI-Powered Integrated Bid Compliance Verification Platform for GeM Procurement
-**Organisation:** Chennai Petroleum Corporation Limited (CPCL) · Ministry of Petroleum & Natural Gas
+**Problem Statement:** SIH26100 — AI-Powered Integrated Bid Compliance Verification Platform for GeM Procurement  
+**Target Organization:** Chennai Petroleum Corporation Limited (CPCL) · IndianOil Group · Ministry of Petroleum & Natural Gas  
 
-This repository is the **single source of truth** for a 3-person SIH Grand Finale team. It converts the raw research dump (`research/`) into a critically audited, executable 36-hour engineering plan (`docs/`), and ships a browsable viewer (`index.html`).
+VigilBid is a buyer-side, human-in-the-loop decision-support platform that automates two-bid tender evaluation under GFR 2017 and CVC guidelines. It ingests bidder document packages (ZIP of PDFs), performs hybrid AI extraction and deterministic compliance rule verification, calculates explainable risk scores, and produces tamper-evident SHA-256 hash-chained compliance dossiers.
 
-> No product code is written yet — by design. The brief was: *understand → decompose → specify → divide → then build.*
+---
 
-## Currently completed
-- ✅ Research dump archived (`research/sih26100-research-dump.txt`)
-- ✅ **00 Research Audit** — every major recommendation classified (Research-backed / Official requirement / Engineering decision / MVP decision / Future feature / Assumption / Legal flag), contradictions listed, hallucination risks flagged
-- ✅ **01–04** Understanding, decomposition, functional + non-functional requirements, final layered architecture
-- ✅ **05–10** AI-vs-rules matrix, Document AI pipeline & OCR decision, RAG verdict (optional, retrieval-first), Entity-Resolution algorithm & weights, 34-rule Compliance Engine, Risk/Anomaly engine with legal vocabulary rule
-- ✅ **11–14** 8 MVP screens, backend module layout & job state machine, PostgreSQL schema (17 tables), 24 REST endpoints
-- ✅ **15–20** Synthetic demo dataset (1 tender, 4+1 bidders), mock government-API strategy, security (incl. indirect prompt injection), DevOps, MVP cut line, 3-person team architecture with cross-ownership
-- ✅ **21–25** Dependency graph / critical path, hour-by-hour 36-h plan, per-person checklists with DoD, skill-gap analysis, Git & project management
-- ✅ **26–32** 6.5-min demo script, "one screen that wins" spec, 32 judge attack questions, claim-defense table, final tech lock, final technical specification, winning strategy
-- ✅ **Build Status & Transition Baseline** (`docs/BUILD-STATUS.md`) — current implementation status, architecture, known risks, unresolved decisions, and next steps
-- ✅ Web viewer with TOC (`index.html`, `css/style.css`, `js/main.js`)
+## 1. Repository Architecture
 
-## Entry points
-| Path | Purpose |
-|---|---|
-| `docs/BUILD-STATUS.md` | **Read this for current status & handover** — implementation status, architecture baseline, next steps |
-| `index.html` | Browsable blueprint (loads all `docs/*.md`, builds TOC, deep-linkable `#section` anchors) |
-| `docs/00-research-audit.md` | Read this first for research verification — what in the research is trustworthy |
-| `docs/01-…` → `docs/06-…` | Sections 01–32 in order |
-| `research/sih26100-research-dump.txt` | Original research input (unchanged) |
+```
+SIH26100/
+├── backend/          # FastAPI ASGI application, DB models (17 tables), schemas, auth, and worker
+├── pipeline/         # 11-step document processing, OCR, extraction, compliance, risk, and reports
+├── rules/            # Declarative YAML rule definitions (34 CPCL Goods rules) and risk weights
+├── seed/             # Synthetic tender templates, 4+1 bidder datasets, and mock registry fixtures
+├── frontend/         # Vite + React 18 + TypeScript SPA (8 MVP screens S1–S8)
+├── tests/            # Automated test suite (unit, integration, and architecture contracts)
+├── docs/             # Technical specifications, architecture locks, and build status logs
+├── scripts/          # Ops scripts, Windows PowerShell helper (dev.ps1), and structure validators
+└── data/             # Content-addressable document storage (data/storage/) and fixtures
+```
 
-## Key decisions (summary)
-- **Decision support, never adjudication:** statuses are PASS/WARN/REVIEW/FAIL; bidder label is "Recommended: Not Qualified — officer confirmation required". No "fraud/forged/fake" wording anywhere.
-- **Rules where the law is clear, AI where documents are messy:** OCR, classification, fuzzy matching, retrieval = AI. Checksums, cross-document identity, thresholds, risk aggregation, audit hashing = deterministic.
-- **Cut from MVP:** LayoutLMv3/Donut/VLM, GNN collusion model, SigNet, blockchain, Celery/Redis/MinIO/Keycloak/K8s, live government APIs, multilingual OCR.
-- **Kept & de-risked:** PyMuPDF text-layer → PaddleOCR → Tesseract; TF-IDF classifier; rapidfuzz entity resolution; YAML rule engine with clause citations; PDF anomaly signals; cross-bidder attribute graph; hash-chained audit; WeasyPrint dossier; mock `RegistryProvider` with honest "simulated" badge.
+See [docs/REPOSITORY-STRUCTURE.md](docs/REPOSITORY-STRUCTURE.md) for full folder and module descriptions.
 
-## Not yet implemented
-- The product itself (backend, pipeline, frontend) — starts at Hackathon Hour 0 per `docs/05-…` §22
-- Verification of external figures marked ⚠️ in the audit (CAG PDF, arXiv IDs, GFR rule numbers) — assigned as pre-finale homework
+---
 
-## Recommended next steps
-1. All three members read `docs/00` and `docs/06 §31–32` (spec + strategy) — 30 min.
-2. Each member reads their own checklist in `docs/05 §23` and the skill-gap row in §24; do the pre-hackathon homework.
-3. Hour 0: freeze OpenAPI from `docs/03 §14`, agree evidence bbox convention, scaffold the monorepo (`backend/`, `frontend/`, `infra/`, `seed/`).
-4. Verify every ⚠️ claim before the pitch; delete anything that can't be sourced.
+## 2. Quickstart & Local Development
 
-## Data / storage
-This site is static documentation; no tables or persistent storage are used. The future product's PostgreSQL schema is specified in `docs/03 §13`.
+### Prerequisites
+- Python 3.11 or 3.12
+- Node.js 18+ and npm 10+
+- PostgreSQL 16 (or local Docker container)
+
+### Step 1: Environment Configuration
+Copy the template configuration file:
+```bash
+cp .env.example .env
+```
+
+### Step 2: Run Verification Checks
+Validate directory structure, package scaffolding, and module importability:
+```bash
+# Cross-platform / POSIX:
+python scripts/verify_structure.py
+
+# Or via Makefile:
+make verify
+
+# Or on Windows PowerShell:
+.\scripts\dev.ps1 verify
+```
+
+### Step 3: Run Automated Tests
+```bash
+pytest tests/ -v
+# or: make test
+```
+
+### Step 4: Run Development Servers
+
+**Backend (FastAPI):**
+```bash
+uvicorn backend.main:app --reload --port 8000
+# API docs available at: http://localhost:8000/api/v1/docs
+```
+
+**Frontend (Vite + React):**
+```bash
+cd frontend
+npm install
+npm run dev
+# App available at: http://localhost:5173
+```
+
+---
+
+## 3. Key Architectural Principles
+
+1. **Decision Support, Never Adjudication**: System outputs traffic-light statuses (`PASS`, `WARN`, `REVIEW`, `FAIL`) and `"Recommended: Not Qualified — officer confirmation required"`. The platform never autonomously disqualifies or accuses any bidder.
+2. **Strict Legal Vocabulary Ban**: The words "fraud", "fake", "forged", and "tampered" are strictly prohibited in all user-facing UI, generated PDFs, and audit trails. Anomaly signals are described neutrally as `"Potential anomaly detected — human verification required"`.
+3. **Hybrid AI + Deterministic Separation**: AI is utilized strictly where inputs are noisy and unstructured (PDF text extraction, scan OCR, fuzzy entity matching, and semantic search). Deterministic code strictly governs anything with legal weight (tax checksums, GFR/CVC rule evaluation, risk score aggregation, and SHA-256 audit chaining).
+4. **Air-Gap Readiness**: Verification interfaces (`RegistryProvider`) operate with local synthetic fixtures (`seed/mock_fixtures`) to ensure zero failure risk during network-isolated live pitches.
+
+---
+
+## 4. Documentation Index
+
+- [docs/BUILD-STATUS.md](docs/BUILD-STATUS.md): Current build status, completed phases, and transition backlog.
+- [docs/ARCHITECTURE-LOCK.md](docs/ARCHITECTURE-LOCK.md): Immutable architectural specifications and MVP scope cut-line.
+- [docs/INTERFACE-CONTRACTS.md](docs/INTERFACE-CONTRACTS.md): 24 REST API endpoint contracts, 11-step pipeline signatures, and audit event format.
+- [docs/REPOSITORY-STRUCTURE.md](docs/REPOSITORY-STRUCTURE.md): Detailed module directory documentation.
+- [index.html](index.html): Interactive browser-based viewer for blueprint documents.
