@@ -1,31 +1,60 @@
 version: "1.0"
-description: "Transparent risk weight point allocations for VigilBid evaluation"
+description: "Transparent risk weight point allocations and anomaly signal definitions for VigilBid evaluation"
 
 weights:
-  identity_mismatch:
-    pan_gstin_mismatch: 35
-    unverified_debarment: 40
-    fuzzy_name_low_confidence: 20
-  financial_deficiency:
-    turnover_below_threshold: 25
-    negative_net_worth: 25
-    missing_ca_udin: 15
-  regulatory_non_compliance:
-    missing_land_border_decl: 30
-    insufficient_local_content: 25
-    missing_integrity_pact: 20
+  compliance_findings:
+    hard_fail: 25        # Cap 50 points
+    hard_fail_cap: 50
+    review_finding: 8    # Cap 24 points
+    review_finding_cap: 24
+    warn_finding: 3      # Cap 12 points
+    warn_finding_cap: 12
+
+  entity_resolution:
+    low_confidence_below_60: 20
+    moderate_confidence_60_to_85: 10
+
+  identity_and_verification:
+    pan_gstin_mismatch: 25
+    government_registry_failure: 25
+    medium_claiming_mse_exemption: 20
+    unverified_debarment_match: 35
+
+  documentation_and_dates:
+    missing_mandatory_document: 10
+    expired_certificate_on_due_date: 15
+    oem_validity_expired: 15
+
+  cross_document_contradictions:
+    udyam_gstin_identifier_conflict: 20
+    turnover_statement_inconsistency: 15
+
   forensic_anomalies:
-    metadata_author_collision: 20
-    suspicious_incremental_xref: 15
-    prompt_injection_signal: 30
+    A_PDF_01_metadata_date_anomaly: 6
+    A_PDF_02_incremental_updates_xref: 8
+    A_PDF_03_producer_mismatch_image_editor: 6
+    A_PDF_04_text_layer_ocr_mismatch: 12
+    A_PDF_05_font_subset_mismatch: 5
+    A_INJ_01_prompt_injection_signal: 20
+
+  cross_bidder_collusion:
+    A_XB_01_shared_pdf_metadata: 10
+    A_XB_02_shared_contact_bank_director: 15
+    A_XB_03_near_duplicate_text: 10
 
 bands:
   low:
     min: 0
-    max: 30
+    max: 24
+    label: "LOW"
+    description: "Standard risk profile — standard verification routine"
   medium:
-    min: 31
-    max: 60
+    min: 25
+    max: 54
+    label: "MEDIUM"
+    description: "Elevated risk signals — officer verification required on flagged drivers"
   high:
-    min: 61
+    min: 55
     max: 100
+    label: "HIGH"
+    description: "Substantial risk signals — thorough human review required before qualification"
