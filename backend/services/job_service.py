@@ -12,6 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.models.entities import Bidder, Document, DocumentPage, Job
 from backend.schemas.job import JobState, StepStatus
+from pipeline.document_processing.classifier import RuleBasedDocumentClassifier
 from pipeline.ocr.factory import get_ocr_provider
 from pipeline.ocr.interface import OCRProvider
 from pipeline.pdf.processor import PDFProcessor
@@ -39,6 +40,7 @@ class JobService:
     def __init__(self, ocr_provider: Optional[OCRProvider] = None):
         self.ocr_provider = ocr_provider or get_ocr_provider()
         self.pdf_processor = PDFProcessor()
+        self.classifier = RuleBasedDocumentClassifier()
 
     async def create_job(
         self,
@@ -247,23 +249,36 @@ class JobService:
                     result=process_result,
                 )
 
+                # Run classification on extracted pages
+                pages_text = [p.text for p in process_result.pages if p.text]
+                class_res = self.classifier.classify_document(
+                    filename=doc.original_filename,
+                    pages_text=pages_text,
+                )
+                doc.doc_type = class_res.doc_type.value
+
                 # Update document text_source and average confidence
                 avg_conf = (total_conf / len(process_result.pages)) if process_result.pages else 1.0
                 doc.text_source = "ocr" if has_ocr_pages else "text_layer"
                 doc.ocr_conf = round(avg_conf, 3)
 
-            # Mark step 3 and overall Job as DONE
+            # Mark Step 2 (Classification) and Step 3 (OCR) as DONE
+            now_iso = datetime.now(timezone.utc).isoformat()
             for s in current_steps:
-                if s.get("step_number") == 3:
+                if s.get("step_number") == 2:
                     s["status"] = "DONE"
-                    s["ended_at"] = datetime.now(timezone.utc).isoformat()
+                    s["ended_at"] = now_iso
+                elif s.get("step_number") == 3:
+                    s["status"] = "DONE"
+                    s["ended_at"] = now_iso
             job.steps = current_steps
+            job.current_step = 3
             job.status = JobState.DONE.value
             job.ended_at = datetime.now(timezone.utc)
             await session.commit()
             if hasattr(session, "refresh"):
                 await session.refresh(job)
-            logger.info("Job %s successfully completed OCR processing", job.id)
+            logger.info("Job %s successfully completed Classification and OCR processing", job.id)
             return job
 
         except Exception as exc:
