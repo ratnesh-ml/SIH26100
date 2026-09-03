@@ -97,7 +97,7 @@ def test_alembic_migration_and_user_seeding():
             users = session.query(User).all()
             assert len(users) == 4
             roles = {u.role for u in users}
-            assert roles == {"officer", "approver", "auditor", "admin"}
+            assert roles == {"officer", "evaluator", "vigilance", "admin"}
 
             # Verify password hashing
             for dev_user in DEV_USERS:

@@ -33,7 +33,7 @@ class User(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     __tablename__ = "users"
     __table_args__ = (
         CheckConstraint(
-            "role IN ('officer', 'approver', 'auditor', 'admin')",
+            "role IN ('officer', 'evaluator', 'approver', 'vigilance', 'auditor', 'admin')",
             name="check_user_role",
         ),
     )
