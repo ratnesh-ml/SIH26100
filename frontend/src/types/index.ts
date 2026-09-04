@@ -352,5 +352,47 @@ export interface DashboardMetricsOut {
   processing_performance: ProcessingPerformance;
 }
 
+export interface CopilotCitation {
+  source: string;
+  clause: string;
+  content: string;
+  score: number;
+  page_no?: number;
+  domain?: string;
+  exact_quote?: string;
+  document_name?: string;
+  url?: string;
+}
 
+export interface CopilotQueryRequest {
+  question: string;
+  tender_id?: string;
+  bidder_id?: string;
+  domains?: string[];
+  top_k?: number;
+}
 
+export interface CopilotQueryResponse {
+  answer: string;
+  citations: CopilotCitation[];
+  domains_searched: string[];
+  used_llm: boolean;
+  confidence: number;
+  grounding_status: string;
+  facts: string[];
+  explanations: string[];
+  injection_detected: boolean;
+  is_conclusive: boolean;
+  category: string;
+}
+
+export interface RAGDomainInfo {
+  domain: string;
+  description: string;
+  total_chunks: number;
+}
+
+export interface RAGKnowledgeBaseStatus {
+  total_chunks: number;
+  domains: RAGDomainInfo[];
+}

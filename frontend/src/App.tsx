@@ -14,6 +14,8 @@ import { CrossBidderGraphView } from './components/CrossBidderGraphView';
 import { AuditTrailView } from './components/AuditTrailView';
 import { DashboardView } from './components/DashboardView';
 import { DemoView } from './components/DemoView';
+import { Sparkles } from 'lucide-react';
+import { CopilotDrawer } from './components/CopilotDrawer';
 import { BidderSummary, TenderDetail, TenderSummary, UploadPackageResponse, User } from './types';
 
 export default function App() {
@@ -45,6 +47,7 @@ export default function App() {
   const [uploadTenderId, setUploadTenderId] = useState<string | undefined>(undefined);
   const [uploadBidderId, setUploadBidderId] = useState<string | undefined>(undefined);
   const [tenderListKey, setTenderListKey] = useState(0);
+  const [isCopilotOpen, setIsCopilotOpen] = useState(false);
 
   useEffect(() => {
     // 1. Health Probe
@@ -127,7 +130,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-sky-500/20 selection:text-sky-300">
+    <div className="min-h-screen bg-[#f5f5f7] text-[#1d1d1f] flex flex-col font-sans selection:bg-[#0066cc]/20 selection:text-[#0066cc]">
       <Navbar
         currentUser={currentUser}
         activeView={activeView}
@@ -141,7 +144,7 @@ export default function App() {
         healthStatus={healthStatus}
       />
 
-      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
+      <main className="flex-1 max-w-[1440px] w-full mx-auto p-4 sm:p-6 lg:p-8">
         {initialLoading ? (
           <div className="min-h-[60vh] flex flex-col items-center justify-center gap-3">
             <div className="w-8 h-8 rounded-full border-2 border-sky-400 border-t-transparent animate-spin" />
@@ -298,16 +301,41 @@ export default function App() {
         onUploadComplete={handleUploadComplete}
       />
 
-      <footer className="border-t border-slate-800/80 px-6 py-3.5 text-xs text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-2 bg-slate-950">
-        <div>
-          <span className="font-semibold text-slate-400">VigilBid</span> • Public Procurement Decision Support System (Problem SIH26100)
+      {/* Floating AI Copilot Trigger (Stitch Screen 09) */}
+      <button
+        onClick={() => setIsCopilotOpen(true)}
+        className="fixed bottom-6 right-6 z-40 bg-[#0066cc] hover:bg-[#0071e3] text-white px-4 py-2.5 rounded-full shadow-lg flex items-center gap-2 transition-all hover:scale-105 active:scale-95 cursor-pointer"
+        title="Open Procurement AI Copilot & Regulatory Assistant"
+      >
+        <Sparkles className="w-4 h-4" />
+        <span className="text-xs font-semibold">AI Copilot</span>
+      </button>
+
+      <CopilotDrawer
+        isOpen={isCopilotOpen}
+        onClose={() => setIsCopilotOpen(false)}
+        currentUser={currentUser}
+        tenderId={selectedTender?.id}
+        bidderId={selectedBidderId || undefined}
+      />
+
+      <footer className="border-t border-[#e0e0e0] px-8 py-5 text-xs text-[#7a7a7a] flex flex-col sm:flex-row items-center justify-between gap-3 bg-[#f5f5f7]">
+        <div className="flex items-center gap-2">
+          <span className="font-semibold text-[#1d1d1f]">VigilBid</span>
+          <span>•</span>
+          <span>Chennai Petroleum Corporation Limited (CPCL / IndianOil & MoPNG)</span>
+          <span className="px-1.5 py-0.5 rounded-full bg-white border border-[#e0e0e0] text-[10px] font-mono text-[#1d1d1f]">
+            SIH26100
+          </span>
         </div>
-        <div className="flex items-center gap-4 text-[11px]">
-          <span>GFR 2017 & CVC 2021 Compliant</span>
+        <div className="flex items-center gap-4 text-[11px] text-[#7a7a7a]">
+          <span>GFR 2017 Rule 144(xi)</span>
           <span>•</span>
-          <span>CPCL / MoPNG</span>
+          <span>PPP-MII Order 2017</span>
           <span>•</span>
-          <span>v1.0.0</span>
+          <span>CVC 2021 Compliant</span>
+          <span>•</span>
+          <span className="font-mono">v2.34.0</span>
         </div>
       </footer>
     </div>

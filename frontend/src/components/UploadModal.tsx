@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { UploadCloud, File, Trash2, ShieldCheck } from 'lucide-react';
 import { uploadBidderPackage, uploadDocuments } from '../api/client';
 import { UploadPackageResponse } from '../types';
-import { Modal, Button, ErrorState } from './ui';
+import { Modal, ErrorState } from './ui';
 
 interface UploadModalProps {
   isOpen: boolean;
@@ -101,9 +101,9 @@ export const UploadModal: React.FC<UploadModalProps> = ({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={tenderId ? 'Upload Bidder Submission Package' : 'Upload Additional Statutory Filings'}
+      title={tenderId ? 'Secure Bidder Ingestion Portal' : 'Upload Additional Statutory Filings'}
       description="Safe CAS ingestion with SHA-256 deduplication and zip-bomb decompression limits."
-      icon={<UploadCloud className="w-5 h-5" />}
+      icon={<UploadCloud className="w-5 h-5 text-[#0066cc]" />}
       maxWidth="lg"
     >
       {error && (
@@ -117,8 +117,8 @@ export const UploadModal: React.FC<UploadModalProps> = ({
       <form onSubmit={handleSubmit} className="space-y-4 text-xs">
         {tenderId && (
           <div>
-            <label htmlFor="declared-name-input" className="block font-semibold text-slate-200 mb-1">
-              Declared Bidder Legal Name <span className="text-rose-400">*</span>
+            <label htmlFor="declared-name-input" className="block font-semibold text-[#1d1d1f] mb-1">
+              Declared Bidder Legal Name <span className="text-[#ba1a1a]">*</span>
             </label>
             <input
               id="declared-name-input"
@@ -127,14 +127,14 @@ export const UploadModal: React.FC<UploadModalProps> = ({
               value={declaredName}
               onChange={(e) => setDeclaredName(e.target.value)}
               placeholder="e.g. Apex Industrial Solutions Private Limited"
-              className="w-full bg-slate-950 border border-slate-700/80 rounded-lg px-3 py-2 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-sky-500 transition-colors"
+              className="w-full bg-[#f5f5f7] border border-[#e0e0e0] rounded-xl px-3.5 py-2.5 text-xs text-[#1d1d1f] placeholder-[#7a7a7a] focus:outline-none focus:border-[#0066cc] focus:ring-1 focus:ring-[#0066cc] transition-colors"
             />
           </div>
         )}
 
         <div>
-          <label className="block font-semibold text-slate-200 mb-1">
-            Select PDF Documents or ZIP Package <span className="text-rose-400">*</span>
+          <label className="block font-semibold text-[#1d1d1f] mb-1">
+            Select PDF Documents or ZIP Package <span className="text-[#ba1a1a]">*</span>
           </label>
           <div
             onDrop={handleDrop}
@@ -150,10 +150,10 @@ export const UploadModal: React.FC<UploadModalProps> = ({
             tabIndex={0}
             role="button"
             aria-label="Upload files dropzone. Click to browse or drag and drop files here."
-            className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all outline-none focus-visible:ring-2 focus-visible:ring-sky-400 ${
+            className={`border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-all outline-none ${
               isDragging
-                ? 'border-sky-400 bg-sky-950/30'
-                : 'border-slate-700/80 hover:border-slate-600 bg-slate-950/50'
+                ? 'border-[#0066cc] bg-[#0066cc]/5'
+                : 'border-[#c1c6d6] hover:border-[#0066cc] bg-[#f5f5f7]'
             }`}
           >
             <input
@@ -165,11 +165,13 @@ export const UploadModal: React.FC<UploadModalProps> = ({
               className="hidden"
               tabIndex={-1}
             />
-            <UploadCloud className="w-8 h-8 text-sky-400 mx-auto mb-2" aria-hidden="true" />
-            <p className="text-slate-200 font-semibold text-xs">
+            <div className="w-12 h-12 rounded-full bg-white border border-[#e0e0e0] flex items-center justify-center mx-auto mb-3 shadow-xs">
+              <UploadCloud className="w-6 h-6 text-[#0066cc]" aria-hidden="true" />
+            </div>
+            <p className="text-[#1d1d1f] font-semibold text-xs">
               Click to browse or drag & drop files here
             </p>
-            <p className="text-slate-400 text-[11px] mt-1">
+            <p className="text-[#7a7a7a] text-[11px] mt-1">
               Supports individual statutory PDF certificates or consolidated bidder ZIP archives
             </p>
           </div>
@@ -177,12 +179,12 @@ export const UploadModal: React.FC<UploadModalProps> = ({
 
         {selectedFiles.length > 0 && (
           <div className="space-y-1.5 max-h-44 overflow-y-auto pr-1">
-            <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between">
+            <div className="text-[11px] font-semibold text-[#7a7a7a] uppercase tracking-wider flex items-center justify-between">
               <span>Selected Files ({selectedFiles.length})</span>
               <button
                 type="button"
                 onClick={() => setSelectedFiles([])}
-                className="text-rose-400 hover:text-rose-300 text-[10px] font-normal cursor-pointer"
+                className="text-[#ba1a1a] hover:underline text-[10px] font-medium cursor-pointer"
               >
                 Clear all
               </button>
@@ -190,12 +192,12 @@ export const UploadModal: React.FC<UploadModalProps> = ({
             {selectedFiles.map((file, idx) => (
               <div
                 key={idx}
-                className="flex items-center justify-between p-2 rounded-lg bg-slate-950 border border-slate-800 text-slate-200"
+                className="flex items-center justify-between p-2.5 rounded-xl bg-[#f5f5f7] border border-[#e0e0e0] text-[#1d1d1f]"
               >
                 <div className="flex items-center gap-2 truncate pr-2">
-                  <File className="w-3.5 h-3.5 text-sky-400 shrink-0" aria-hidden="true" />
+                  <File className="w-3.5 h-3.5 text-[#0066cc] shrink-0" aria-hidden="true" />
                   <span className="truncate font-mono text-xs">{file.name}</span>
-                  <span className="text-slate-500 text-[10px] shrink-0 font-mono">
+                  <span className="text-[#7a7a7a] text-[10px] shrink-0 font-mono">
                     ({formatSize(file.size)})
                   </span>
                 </div>
@@ -205,7 +207,7 @@ export const UploadModal: React.FC<UploadModalProps> = ({
                     e.stopPropagation();
                     removeFile(idx);
                   }}
-                  className="text-slate-400 hover:text-rose-400 p-1 rounded transition-colors cursor-pointer"
+                  className="text-[#7a7a7a] hover:text-[#ba1a1a] p-1 rounded transition-colors cursor-pointer"
                   title="Remove file"
                   aria-label={`Remove file ${file.name}`}
                 >
@@ -217,30 +219,29 @@ export const UploadModal: React.FC<UploadModalProps> = ({
         )}
 
         {/* Security / Verification Badge */}
-        <div className="p-2.5 rounded-lg bg-sky-950/20 border border-sky-900/40 text-[11px] text-slate-400 flex items-center gap-2">
-          <ShieldCheck className="w-4 h-4 text-sky-400 shrink-0" />
+        <div className="p-3 rounded-xl bg-[#f5f5f7] border border-[#e0e0e0] text-xs text-[#515154] flex items-center gap-2">
+          <ShieldCheck className="w-4 h-4 text-[#248a3d] shrink-0" />
           <span>
             Uploaded documents are hashed with SHA-256 and stored immutably in content-addressable storage (CAS).
           </span>
         </div>
 
-        <div className="pt-2 flex items-center justify-end gap-2.5 border-t border-slate-800">
-          <Button
+        <div className="pt-3 flex items-center justify-end gap-2.5 border-t border-[#e0e0e0]">
+          <button
             type="button"
-            variant="ghost"
             onClick={onClose}
+            className="px-4 py-2 rounded-full border border-[#e0e0e0] hover:bg-[#f5f5f7] text-[#515154] font-medium text-xs transition-colors cursor-pointer"
           >
             Cancel
-          </Button>
-          <Button
+          </button>
+          <button
             type="submit"
-            variant="primary"
-            isLoading={uploading}
-            disabled={selectedFiles.length === 0}
-            leftIcon={<UploadCloud className="w-4 h-4" />}
+            disabled={uploading || selectedFiles.length === 0}
+            className="px-5 py-2 rounded-full bg-[#0066cc] hover:bg-[#0071e3] text-white font-medium text-xs flex items-center gap-1.5 transition-colors cursor-pointer shadow-none disabled:opacity-50"
           >
-            Upload & Ingest Package
-          </Button>
+            <UploadCloud className="w-4 h-4" />
+            <span>{uploading ? 'Ingesting Package...' : 'Upload & Ingest Package'}</span>
+          </button>
         </div>
       </form>
     </Modal>

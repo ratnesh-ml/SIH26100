@@ -20,6 +20,9 @@ import {
   DashboardMetricsOut,
   JobStatus,
   User,
+  CopilotQueryRequest,
+  CopilotQueryResponse,
+  RAGKnowledgeBaseStatus,
 } from '../types';
 
 const API_BASE = '/api/v1';
@@ -411,6 +414,17 @@ export async function fetchDocumentPageBlob(docId: string, pageNo = 1, dpi = 150
   }
   const blob = await response.blob();
   return URL.createObjectURL(blob);
+}
+
+export async function queryCopilot(payload: CopilotQueryRequest): Promise<CopilotQueryResponse> {
+  return request<CopilotQueryResponse>(`${API_BASE}/copilot/query`, {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function fetchCopilotKnowledgeDomains(): Promise<RAGKnowledgeBaseStatus> {
+  return request<RAGKnowledgeBaseStatus>(`${API_BASE}/copilot/knowledge-domains`);
 }
 
 

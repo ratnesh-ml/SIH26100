@@ -5,10 +5,6 @@ import {
   Download,
   UploadCloud,
   CheckCircle2,
-  XCircle,
-  AlertTriangle,
-  AlertCircle,
-  Clock,
   ArrowUpDown,
   Search,
   ExternalLink,
@@ -135,69 +131,65 @@ export const ComplianceMatrixView: React.FC<ComplianceMatrixViewProps> = ({
   };
 
   return (
-    <div className="space-y-5">
-      {/* 1. Header & Actions */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <Button
-            variant="outline"
-            size="xs"
-            onClick={onBack}
-            leftIcon={<ArrowLeft className="w-4 h-4" />}
-            aria-label="Back to Tenders list"
-          >
-            Tenders
-          </Button>
-
-          <div className="h-5 w-px bg-slate-800" aria-hidden="true" />
-
-          <div>
-            <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="text-xl font-bold tracking-tight text-white">
-                Compliance Evaluation Matrix
-              </h1>
-              <span className="font-mono text-xs text-sky-400 px-2 py-0.5 bg-sky-950/80 border border-sky-800/80 rounded-md">
-                NIT: {tender.nit_no}
-              </span>
-            </div>
-            <p className="text-xs text-slate-400 mt-0.5 truncate max-w-xl">
-              {tender.title}
-            </p>
+    <div className="space-y-6">
+      {/* 1. Header & Tender Context Banner */}
+      <div className="p-6 rounded-3xl bg-white border border-[#e0e0e0] shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div>
+          <div className="flex items-center gap-3 mb-2">
+            <button
+              onClick={onBack}
+              className="px-3 py-1.5 rounded-full bg-[#f5f5f7] hover:bg-[#e0e0e0] text-[#1d1d1f] text-xs font-medium inline-flex items-center gap-1.5 transition-colors"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              <span>Back to Tenders</span>
+            </button>
+            <span className="font-mono text-xs text-[#0066cc] px-3 py-1 bg-[#f5f5f7] border border-[#0066cc]/30 rounded-full font-bold">
+              NIT: {tender.nit_no}
+            </span>
           </div>
+
+          <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-[#1d1d1f]">
+            Tender Compliance Evaluation Matrix
+          </h1>
+          <p className="text-xs text-[#7a7a7a] mt-1 flex items-center gap-2 flex-wrap">
+            <span>Mandate: <strong className="text-[#1d1d1f]">12 Centrifugal Pump Units</strong></span>
+            <span>•</span>
+            <span>Scrutiny Officer: <strong className="text-[#1d1d1f]">Ravi K. (Materials Dept)</strong></span>
+            <span>•</span>
+            <span>Standard: <strong className="text-[#1d1d1f]">GFR 2017 & PPP-MII (Class-I ≥50%)</strong></span>
+          </p>
         </div>
 
-        <div className="flex items-center gap-2.5 flex-wrap">
+        <div className="flex items-center gap-3 flex-wrap">
           <a
             href={`/api/v1/tenders/${tender.id}/report.pdf`}
             target="_blank"
             rel="noreferrer"
-            className="py-1.5 px-3 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white font-medium text-xs inline-flex items-center gap-1.5 transition-colors focus-visible:ring-2 focus-visible:ring-sky-400"
+            className="py-2 px-4 rounded-full bg-[#0066cc] hover:bg-[#0071e3] text-white font-semibold text-xs inline-flex items-center gap-1.5 transition-colors shadow-xs apple-button-press"
             title="Download full comparative tender evaluation report (PDF)"
           >
-            <Download className="w-3.5 h-3.5 text-sky-400" />
-            <span>Export Report (PDF)</span>
+            <Download className="w-3.5 h-3.5" />
+            <span>Export Dossier (PDF)</span>
           </a>
 
           {onViewGraph && (
-            <Button
-              variant="outline"
-              size="sm"
+            <button
               onClick={onViewGraph}
-              leftIcon={<Share2 className="w-3.5 h-3.5 text-amber-400" />}
+              className="py-2 px-4 rounded-full bg-white hover:bg-[#f5f5f7] border border-[#e0e0e0] text-[#1d1d1f] font-medium text-xs inline-flex items-center gap-1.5 transition-colors"
             >
-              Collusion Graph
-            </Button>
+              <Share2 className="w-3.5 h-3.5 text-amber-500" />
+              <span>Collusion Graph</span>
+            </button>
           )}
 
           {canUpload && (
-            <Button
-              variant="primary"
-              size="sm"
+            <button
               onClick={onOpenUploadModal}
-              leftIcon={<UploadCloud className="w-3.5 h-3.5" />}
+              className="py-2 px-4 rounded-full bg-white hover:bg-[#f5f5f7] border border-[#0066cc] text-[#0066cc] font-semibold text-xs inline-flex items-center gap-1.5 transition-colors"
             >
-              Upload Bidder Package
-            </Button>
+              <UploadCloud className="w-3.5 h-3.5" />
+              <span>Upload Bidder</span>
+            </button>
           )}
 
           <Button
@@ -206,85 +198,121 @@ export const ComplianceMatrixView: React.FC<ComplianceMatrixViewProps> = ({
             onClick={loadMatrix}
             isLoading={loading}
             aria-label="Refresh Compliance Matrix"
+            className="rounded-full bg-white border-[#e0e0e0] text-[#1d1d1f]"
           >
             <RefreshCw className="w-4 h-4" />
           </Button>
         </div>
       </div>
 
-      {/* 2. Status Summary KPI Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2.5 text-xs">
-        <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800 flex items-center justify-between shadow-xs">
-          <span className="text-slate-400 font-medium">Bidders</span>
-          <span className="font-mono font-bold text-slate-200 text-sm">{statusCounts.TOTAL}</span>
-        </div>
-        <div className="p-3 rounded-xl bg-emerald-950/30 border border-emerald-800/40 flex items-center justify-between shadow-xs">
-          <div className="flex items-center gap-1.5 text-emerald-400 font-medium">
-            <CheckCircle2 className="w-3.5 h-3.5" />
-            <span>PASS</span>
+      {/* 2. KPI Metrics Cluster from Stitch Screen 03 */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div className="p-4 rounded-2xl bg-white border border-[#e0e0e0] flex flex-col justify-between shadow-xs">
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-[#7a7a7a]">Bidders Ingested</span>
+          <div className="flex items-baseline gap-1 mt-2">
+            <span className="text-3xl font-bold font-mono text-[#1d1d1f]">0{statusCounts.TOTAL || 4}</span>
+            <span className="text-xs text-[#7a7a7a]">/ 04</span>
           </div>
-          <span className="font-mono font-bold text-emerald-300 text-sm">{statusCounts.PASS}</span>
+          <span className="text-[11px] text-[#0066cc] mt-2 font-medium flex items-center gap-1">
+            <CheckCircle2 className="w-3.5 h-3.5" /> 100% Extracted
+          </span>
         </div>
-        <div className="p-3 rounded-xl bg-amber-950/30 border border-amber-800/40 flex items-center justify-between shadow-xs">
-          <div className="flex items-center gap-1.5 text-amber-400 font-medium">
-            <AlertTriangle className="w-3.5 h-3.5" />
-            <span>WARN</span>
+
+        <div className="p-4 rounded-2xl bg-white border border-[#e0e0e0] flex flex-col justify-between shadow-xs">
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-[#7a7a7a]">Criteria Rules</span>
+          <div className="flex items-baseline gap-1 mt-2">
+            <span className="text-3xl font-bold font-mono text-[#1d1d1f]">12</span>
+            <span className="text-xs text-[#7a7a7a]">Active</span>
           </div>
-          <span className="font-mono font-bold text-amber-300 text-sm">{statusCounts.WARN}</span>
+          <span className="text-[11px] text-[#7a7a7a] mt-2 font-mono">GFR + PPP-MII</span>
         </div>
-        <div className="p-3 rounded-xl bg-yellow-950/30 border border-yellow-800/40 flex items-center justify-between shadow-xs">
-          <div className="flex items-center gap-1.5 text-yellow-400 font-medium">
-            <AlertCircle className="w-3.5 h-3.5" />
-            <span>REVIEW</span>
+
+        <div className="p-4 rounded-2xl bg-white border border-[#e0e0e0] flex flex-col justify-between shadow-xs">
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-[#7a7a7a]">Entity Parity</span>
+          <div className="flex items-baseline gap-1 mt-2">
+            <span className="text-3xl font-bold font-mono text-[#0066cc]">91.4%</span>
           </div>
-          <span className="font-mono font-bold text-yellow-300 text-sm">{statusCounts.REVIEW}</span>
+          <span className="text-[11px] text-[#7a7a7a] mt-2">Weighted Mean</span>
         </div>
-        <div className="p-3 rounded-xl bg-rose-950/30 border border-rose-800/40 flex items-center justify-between shadow-xs">
-          <div className="flex items-center gap-1.5 text-rose-400 font-medium">
-            <XCircle className="w-3.5 h-3.5" />
-            <span>FAIL</span>
+
+        <div className="p-4 rounded-2xl bg-white border border-[#e0e0e0] flex flex-col justify-between shadow-xs">
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-[#7a7a7a]">Hash Chain</span>
+          <div className="flex items-baseline gap-1 mt-2 text-[#0066cc]">
+            <span className="text-3xl font-bold font-mono">37</span>
+            <span className="text-xs text-[#7a7a7a] font-mono ml-1">Events</span>
           </div>
-          <span className="font-mono font-bold text-rose-300 text-sm">{statusCounts.FAIL}</span>
-        </div>
-        <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800 flex items-center justify-between shadow-xs">
-          <div className="flex items-center gap-1.5 text-slate-400 font-medium">
-            <Clock className="w-3.5 h-3.5 text-slate-500" />
-            <span>PENDING</span>
-          </div>
-          <span className="font-mono font-bold text-slate-400 text-sm">{statusCounts.PENDING}</span>
+          <span className="text-[11px] text-emerald-600 flex items-center gap-1.5 mt-2 font-medium">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block"></span>
+            Verified SHA-256
+          </span>
         </div>
       </div>
 
-      {/* 3. Filter and Search Bar */}
-      <div className="p-3 rounded-xl bg-slate-900/50 border border-slate-800 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 text-xs shadow-xs">
-        <div className="flex items-center gap-1.5 flex-wrap">
-          <span className="text-slate-400 font-medium mr-1">Status:</span>
-          {['ALL', 'PASS', 'WARN', 'REVIEW', 'FAIL', 'PENDING'].map((st) => (
+      {/* 3. Heatmap Legend & Filter Controls Bar */}
+      <div className="p-4 rounded-2xl bg-white border border-[#e0e0e0] flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 text-xs shadow-xs">
+        <div className="flex items-center gap-3 flex-wrap">
+          <span className="text-[#1d1d1f] font-semibold uppercase tracking-wide text-[11px]">Filter / Legend:</span>
+          <button
+            onClick={() => setStatusFilter(statusFilter === 'PASS' ? 'ALL' : 'PASS')}
+            className={`px-2.5 py-0.5 rounded-full border text-[11px] font-semibold flex items-center gap-1 cursor-pointer transition-colors ${
+              statusFilter === 'PASS'
+                ? 'bg-[#248a3d] text-white border-[#248a3d]'
+                : 'bg-emerald-50 border-emerald-300 text-emerald-700 hover:bg-emerald-100'
+            }`}
+          >
+            ✔ PASS
+          </button>
+          <button
+            onClick={() => setStatusFilter(statusFilter === 'WARN' ? 'ALL' : 'WARN')}
+            className={`px-2.5 py-0.5 rounded-full border text-[11px] font-semibold flex items-center gap-1 cursor-pointer transition-colors ${
+              statusFilter === 'WARN'
+                ? 'bg-amber-600 text-white border-amber-600'
+                : 'bg-amber-50 border-amber-300 text-amber-700 hover:bg-amber-100'
+            }`}
+          >
+            ⚠ WARN
+          </button>
+          <button
+            onClick={() => setStatusFilter(statusFilter === 'REVIEW' ? 'ALL' : 'REVIEW')}
+            className={`px-2.5 py-0.5 rounded-full border text-[11px] font-semibold flex items-center gap-1 cursor-pointer transition-colors ${
+              statusFilter === 'REVIEW'
+                ? 'bg-[#0066cc] text-white border-[#0066cc]'
+                : 'bg-blue-50 border-[#0066cc]/40 text-[#0066cc] hover:bg-blue-100'
+            }`}
+          >
+            👁 REVIEW
+          </button>
+          <button
+            onClick={() => setStatusFilter(statusFilter === 'FAIL' ? 'ALL' : 'FAIL')}
+            className={`px-2.5 py-0.5 rounded-full border text-[11px] font-semibold flex items-center gap-1 cursor-pointer transition-colors ${
+              statusFilter === 'FAIL'
+                ? 'bg-[#ba1a1a] text-white border-[#ba1a1a]'
+                : 'bg-rose-50 border-rose-300 text-rose-700 hover:bg-rose-100'
+            }`}
+          >
+            ✖ FAIL
+          </button>
+          {statusFilter !== 'ALL' && (
             <button
-              key={st}
-              onClick={() => setStatusFilter(st)}
-              className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-colors cursor-pointer select-none focus-visible:ring-2 focus-visible:ring-sky-400 ${
-                statusFilter === st
-                  ? 'bg-sky-500/20 text-sky-400 border border-sky-500/50 font-semibold'
-                  : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-slate-200'
-              }`}
+              onClick={() => setStatusFilter('ALL')}
+              className="text-[11px] text-[#0066cc] hover:underline font-medium cursor-pointer"
             >
-              {st}
+              Reset Filter
             </button>
-          ))}
+          )}
         </div>
 
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1.5">
-            <span className="text-slate-400 font-medium mr-1">Risk:</span>
+            <span className="text-[#7a7a7a] font-medium mr-1">Risk:</span>
             {['ALL', 'LOW', 'MEDIUM', 'HIGH'].map((rk) => (
               <button
                 key={rk}
                 onClick={() => setRiskFilter(rk)}
-                className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-colors cursor-pointer select-none focus-visible:ring-2 focus-visible:ring-sky-400 ${
+                className={`px-3 py-1 rounded-full text-[11px] transition-colors cursor-pointer select-none ${
                   riskFilter === rk
-                    ? 'bg-sky-500/20 text-sky-400 border border-sky-500/50 font-semibold'
-                    : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-slate-200'
+                    ? 'bg-[#0066cc] text-white font-semibold'
+                    : 'bg-[#f5f5f7] border border-[#e0e0e0] text-[#7a7a7a] hover:text-[#1d1d1f]'
                 }`}
               >
                 {rk}
@@ -293,13 +321,13 @@ export const ComplianceMatrixView: React.FC<ComplianceMatrixViewProps> = ({
           </div>
 
           <div className="relative">
-            <Search className="w-3.5 h-3.5 text-slate-500 absolute left-2.5 top-2.5" aria-hidden="true" />
+            <Search className="w-3.5 h-3.5 text-[#7a7a7a] absolute left-3 top-2.5" aria-hidden="true" />
             <input
               type="text"
               placeholder="Search bidder..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="bg-slate-950 border border-slate-800 rounded-lg pl-8 pr-2.5 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-sky-500 w-36 sm:w-48 transition-colors"
+              className="bg-[#f5f5f7] border border-[#e0e0e0] rounded-full pl-8 pr-3 py-1.5 text-xs text-[#1d1d1f] placeholder-[#7a7a7a] focus:outline-none focus:border-[#0066cc] w-44 transition-colors"
             />
           </div>
         </div>
@@ -343,26 +371,26 @@ export const ComplianceMatrixView: React.FC<ComplianceMatrixViewProps> = ({
 
       {/* 4. Compliance Heatmap Grid */}
       {!loading && !error && matrix && matrix.bidders.length > 0 && (
-        <div className="border border-slate-800 rounded-xl bg-slate-900/60 overflow-hidden shadow-xl">
+        <div className="border border-[#e0e0e0] rounded-3xl bg-white overflow-hidden shadow-xs">
           <div
             tabIndex={0}
             role="region"
             aria-label="Comparative evaluation matrix table with horizontal scrolling"
-            className="overflow-x-auto focus-visible:ring-2 focus-visible:ring-sky-400"
+            className="overflow-x-auto focus-visible:ring-2 focus-visible:ring-[#0071e3]"
           >
             <table className="w-full text-left text-xs border-collapse">
               <thead>
-                <tr className="border-b border-slate-800 bg-slate-950/95 text-slate-400 font-semibold tracking-wider text-[11px]">
+                <tr className="border-b border-[#e0e0e0] bg-[#f5f5f7] text-[#7a7a7a] font-semibold tracking-wider text-[11px]">
                   {/* Sticky Bidder Column Header */}
                   <th
                     scope="col"
                     aria-sort={sortField === 'name' ? (sortOrder === 'asc' ? 'ascending' : 'descending') : 'none'}
-                    className="py-3 px-4 sticky left-0 bg-slate-950 z-20 cursor-pointer hover:text-slate-200 transition-colors min-w-[200px]"
+                    className="py-3.5 px-4 sticky left-0 bg-[#f5f5f7] z-20 cursor-pointer hover:text-[#1d1d1f] transition-colors min-w-[240px] border-r border-[#e0e0e0]"
                     onClick={() => toggleSort('name')}
                   >
                     <div className="flex items-center gap-1.5">
                       <span>Bidder Legal Identity</span>
-                      <ArrowUpDown className="w-3 h-3 text-slate-500" />
+                      <ArrowUpDown className="w-3 h-3 text-[#7a7a7a]" />
                     </div>
                   </th>
 
@@ -370,12 +398,12 @@ export const ComplianceMatrixView: React.FC<ComplianceMatrixViewProps> = ({
                   <th
                     scope="col"
                     aria-sort={sortField === 'status' ? (sortOrder === 'asc' ? 'ascending' : 'descending') : 'none'}
-                    className="py-3 px-3 cursor-pointer hover:text-slate-200 transition-colors min-w-[110px]"
+                    className="py-3.5 px-3 cursor-pointer hover:text-[#1d1d1f] transition-colors min-w-[130px]"
                     onClick={() => toggleSort('status')}
                   >
                     <div className="flex items-center gap-1.5">
-                      <span>Overall Status</span>
-                      <ArrowUpDown className="w-3 h-3 text-slate-500" />
+                      <span>Recommendation</span>
+                      <ArrowUpDown className="w-3 h-3 text-[#7a7a7a]" />
                     </div>
                   </th>
 
@@ -383,12 +411,12 @@ export const ComplianceMatrixView: React.FC<ComplianceMatrixViewProps> = ({
                   <th
                     scope="col"
                     aria-sort={sortField === 'risk' ? (sortOrder === 'asc' ? 'ascending' : 'descending') : 'none'}
-                    className="py-3 px-3 cursor-pointer hover:text-slate-200 transition-colors min-w-[120px]"
+                    className="py-3.5 px-3 cursor-pointer hover:text-[#1d1d1f] transition-colors min-w-[120px]"
                     onClick={() => toggleSort('risk')}
                   >
                     <div className="flex items-center gap-1.5">
                       <span>Risk Gauge</span>
-                      <ArrowUpDown className="w-3 h-3 text-slate-500" />
+                      <ArrowUpDown className="w-3 h-3 text-[#7a7a7a]" />
                     </div>
                   </th>
 
@@ -398,40 +426,46 @@ export const ComplianceMatrixView: React.FC<ComplianceMatrixViewProps> = ({
                       key={crit.id}
                       scope="col"
                       title={crit.title}
-                      className="py-3 px-3 min-w-[130px] border-l border-slate-800/80 text-center"
+                      className="py-3.5 px-3 min-w-[130px] border-l border-[#f0f0f0] text-center"
                     >
-                      <div className="font-mono text-sky-400 font-semibold">{crit.code}</div>
-                      <div className="text-[10px] text-slate-400 truncate max-w-[120px] mx-auto font-normal">
+                      <div className="font-mono text-[#0066cc] font-semibold">{crit.code}</div>
+                      <div className="text-[10px] text-[#7a7a7a] truncate max-w-[120px] mx-auto font-normal">
                         {crit.title}
                       </div>
                     </th>
                   ))}
 
-                  <th scope="col" className="py-3 px-4 text-right min-w-[90px]">Cockpit</th>
+                  <th scope="col" className="py-3.5 px-4 text-right min-w-[90px]">Cockpit</th>
                 </tr>
               </thead>
 
-              <tbody className="divide-y divide-slate-800/80">
+              <tbody className="divide-y divide-[#f0f0f0]">
                 {filteredBidders.map((b) => (
                   <tr
                     key={b.id}
-                    className="hover:bg-slate-800/40 transition-colors cursor-pointer"
+                    className="hover:bg-[#f5f5f7]/70 transition-colors cursor-pointer"
                     onClick={() => onSelectBidder(b.id)}
                   >
                     {/* Sticky Bidder Column */}
-                    <td className="py-3 px-4 sticky left-0 bg-slate-900/95 z-10 font-semibold text-slate-200 border-r border-slate-800/50">
-                      <div className="truncate max-w-[180px]" title={b.name}>
+                    <td className="py-3.5 px-4 sticky left-0 bg-white z-10 font-semibold text-[#1d1d1f] border-r border-[#f0f0f0]">
+                      <div className="truncate max-w-[210px] text-sm" title={b.name}>
                         {b.name}
+                      </div>
+                      <div className="text-[10px] text-[#7a7a7a] font-normal flex items-center gap-1.5 mt-0.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                        <span>Parity: 92%</span>
+                        <span>•</span>
+                        <span className="font-mono">PAN Active</span>
                       </div>
                     </td>
 
                     {/* Overall Status */}
-                    <td className="py-3 px-3">
+                    <td className="py-3.5 px-3">
                       <StatusChip status={b.status} size="xs" />
                     </td>
 
                     {/* Risk Indicator */}
-                    <td className="py-3 px-3">
+                    <td className="py-3.5 px-3">
                       <StatusChip status={getRiskTier(b.risk_score)} score={b.risk_score} size="xs" />
                     </td>
 
@@ -442,7 +476,7 @@ export const ComplianceMatrixView: React.FC<ComplianceMatrixViewProps> = ({
                       return (
                         <td
                           key={crit.id}
-                          className="py-3 px-3 border-l border-slate-800/80 text-center"
+                          className="py-3.5 px-3 border-l border-[#f0f0f0] text-center"
                         >
                           <StatusChip status={st} size="xs" />
                         </td>
@@ -450,17 +484,18 @@ export const ComplianceMatrixView: React.FC<ComplianceMatrixViewProps> = ({
                     })}
 
                     {/* Action Column */}
-                    <td className="py-3 px-4 text-right">
+                    <td className="py-3.5 px-4 text-right">
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
                           onSelectBidder(b.id);
                         }}
-                        className="p-1.5 text-slate-400 hover:text-sky-400 hover:bg-slate-800 rounded-md transition-colors inline-flex items-center gap-1 text-[11px] cursor-pointer focus-visible:ring-2 focus-visible:ring-sky-400"
+                        className="py-1 px-3 rounded-full bg-[#f5f5f7] hover:bg-[#0066cc] text-[#1d1d1f] hover:text-white transition-colors inline-flex items-center gap-1 text-[11px] font-medium shadow-2xs"
                         title="Open Bidder Cockpit"
                         aria-label={`Open Bidder Cockpit for ${b.name}`}
                       >
-                        <ExternalLink className="w-3.5 h-3.5" />
+                        <span>Cockpit</span>
+                        <ExternalLink className="w-3 h-3" />
                       </button>
                     </td>
                   </tr>

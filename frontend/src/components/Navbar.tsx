@@ -1,5 +1,4 @@
 import React from 'react';
-import { Shield, LogOut, User as UserIcon } from 'lucide-react';
 import { User } from '../types';
 
 interface NavbarProps {
@@ -29,7 +28,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 }) => {
   const isDemoActive = activeView === 'demo';
   const isDashboardActive = activeView === 'dashboard';
-  const isTendersActive = activeView === 'tenders' || activeView === 'matrix' || activeView === 'graph';
+  const isTendersActive = activeView === 'tenders' || activeView === 'matrix';
   const isBiddersActive =
     activeView === 'bidders' ||
     activeView === 'bidder-detail' ||
@@ -37,132 +36,173 @@ export const Navbar: React.FC<NavbarProps> = ({
     activeView === 'risk-anomalies';
   const isAuditActive = activeView === 'audit';
 
+  const getViewSubtitle = () => {
+    switch (activeView) {
+      case 'dashboard':
+        return 'Executive Command Center • Central Tender Board';
+      case 'tenders':
+        return 'Active Two-Bid Tenders • GFR 2017 Evaluation';
+      case 'matrix':
+        return 'Tender Compliance Matrix • NIT CPCL/MM/2026/PUMP-217';
+      case 'bidders':
+      case 'bidder-detail':
+        return 'Primary Bidder Cockpit • Adjudication & Evidence';
+      case 'graph':
+        return 'Cross-Bidder Collusion Graph • CVC Related-Party Heuristics';
+      case 'audit':
+        return 'Tamper-Evident Audit Ledger • SHA-256 Hash Chain';
+      case 'pipeline':
+        return '11-Step Forensic Pipeline Stepper • Live Monitor';
+      case 'demo':
+        return 'SIH Grand Finale Presentation Runner';
+      default:
+        return 'Public Procurement Decision Support';
+    }
+  };
+
   return (
-    <header className="border-b border-slate-800 bg-slate-900/90 backdrop-blur px-6 py-3.5 flex items-center justify-between sticky top-0 z-40">
-      <div className="flex items-center gap-6">
-        <div className="flex items-center gap-3 cursor-pointer" onClick={() => onNavigate('dashboard')}>
-          <div className="p-2 rounded-lg bg-sky-500/10 border border-sky-500/20 text-sky-400">
-            <Shield className="w-5 h-5" />
+    <header className="sticky top-0 z-50 w-full shadow-sm">
+      {/* Row 1: Apple Global Black Bar (44px) */}
+      <div className="h-11 bg-black text-white flex items-center justify-between px-6 border-b border-white/10">
+        <div className="flex items-center gap-6">
+          <div
+            className="flex items-center gap-2.5 cursor-pointer hover:opacity-90 transition-opacity"
+            onClick={() => onNavigate('dashboard')}
+          >
+            <span className="w-6 h-6 rounded-full bg-[#0066cc] flex items-center justify-center text-white text-[11px] font-bold shadow-sm">
+              V
+            </span>
+            <span className="text-[13px] font-semibold tracking-tight text-white flex items-center gap-1.5">
+              CPCL <span className="text-white/40">•</span> VigilBid
+            </span>
+            <span className="text-[10px] tracking-wider px-1.5 py-0.5 rounded-full bg-white/10 border border-white/15 text-white/80 font-mono">
+              SIH26100
+            </span>
           </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="font-bold text-base tracking-tight text-white">VigilBid</span>
-              <span className="text-[10px] uppercase font-mono tracking-wider px-1.5 py-0.5 rounded bg-sky-950 border border-sky-800 text-sky-300">
-                SIH26100
-              </span>
-            </div>
-            <p className="text-[11px] text-slate-400">CPCL Public Procurement Decision Support</p>
-          </div>
+
+          {currentUser && (
+            <nav className="hidden md:flex items-center gap-5 text-[13px] border-l border-white/15 pl-6">
+              <button
+                onClick={() => onNavigate('dashboard')}
+                className={`transition-colors py-1 ${
+                  isDashboardActive
+                    ? 'text-white font-semibold underline underline-offset-8 decoration-[#0066cc] decoration-2'
+                    : 'text-[#a0a0a5] hover:text-white font-normal'
+                }`}
+              >
+                Command Center
+              </button>
+              <button
+                onClick={() => onNavigate('tenders')}
+                className={`transition-colors py-1 ${
+                  isTendersActive
+                    ? 'text-white font-semibold underline underline-offset-8 decoration-[#0066cc] decoration-2'
+                    : 'text-[#a0a0a5] hover:text-white font-normal'
+                }`}
+              >
+                Tenders
+              </button>
+              <button
+                onClick={() => onNavigate('bidders')}
+                className={`transition-colors py-1 ${
+                  isBiddersActive
+                    ? 'text-white font-semibold underline underline-offset-8 decoration-[#0066cc] decoration-2'
+                    : 'text-[#a0a0a5] hover:text-white font-normal'
+                }`}
+              >
+                Bidders
+              </button>
+              <button
+                onClick={() => onNavigate('audit')}
+                className={`transition-colors py-1 ${
+                  isAuditActive
+                    ? 'text-white font-semibold underline underline-offset-8 decoration-[#0066cc] decoration-2'
+                    : 'text-[#a0a0a5] hover:text-white font-normal'
+                }`}
+              >
+                Audit Ledger
+              </button>
+              <button
+                onClick={() => onNavigate('demo')}
+                className={`transition-colors py-1 flex items-center gap-1.5 ${
+                  isDemoActive
+                    ? 'text-amber-300 font-semibold underline underline-offset-8 decoration-amber-400 decoration-2'
+                    : 'text-amber-400/90 hover:text-amber-300 font-normal'
+                }`}
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+                Live Demo
+              </button>
+            </nav>
+          )}
         </div>
 
-        {currentUser && (
-          <nav className="flex items-center gap-1 border-l border-slate-800 pl-6">
-            <button
-              onClick={() => onNavigate('dashboard')}
-              className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
-                isDashboardActive
-                  ? 'bg-sky-500/15 text-sky-400 border border-sky-500/30'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
-              }`}
-            >
-              Dashboard
-            </button>
-            <button
-              onClick={() => onNavigate('tenders')}
-              className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
-                isTendersActive
-                  ? 'bg-sky-500/15 text-sky-400 border border-sky-500/30'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
-              }`}
-            >
-              Tenders
-            </button>
-            <button
-              onClick={() => onNavigate('bidders')}
-              className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
-                isBiddersActive
-                  ? 'bg-sky-500/15 text-sky-400 border border-sky-500/30'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
-              }`}
-            >
-              All Bidders
-            </button>
-            <button
-              onClick={() => onNavigate('audit')}
-              className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
-                isAuditActive
-                  ? 'bg-sky-500/15 text-sky-400 border border-sky-500/30'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
-              }`}
-            >
-              Audit Trail
-            </button>
-            <button
-              onClick={() => onNavigate('demo')}
-              className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-colors flex items-center gap-1.5 ${
-                isDemoActive
-                  ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-sm'
-                  : 'text-amber-400/90 hover:text-amber-300 hover:bg-amber-500/10'
-              }`}
-            >
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-              Guided Demo
-            </button>
-          </nav>
-        )}
-      </div>
+        <div className="flex items-center gap-3">
+          {healthStatus && (
+            <div className="hidden sm:flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/15 text-white/90 text-[11px] font-mono">
+              <span
+                className={`w-1.5 h-1.5 rounded-full ${
+                  healthStatus === 'healthy' || healthStatus === 'ok'
+                    ? 'bg-emerald-400 animate-pulse'
+                    : 'bg-amber-400'
+                }`}
+              />
+              <span>PostgreSQL 16 & OCR Online</span>
+            </div>
+          )}
 
-      <div className="flex items-center gap-4">
-        {!currentUser && (
-          <button
-            onClick={() => onNavigate('demo')}
-            className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-colors flex items-center gap-1.5 ${
-              isDemoActive
-                ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
-                : 'text-amber-400 hover:text-amber-300 hover:bg-amber-500/10 border border-amber-500/30'
-            }`}
-          >
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-            Guided Demo Tour
-          </button>
-        )}
-
-        {healthStatus && (
-          <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-800/80 border border-slate-700/80 text-[11px] text-slate-300">
-            <span
-              className={`w-2 h-2 rounded-full ${
-                healthStatus === 'healthy' || healthStatus === 'ok' ? 'bg-emerald-400' : 'bg-amber-400'
-              }`}
-            />
-            <span>DB: {healthStatus}</span>
-          </div>
-        )}
-
-        {currentUser ? (
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 px-2.5 py-1 rounded-md bg-slate-800/80 border border-slate-700/70">
-              <UserIcon className="w-3.5 h-3.5 text-slate-400" />
-              <div className="text-left">
-                <span className="text-xs font-medium text-slate-200 block leading-tight truncate max-w-[140px]">
-                  {currentUser.full_name}
-                </span>
-                <span className="text-[10px] uppercase font-mono font-semibold tracking-wider text-sky-400 block">
+          {currentUser ? (
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/15 text-xs text-white">
+                <span className="w-2 h-2 rounded-full bg-[#0071e3]" />
+                <span className="font-medium text-[12px]">{currentUser.full_name}</span>
+                <span className="text-[10px] uppercase font-mono px-1.5 py-0.2 rounded bg-white/15 text-white/80">
                   {currentUser.role}
                 </span>
               </div>
-            </div>
 
+              <button
+                onClick={onLogout}
+                title="Sign Out"
+                className="w-8 h-8 rounded-full bg-white/10 hover:bg-rose-500/20 border border-white/15 hover:border-rose-400/40 text-white/80 hover:text-rose-300 flex items-center justify-center transition-colors"
+              >
+                <span className="material-symbols-outlined text-[16px]">logout</span>
+              </button>
+            </div>
+          ) : (
             <button
-              onClick={onLogout}
-              title="Sign Out"
-              className="p-1.5 rounded-md hover:bg-rose-950/40 border border-transparent hover:border-rose-800/60 text-slate-400 hover:text-rose-400 transition-colors"
+              onClick={() => onNavigate('demo')}
+              className="px-4 py-1 rounded-full bg-[#0066cc] hover:bg-[#0071e3] text-white text-xs font-medium transition-colors"
             >
-              <LogOut className="w-4 h-4" />
+              Enter Demo
             </button>
-          </div>
-        ) : (
-          <div className="text-xs text-slate-400">Not Authenticated</div>
-        )}
+          )}
+        </div>
+      </div>
+
+      {/* Row 2: Frosted Apple Sub-Nav (52px) */}
+      <div className="h-[52px] bg-[#f5f5f7]/90 backdrop-blur-xl border-b border-[#e0e0e0] flex items-center justify-between px-6">
+        <div className="flex items-center gap-3">
+          <span className="text-[15px] font-semibold text-[#1d1d1f] tracking-tight">
+            Decision Support Matrix
+          </span>
+          <div className="h-3.5 w-[1px] bg-[#e0e0e0]" />
+          <span className="text-[13px] text-[#7a7a7a] font-normal truncate max-w-[450px]">
+            {getViewSubtitle()}
+          </span>
+        </div>
+
+        <div className="hidden sm:flex items-center gap-2">
+          <span className="px-3 py-1 rounded-full bg-white border border-[#0066cc] text-[#0066cc] text-[11px] font-semibold shadow-xs">
+            GFR 2017 Audit Active
+          </span>
+          <span className="px-3 py-1 rounded-full bg-white border border-[#e0e0e0] text-[#1d1d1f] text-[11px] font-medium shadow-xs">
+            PPP-MII 50%+
+          </span>
+          <span className="px-3 py-1 rounded-full bg-white border border-[#e0e0e0] text-[#7a7a7a] text-[11px] font-mono shadow-xs">
+            SHA-256 Verified
+          </span>
+        </div>
       </div>
     </header>
   );

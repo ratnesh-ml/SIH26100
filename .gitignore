@@ -59,3 +59,9 @@ data/fixtures/*
 .cache/
 paddleocr/
 transformers/
+
+# Agent local configs & secrets
+.agents/
+
+# Stitch raw design mockups (downloaded artifacts)
+stitch_screens/
