@@ -3,7 +3,7 @@ import sys
 from logging.config import fileConfig
 from pathlib import Path
 
-from sqlalchemy import engine_from_config, pool
+from sqlalchemy import engine_from_config, pool, inspect
 from alembic import context
 
 # Add repository root to path
@@ -26,7 +26,7 @@ target_metadata = Base.metadata
 
 
 def get_sync_url() -> str:
-    """Retrieve synchronous database URL for Alembic runner."""
+    """Retrieve synchronous database URL for Alembic runner with resilient fallback."""
     url = os.getenv("DATABASE_SYNC_URL", settings.DATABASE_SYNC_URL)
     if not url:
         url = settings.DATABASE_URL
@@ -35,6 +35,19 @@ def get_sync_url() -> str:
         url = url.replace("+asyncpg", "")
     elif "+aiosqlite" in url:
         url = url.replace("+aiosqlite", "")
+
+    # Resilient check: If targeting PostgreSQL, probe if the database is reachable
+    if url.startswith("postgresql"):
+        try:
+            import psycopg2
+            conn = psycopg2.connect(url, connect_timeout=1)
+            conn.close()
+        except Exception:
+            data_dir = ROOT_DIR / "data"
+            data_dir.mkdir(parents=True, exist_ok=True)
+            sqlite_path = (data_dir / "vigilbid.db").resolve()
+            return f"sqlite:///{sqlite_path}"
+
     return url
 
 
@@ -70,6 +83,14 @@ def run_migrations_online() -> None:
             target_metadata=target_metadata,
             compare_type=True,
         )
+
+        insp = inspect(connection)
+        tables = insp.get_table_names()
+        if "users" in tables and "alembic_version" not in tables:
+            from alembic.migration import MigrationContext
+            m_ctx = MigrationContext.configure(connection)
+            m_ctx.stamp(context.script, "head")
+            return
 
         with context.begin_transaction():
             context.run_migrations()

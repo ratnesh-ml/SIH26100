@@ -10,6 +10,26 @@ jobs:
   backend-test:
     name: Backend Tests & Audit
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: vigilbid
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: "postgresql+asyncpg://postgres:postgres@localhost:5432/vigilbid"
+      DATABASE_SYNC_URL: "postgresql://postgres:postgres@localhost:5432/vigilbid"
+      SECRET_KEY: "vigilbid-ci-secret-key-for-automated-testing-64-characters-minimum"
+      FERNET_KEY: "uE_3m_9sF9yKz6T-Yh1N9P0wZ7vL5k4j2h1g8f7e6d4="
+      ENVIRONMENT: "testing"
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -33,7 +53,7 @@ jobs:
       - name: Run Database Migrations & Demo Seeding
         run: |
           alembic upgrade head
-          python scripts/demo_setup.py
+          python scripts/demo_setup.py --seed-only
 
       - name: Run Backend Pytest Suite
         run: |
