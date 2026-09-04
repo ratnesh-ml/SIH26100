@@ -98,6 +98,8 @@ class Bidder(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     __table_args__ = (
         Index("ix_bidders_tender_id", "tender_id"),
         Index("ix_bidders_canonical_name", "canonical_name"),
+        Index("ix_bidders_overall_status", "overall_status"),
+        Index("ix_bidders_risk_band", "risk_band"),
         CheckConstraint(
             "overall_status IN ('PENDING', 'PASS', 'WARN', 'REVIEW', 'FAIL')",
             name="check_bidder_status",
@@ -248,6 +250,8 @@ class Finding(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     __table_args__ = (
         Index("ix_findings_bidder_id", "bidder_id"),
         Index("ix_findings_rule_id", "rule_id"),
+        Index("ix_findings_status", "status"),
+        Index("ix_findings_bidder_status", "bidder_id", "status"),
         CheckConstraint(
             "status IN ('PASS', 'WARN', 'REVIEW', 'FAIL', 'INFO')",
             name="check_finding_status",
@@ -344,7 +348,10 @@ class BidderLink(Base):
 
 class Job(Base, UUIDPrimaryKeyMixin):
     __tablename__ = "jobs"
-    __table_args__ = (Index("ix_jobs_status_created_at", "status", "created_at"),)
+    __table_args__ = (
+        Index("ix_jobs_status_created_at", "status", "created_at"),
+        Index("ix_jobs_bidder_id", "bidder_id"),
+    )
 
     bidder_id: Mapped[uuid.UUID] = mapped_column(UUID_TYPE, ForeignKey("bidders.id"), nullable=False)
     status: Mapped[str] = mapped_column(String(50), default="QUEUED")  # QUEUED, RUNNING, DONE, FAILED
@@ -360,7 +367,12 @@ class Job(Base, UUIDPrimaryKeyMixin):
 
 class AuditLog(Base):
     __tablename__ = "audit_log"
-    __table_args__ = (Index("ix_audit_log_seq", "seq"),)
+    __table_args__ = (
+        Index("ix_audit_log_seq", "seq"),
+        Index("ix_audit_log_ts", "ts"),
+        Index("ix_audit_log_target", "target_type", "target_id"),
+        Index("ix_audit_log_action", "action"),
+    )
 
     seq: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
     ts: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))

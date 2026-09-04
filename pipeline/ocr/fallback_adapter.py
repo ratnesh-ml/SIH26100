@@ -1,5 +1,5 @@
-"""Architecture-approved fallback OCR adapter for local development and CPU execution."""
-
+from collections import OrderedDict
+import hashlib
 import io
 import logging
 import time
@@ -10,6 +10,26 @@ import fitz  # PyMuPDF
 from pipeline.ocr.interface import OCRProvider, OCRRegion, OCRResult
 
 logger = logging.getLogger("vigilbid.pipeline.ocr.fallback")
+
+# In-memory LRU OCR Result Cache to eliminate repeated OCR execution
+_OCR_RESULT_CACHE: OrderedDict[str, OCRResult] = OrderedDict()
+_MAX_OCR_CACHE_ITEMS = 512
+
+
+def _get_cached_ocr(key: str) -> Optional[OCRResult]:
+    """Retrieve OCR result from LRU memory cache if present."""
+    if key in _OCR_RESULT_CACHE:
+        _OCR_RESULT_CACHE.move_to_end(key)
+        return _OCR_RESULT_CACHE[key]
+    return None
+
+
+def _put_cached_ocr(key: str, result: OCRResult) -> None:
+    """Store OCR result into LRU memory cache."""
+    _OCR_RESULT_CACHE[key] = result
+    _OCR_RESULT_CACHE.move_to_end(key)
+    if len(_OCR_RESULT_CACHE) > _MAX_OCR_CACHE_ITEMS:
+        _OCR_RESULT_CACHE.popitem(last=False)
 
 
 class FallbackOCRAdapter(OCRProvider):
@@ -60,7 +80,22 @@ class FallbackOCRAdapter(OCRProvider):
         page: int = 1,
         document_id: Optional[str] = None,
     ) -> OCRResult:
-        """Extract text and bounding box regions from raster image bytes."""
+        """Extract text and bounding box regions from raster image bytes (with LRU caching)."""
+        sha256 = hashlib.sha256(image_bytes).hexdigest()
+        cache_key = f"img:{sha256}:{page}"
+        cached = _get_cached_ocr(cache_key)
+        if cached is not None:
+            return OCRResult(
+                document_id=document_id or cached.document_id,
+                page=cached.page,
+                text=cached.text,
+                confidence=cached.confidence,
+                regions=cached.regions,
+                processing_time=0.0001,
+                provider=self.name,
+                error=cached.error,
+            )
+
         start_time = time.perf_counter()
         regions: list[OCRRegion] = []
         text_lines: list[str] = []
@@ -96,7 +131,7 @@ class FallbackOCRAdapter(OCRProvider):
             avg_conf = (total_conf / len(regions)) if regions else (0.85 if full_text else 0.0)
 
             duration = time.perf_counter() - start_time
-            return OCRResult(
+            res = OCRResult(
                 document_id=document_id,
                 page=page,
                 text=full_text,
@@ -105,6 +140,8 @@ class FallbackOCRAdapter(OCRProvider):
                 processing_time=duration,
                 provider=self.name,
             )
+            _put_cached_ocr(cache_key, res)
+            return res
 
         except Exception as exc:
             duration = time.perf_counter() - start_time
@@ -125,7 +162,22 @@ class FallbackOCRAdapter(OCRProvider):
         page: int = 1,
         document_id: Optional[str] = None,
     ) -> OCRResult:
-        """Extract text from a PDF page, using vector text layer first or raster OCR fallback."""
+        """Extract text from a PDF page, using vector text layer first or raster OCR fallback (with LRU caching)."""
+        sha256 = hashlib.sha256(pdf_bytes).hexdigest()
+        cache_key = f"pdf:{sha256}:{page}"
+        cached = _get_cached_ocr(cache_key)
+        if cached is not None:
+            return OCRResult(
+                document_id=document_id or cached.document_id,
+                page=cached.page,
+                text=cached.text,
+                confidence=cached.confidence,
+                regions=cached.regions,
+                processing_time=0.0001,
+                provider=self.name,
+                error=cached.error,
+            )
+
         start_time = time.perf_counter()
         doc = None
         try:
@@ -156,7 +208,7 @@ class FallbackOCRAdapter(OCRProvider):
                     for w in words_raw
                 ]
                 duration = time.perf_counter() - start_time
-                return OCRResult(
+                res = OCRResult(
                     document_id=document_id,
                     page=page,
                     text=raw_text,
@@ -165,11 +217,15 @@ class FallbackOCRAdapter(OCRProvider):
                     processing_time=duration,
                     provider=self.name,
                 )
+                _put_cached_ocr(cache_key, res)
+                return res
 
             # Scanned page (insufficient text layer): Render to raster PNG and run image OCR
             pix = fitz_page.get_pixmap(dpi=150)
             png_bytes = pix.tobytes("png")
-            return self.extract_from_image(png_bytes, page=page, document_id=document_id)
+            res = self.extract_from_image(png_bytes, page=page, document_id=document_id)
+            _put_cached_ocr(cache_key, res)
+            return res
 
         except Exception as exc:
             return OCRResult(

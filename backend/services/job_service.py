@@ -1,5 +1,6 @@
 """Job Service orchestrating processing jobs, status lifecycles, queue claims, and full pipeline execution."""
 
+from collections import defaultdict
 from datetime import datetime, timezone
 import hashlib
 import logging
@@ -382,6 +383,22 @@ class JobService:
             bidder_res = await session.execute(bidder_stmt)
             bidder = bidder_res.scalar_one_or_none()
 
+            # Batch fetch all extracted fields and document pages across all docs to eliminate N+1 queries
+            doc_ids = [d.id for d in docs]
+            grouped_fields: dict[uuid.UUID, list[ExtractedField]] = defaultdict(list)
+            grouped_pages: dict[uuid.UUID, list[DocumentPage]] = defaultdict(list)
+
+            if doc_ids:
+                field_stmt = select(ExtractedField).where(ExtractedField.document_id.in_(doc_ids))
+                field_res = await session.execute(field_stmt)
+                for fld in field_res.scalars().all():
+                    grouped_fields[fld.document_id].append(fld)
+
+                page_stmt = select(DocumentPage).where(DocumentPage.document_id.in_(doc_ids)).order_by(DocumentPage.page_no)
+                page_res = await session.execute(page_stmt)
+                for pg in page_res.scalars().all():
+                    grouped_pages[pg.document_id].append(pg)
+
             # Collect extracted fields from DB
             all_extracted_fields: dict[str, dict[str, Any]] = {}
             pipeline_docs: list[dict[str, Any]] = []
@@ -389,13 +406,9 @@ class JobService:
             for doc in docs:
                 doc_id_str = str(doc.id)
 
-                # Load extracted fields
-                field_stmt = select(ExtractedField).where(ExtractedField.document_id == doc.id)
-                field_res = await session.execute(field_stmt)
-                fields = list(field_res.scalars().all())
-
+                # Assemble fields
                 doc_fields: dict[str, Any] = {}
-                for f in fields:
+                for f in grouped_fields.get(doc.id, []):
                     doc_fields[f.field_name] = {
                         "value": f.value,
                         "normalized_value": f.value_norm,
@@ -407,19 +420,11 @@ class JobService:
                     }
                 all_extracted_fields[doc_id_str] = doc_fields
 
-                # Load pages text for pipeline context
-                page_stmt = select(DocumentPage).where(
-                    DocumentPage.document_id == doc.id
-                ).order_by(DocumentPage.page_no)
-                page_res = await session.execute(page_stmt)
-                pages = list(page_res.scalars().all())
-
-                pages_data = []
-                for p in pages:
-                    pages_data.append({
-                        "page_no": p.page_no,
-                        "text": p.text or "",
-                    })
+                # Assemble pages
+                pages_data = [
+                    {"page_no": p.page_no, "text": p.text or ""}
+                    for p in grouped_pages.get(doc.id, [])
+                ]
 
                 pipeline_docs.append({
                     "id": doc_id_str,

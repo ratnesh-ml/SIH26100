@@ -259,8 +259,11 @@ class PipelineRunner:
     # Step 4: OCR Fallback
     # =========================================================================
     def step_04_ocr_fallback(self, ctx: PipelineContext) -> StepExecutionResult:
-        """Execute OCR provider fallback on scanned, low-confidence, or sparse pages."""
-        ocr_invocations = 0
+        """Execute OCR provider fallback on scanned, low-confidence, or sparse pages with parallel dispatch."""
+        from concurrent.futures import ThreadPoolExecutor
+        import os
+
+        ocr_tasks = []
         for doc in ctx.documents:
             raw_bytes = doc.get("raw_bytes")
             pages = doc.get("pages_data", [])
@@ -271,22 +274,44 @@ class PipelineRunner:
 
                 if needs_ocr and raw_bytes:
                     page_no = page.get("page_no", 1)
-                    ocr_res = self.ocr_provider.extract_from_pdf_page(
-                        pdf_bytes=raw_bytes,
-                        page=page_no,
-                        document_id=doc["id"],
+                    ocr_tasks.append((doc, page, raw_bytes, page_no))
+
+        ocr_invocations = len(ocr_tasks)
+        if ocr_invocations == 1:
+            doc, page, raw_bytes, page_no = ocr_tasks[0]
+            ocr_res = self.ocr_provider.extract_from_pdf_page(
+                pdf_bytes=raw_bytes,
+                page=page_no,
+                document_id=doc["id"],
+            )
+            page["text"] = ocr_res.text
+            page["confidence"] = ocr_res.confidence
+            page["text_source"] = "ocr"
+            doc["text_source"] = "ocr"
+        elif ocr_invocations > 1:
+            max_workers = min(4, os.cpu_count() or 1, ocr_invocations)
+            with ThreadPoolExecutor(max_workers=max_workers) as executor:
+                def _run_single_ocr(task_item):
+                    d, p, b, pno = task_item
+                    res = self.ocr_provider.extract_from_pdf_page(
+                        pdf_bytes=b,
+                        page=pno,
+                        document_id=d["id"],
                     )
-                    page["text"] = ocr_res.text
-                    page["confidence"] = ocr_res.confidence
-                    page["text_source"] = "ocr"
-                    doc["text_source"] = "ocr"
-                    ocr_invocations += 1
+                    return d, p, res
+
+                results = list(executor.map(_run_single_ocr, ocr_tasks))
+                for d, p, res in results:
+                    p["text"] = res.text
+                    p["confidence"] = res.confidence
+                    p["text_source"] = "ocr"
+                    d["text_source"] = "ocr"
 
         return StepExecutionResult(
             step_number=4,
             name="OCR Fallback on Scanned Pages",
             status="DONE",
-            message=f"Completed OCR fallback evaluation ({ocr_invocations} page(s) OCR processed).",
+            message=f"Completed OCR fallback evaluation ({ocr_invocations} page(s) OCR processed in parallel).",
             output_data={"ocr_pages_processed": ocr_invocations},
         )
 

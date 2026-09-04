@@ -1,5 +1,6 @@
 """Document Service orchestrating file ingestion, deduplication, storage safety, and database persistence."""
 
+from collections import OrderedDict
 import logging
 from pathlib import Path
 from typing import BinaryIO, Optional
@@ -16,6 +17,28 @@ from backend.services.job_service import JobService
 from pipeline.document_processing.ingest import DocumentIngester
 
 logger = logging.getLogger("vigilbid.services.document")
+
+# Two-tier LRU Page Image Cache for instant PDF viewer page rendering
+_PAGE_IMAGE_CACHE: OrderedDict[tuple[str, int, int], bytes] = OrderedDict()
+_MAX_PAGE_CACHE_ITEMS = 256
+
+
+def get_cached_page_image(sha256: str, page_no: int, dpi: int) -> Optional[bytes]:
+    """Retrieve rendered page bytes from LRU memory cache."""
+    key = (sha256, page_no, dpi)
+    if key in _PAGE_IMAGE_CACHE:
+        _PAGE_IMAGE_CACHE.move_to_end(key)
+        return _PAGE_IMAGE_CACHE[key]
+    return None
+
+
+def put_cached_page_image(sha256: str, page_no: int, dpi: int, data: bytes) -> None:
+    """Store rendered page bytes into LRU memory cache."""
+    key = (sha256, page_no, dpi)
+    _PAGE_IMAGE_CACHE[key] = data
+    _PAGE_IMAGE_CACHE.move_to_end(key)
+    if len(_PAGE_IMAGE_CACHE) > _MAX_PAGE_CACHE_ITEMS:
+        _PAGE_IMAGE_CACHE.popitem(last=False)
 
 
 class DocumentService:
@@ -211,10 +234,29 @@ class DocumentService:
         page_no: int,
         dpi: int = 150,
     ) -> bytes:
-        """Render a specific 1-indexed page of a PDF document to raster PNG bytes."""
+        """Render a specific 1-indexed page of a PDF document to raster PNG bytes (with LRU & disk caching)."""
         doc = await DocumentService.get_document(session, doc_id)
-        doc_path = Path(doc.storage_path).resolve()
+
+        # 1. Check in-memory LRU cache
+        cached_mem = get_cached_page_image(doc.sha256, page_no, dpi)
+        if cached_mem is not None:
+            return cached_mem
+
+        # 2. Check on-disk cache under storage root
         storage_root = Path(settings.STORAGE_DIR).resolve()
+        cache_dir = storage_root / "_page_cache"
+        cache_file = cache_dir / f"{doc.sha256}_p{page_no}_{dpi}.png"
+        if cache_file.exists() and cache_file.is_file():
+            try:
+                data = cache_file.read_bytes()
+                if data:
+                    put_cached_page_image(doc.sha256, page_no, dpi, data)
+                    return data
+            except Exception as exc:
+                logger.warning("Failed to read disk page cache %s: %s", cache_file, exc)
+
+        # 3. Cache miss: Validate storage path and render
+        doc_path = Path(doc.storage_path).resolve()
         is_safe = doc_path.is_relative_to(storage_root)
         if not is_safe and settings.ENVIRONMENT.lower() in ("development", "test", "testing"):
             import tempfile
@@ -248,6 +290,15 @@ class DocumentService:
             renderer = PDFRenderer(default_dpi=dpi)
             png_bytes = renderer.render_page_bytes(page, dpi=dpi)
             doc_fitz.close()
+
+            # Store in both disk cache and memory cache
+            try:
+                cache_dir.mkdir(parents=True, exist_ok=True)
+                cache_file.write_bytes(png_bytes)
+            except Exception as exc:
+                logger.warning("Failed to write disk page cache %s: %s", cache_file, exc)
+
+            put_cached_page_image(doc.sha256, page_no, dpi, png_bytes)
             return png_bytes
         except HTTPException:
             raise
