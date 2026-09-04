@@ -64,7 +64,7 @@ Use the synthetic **Bharat Hydrotech Corp** scenario. It is designed to demonstr
 | 8 | Open the audit ledger | The decision appears in the tamper-evident audit history. |
 | 9 | Generate the dossier | The evidence-backed compliance report is available for review. |
 
-For the detailed version of this flow, see [docs/demo/DEMO-GUIDE.md](demo/DEMO-GUIDE.md) and [docs/ONE-MINUTE-TOUR.md](ONE-MINUTE-TOUR.md).
+For the detailed version of this flow, see [docs/demo/DEMO-GUIDE.md](demo/DEMO-GUIDE.md) and [docs/ONE-MINUTE-TOUR.md](ONE-MINUTE-TOUR.md). The planned scenario-card experience is specified in [Judge Mode](EVALUATOR-JUDGE-MODE.md).
 
 ## 5. What the evaluator should verify
 
@@ -110,6 +110,9 @@ That limitation is intentional: the prototype demonstrates the workflow, evidenc
 - [Security threat model](security/THREAT-MODEL.md)
 - [Known limitations](KNOWN-LIMITATIONS.md)
 - [Testing and evaluation](testing/EVALUATION.md)
+- [Demonstration benchmark](testing/DEMO-BENCHMARK.md)
+- [Judge Mode specification](EVALUATOR-JUDGE-MODE.md)
+- [Final submission asset plan](demo/SUBMISSION-ASSETS.md)
 
 > **Submission reminder:** Before the final submission, replace the URL placeholders and add the screenshots listed in Section 2. No structural rewrite should be required after that point.
 

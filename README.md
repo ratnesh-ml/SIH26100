@@ -31,6 +31,12 @@
 
 The placeholders above are intentional. The repository structure is ready for the final URLs and images to be inserted without reorganizing the documentation again.
 
+Additional evaluator-facing planning documents are available for the future Judge Mode, demonstration benchmark, and final screenshot/video package:
+
+- [Judge Mode specification](docs/EVALUATOR-JUDGE-MODE.md)
+- [Demonstration benchmark](docs/testing/DEMO-BENCHMARK.md)
+- [Final submission asset plan](docs/demo/SUBMISSION-ASSETS.md)
+
 ## 🏛️ SIH 2026 Project Identity
 
 | Attribute | Official Specification |
