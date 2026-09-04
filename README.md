@@ -35,12 +35,12 @@
 
 ## 💎 Key Value Proposition
 
-Public procurement scrutiny takes **8 to 10 hours per bidder**, leaving evaluation committees vulnerable to unverified tax credentials, cross-document inconsistencies, and forensic tampering. VigilBid delivers:
+Public procurement scrutiny takes **8 to 10 hours per bidder**, leaving evaluation committees vulnerable to unverified tax credentials, cross-document inconsistencies, and manipulated files. VigilBid delivers:
 
 - 🛡️ **Sub-Second Scrutiny:** Evaluates multi-document bidder archives across 34 CPCL Goods criteria in &lt;108ms.
 - 🔍 **Split-Screen Evidence:** Connects every finding directly to exact source PDF pages and coordinate bounding box highlights.
 - ⚖️ **Zero AI Hallucinations:** Legal compliance is executed by **100% deterministic Python rules citing GFR 2017 clauses**—probabilistic LLMs are never legal judges.
-- 👤 **Preserved Human Authority:** Procurement officers retain complete statutory discretion to accept, reject, or override findings with mandatory written minutes.
+- 👤 **Preserved Human Authority:** Procurement officers retain complete discretion to accept, reject, or override findings with mandatory written minutes.
 - 🔐 **Cryptographic Auditability:** Every decision is permanently committed to an immutable SHA-256 forward hash chain for CAG and CVC audit oversight.
 
 ```
@@ -159,7 +159,7 @@ Public sector procurement in India handles over ₹4 lakh crore annually on GeM.
 - **Cross-Document Comparison Fatigue:** Subtle inconsistencies across documents—such as a PAN character discrepancy within a 15-character GSTIN, or entity name abbreviation drift—are easily missed under strict evaluation deadlines.
 - **Eligibility Verification Complexity:** Verifying mandatory eligibility criteria (such as 3-year average turnover thresholds, MSE exemptions under GFR Rule 153, and local content thresholds under the PPP-MII Order 2017) requires manually cross-referencing multiple legal clauses.
 - **Evidence Tracing Deficits:** Traditional spreadsheet evaluations record binary "Complied" or "Not Complied" notes with zero link to the source document, page number, or bounding box coordinate.
-- **Hidden Forensic Risks:** Unchecked PDF metadata tampering (e.g. modified dates postdating creation dates) and adversarial prompt injections in bid documents are undetectable during routine human reading.
+- **Hidden Document Anomalies:** Unchecked PDF metadata discrepancies (e.g. modification timestamps postdating creation timestamps) and hidden prompt manipulation tokens in bid document layers are undetectable during routine human reading.
 - **Severe Manual Review Burden:** Manual scrutiny takes 4 to 8 hours per bidder package. Comptroller and Auditor General (CAG) Report No. 18 of 2022 documented that up to 42.79% of unverified PAN/GSTIN submissions in sampled PSU procurements went unnoticed during manual sampling.
 
 ---
@@ -227,7 +227,7 @@ VigilBid covers all 24 official requirement areas defined in Problem Statement S
 | | EPFO & ESIC Compliance | `PLANNED` | Base registry adapter schemas and statutory labor law citations in KB |
 | **Document AI & Logic** | Missing Document Detection | `IMPLEMENTED` | Document presence rule `R-DOC-01`, mandatory document list checks |
 | | Inconsistent Data Detection | `IMPLEMENTED` | Cross-document PAN-in-GSTIN parity & Jaro-Winkler entity name matcher |
-| | Non-Compliant Information | `IMPLEMENTED` | PDF metadata tampering detection (GIMP modifications, creation date delta) |
+| | Non-Compliant Information | `IMPLEMENTED` | PDF metadata anomaly detection (modification tools, timestamp deltas) |
 | | Adversarial Prompt Defense | `IMPLEMENTED` | Input quarantined in `<DOCUMENT_DATA>` tags; deterministic logic supersedes LLM |
 | **Scoring & Governance** | Overall Compliance Score | `IMPLEMENTED` | 0–100 explainable composite score (`pipeline/risk/scorer.py`) |
 | | Risk Level Classification | `IMPLEMENTED` | Deterministic risk banding: `LOW` (0–30), `MEDIUM` (31–60), `HIGH` (61–100) |
@@ -299,7 +299,7 @@ graph TB
 ```
 ┌──────────────────────────────────────┬──────────────────────────────────────┬──────────────────────────────────────┐
 │       PROBABILISTIC AI LAYER         │      DETERMINISTIC COMPLIANCE LAYER  │         HUMAN OFFICER LAYER          │
-│   (Perception of Unstructured Data)  │        (Statutory Rule Execution)    │        (Statutory Adjudication)      │
+│   (Perception of Unstructured Data)  │        (Statutory Rule Execution)    │        (Human Decision Authority)    │
 ├──────────────────────────────────────┼──────────────────────────────────────┼──────────────────────────────────────┤
 │ • Document classification (TF-IDF)   │ • Tax check-digit validation         │ • Accept system findings             │
 │ • PyMuPDF layout analysis            │ • Sub-string PAN-in-GSTIN match      │ • Mandatory override justification   │
@@ -318,14 +318,14 @@ graph TB
 |---|---|---|---|
 | **1** | **Safe Document Ingestion** | Decompression bomb protection (100:1 ratio guard), magic byte validation (`%PDF-`), and Content-Addressable Storage (CAS) via SHA-256 digests. | Isolates untrusted vendor archives before downstream processing. |
 | **2** | **Document Intelligence** | TF-IDF classification across 13 statutory document types with sub-second PyMuPDF text layer and Tesseract 5.0 OCR fallback. | Eliminates manual document sorting and extracts word coordinates. |
-| **3** | **Entity Resolution** | Deterministic PAN-in-GSTIN containment checking (chars 3–12) and Jaro-Winkler legal name similarity ($\ge 0.85$). | Prevents identity fraud while protecting MSEs from wrongful disqualification due to minor abbreviations. |
-| **4** | **Registry Adapters** | Deterministic simulated adapters conforming to GSTN, PAN, MCA-21, Udyam, and CPPP schemas with transparent mock disclosures. | Validates credentials without requiring officers to log into 5 external portals. |
+| **3** | **Entity Resolution** | Deterministic PAN-in-GSTIN containment checking (chars 3–12) and Jaro-Winkler legal name similarity ($\ge 0.85$). | Prevents identity mismatches while protecting MSEs from wrongful disqualification due to minor abbreviations. |
+| **4** | **Registry Adapters** | Controlled mock adapters that follow the expected verification interface conforming to GSTN, PAN, MCA-21, Udyam, and CPPP schemas. | Validates credentials without requiring officers to log into 5 external portals. |
 | **5** | **Deterministic Rules Engine** | 34 CPCL Goods criteria under GFR 2017 evaluated in Python with strict legal precedence (`FAIL > REVIEW > WARN > PASS`). | Guarantees 100% reproducible compliance rulings with zero generative hallucinations. |
-| **6** | **Forensic Anomaly Detection** | Scans PDF binary streams for graphic editor modifications (e.g. GIMP) and detects indirect prompt injection tokens in bid text. | Defends the procurement process against doctored credentials and adversarial LLM attacks. |
+| **6** | **PDF Metadata & Anomaly Detection** | Scans PDF metadata for editing tool traces and detects indirect instruction text in bid document layers. | Flags unexpected editing tool signatures and prompt manipulation attempts. |
 | **7** | **Explainable Risk Scoring** | Transparent 0–100 composite risk score decomposed into Identity (+35), Compliance (+25), Financial (+5), and Anomaly factors. | Eliminates black-box scoring; every single risk point is attributed to a verifiable root cause. |
 | **8** | **Split-Screen Evidence Inspector** | Dual-pane viewer rendering high-resolution PDF pages with exact coordinate bounding box highlight overlays. | Enables officers to verify evidence visually in seconds without opening external PDF viewers. |
-| **9** | **Human Adjudication Cockpit** | Dedicated interface allowing officers to accept findings, issue clarifications, or record mandatory written justifications for overrides. | Preserves statutory procurement governance; human officers retain sole legal authority. |
-| **10** | **Cryptographic Audit & Dossier** | Forward SHA-256 hash-chained immutable ledger verified at runtime, with one-click export to official CVC Compliance Dossier PDFs. | Produces tamper-evident, publication-grade dossiers ready for CAG and CVC audit scrutiny. |
+| **9** | **Officer Review Cockpit** | Dedicated interface allowing officers to accept findings, issue clarifications, or record mandatory written justifications for overrides. | Preserves human authority; procurement officers retain sole legal discretion. |
+| **10** | **Cryptographic Audit & Dossier** | Forward SHA-256 hash-chained immutable ledger verified at runtime, with one-click export to official CVC Compliance Dossier PDFs. | Generates standardized CVC-formatted compliance dossiers for evaluation committee and CAG review. |
 
 ---
 
@@ -371,14 +371,79 @@ python scripts/release_audit.py
 
 ---
 
-## ⚠️ Synthetic Demonstration Data & Mock Integration Disclosure
+## 🔌 Government Registry Architecture & Verification Coverage
 
-| Component | Current Implementation (Demo) | Production Requirement (Go-Live) |
+### Pluggable Adapter Pattern & Production Integration Boundary
+
+The SIH26100 problem statement mandates verification against multiple government databases. Rather than building tightly coupled network clients that would fail without production API credentials, VigilBid implements a **pluggable adapter architecture**. Every external registry communicates through a standardized verification interface (`BaseRegistryAdapter`):
+
+```
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│                        PLUGGABLE ADAPTER ARCHITECTURE PATTERN                          │
+│                                                                                        │
+│     GST Adapter Interface (BaseRegistryAdapter)                                        │
+│          │                                                                             │
+│          ├──> Mock GST Adapter       [Current SIH Demo / Controlled Sandbox Mode]      │
+│          └──> Real GSTN Connector    [Production Integration Boundary / GSP API]       │
+│                                                                                        │
+│     Udyam Adapter Interface (BaseRegistryAdapter)                                      │
+│          │                                                                             │
+│          ├──> Mock Udyam Adapter     [Current SIH Demo / Controlled Sandbox Mode]      │
+│          └──> Real Udyam Connector   [Production Integration Boundary / NIC Gateway]   │
+│                                                                                        │
+│     PAN, MCA21, EPFO, ESIC, and Debarment adapters follow this identical contract.     │
+└────────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+The current sandbox adapters represent a **deliberate engineering boundary** rather than an omitted integration. By implementing the exact API schemas expected from GSTN, Income Tax, Udyam, MCA-21, and CPPP, the platform enables deterministic, reproducible testing and evaluation. When production credentials, departmental MoUs, and Hardware Security Modules (HSMs) are provisioned, the live connectors slot into the existing pipeline with zero changes to downstream compliance rules or evidence viewers.
+
+### Standardized Registry Response Contract
+
+Every adapter—whether operating in controlled mock mode or connected to a live government gateway—returns a uniform JSON payload to the deterministic compliance engine:
+
+```json
+{
+  "source": "GSTN",
+  "mode": "MOCK",
+  "identifier": "33AAACB9999F1Z5",
+  "status": "ACTIVE",
+  "verified_at": "2026-09-04T16:30:00Z",
+  "evidence": {
+    "legal_name": "BHARAT HYDROTECH CORP",
+    "registration_date": "2018-07-01",
+    "taxpayer_type": "Regular",
+    "center_jurisdiction": "Range-I, Division-IV"
+  }
+}
+```
+
+This decoupling ensures that the rule engine, risk scoring models, and split-screen evidence viewers remain completely independent of external network availability during tender evaluation.
+
+### Government Verification Coverage
+
+The table below provides a complete accounting across all government databases and statutory verification sources specified in the SIH26100 problem statement:
+
+| Source / Requirement | Current Status | Verification Method / Artifact |
 |---|---|---|
-| **External Portals** | Deterministic mock adapters conforming to official GSTN, MCA-21, and Udyam JSON schemas. | Official departmental MoUs, production API credentials, and Hardware Security Modules (HSMs). |
-| **Vendor Datasets** | 5 synthetic vendor packages (26 PDFs) with ground truth specifications. | Ingestion of live vendor archives under departmental confidentiality protocols. |
-| **Procurement Scope** | 34 CPCL Goods criteria under GFR 2017. | Configuration of Works, Services, and Non-Consultancy procurement rule sets. |
-| **Adjudication Role** | Advisory decision support with mandatory human review. | Statutory authority remains exclusively with designated human procurement officers. |
+| **GST Registration** | Mock (API) / Implemented (Checksum) | Mod-36 check-digit verification (`pipeline/extraction/gstin.py`) & controlled mock adapter |
+| **GST Return Filing** | Mock / Partial | Return filing frequency fields in adapter response; multi-month return rule in development |
+| **PAN Verification** | Mock (API) / Implemented (Format & Linkage) | 10-char PAN syntax check (`pipeline/extraction/pan.py`) & cross-document PAN-in-GSTIN containment |
+| **Income Tax Compliance** | Mock / Partial | Section 206AB higher TDS status check & ITR acknowledgment pattern matcher |
+| **Udyam / MSME** | Mock (API) / Implemented (Extraction & Exemption) | Certificate extractor (`pipeline/extraction/udyam.py`), enterprise category check & EMD waiver |
+| **MCA21 Corporate Identity** | Mock (API) / Implemented (Format & Lookup) | CIN/LLPIN format validation & company director cross-reference check |
+| **EPFO Labor Compliance** | Planned / Mock Adapter | Base registry adapter schema and labor law rule stubs (`pipeline/registry_adapters/`) |
+| **ESIC Labor Compliance** | Planned / Mock Adapter | Base registry adapter schema and statutory employee insurance citations |
+| **Startup India Status** | Planned / Mock Adapter | Document classifier pattern `STARTUP_CERT` & regulatory citations under GFR 173(i) |
+| **NSIC Registration** | Planned / Mock Adapter | Single Point Registration Scheme (SPRS) EMD waiver under rule `R-COM-01` |
+| **OEM Authorization** | Document Verification | Manufacturer Authorization Form (MAF) tender-specific validator (`R-TEC-01`) |
+| **DigiLocker Integration** | Planned / Adapter | SHA-256 Content-Addressable Storage (CAS) document fingerprinting |
+| **Make in India (PPP-MII)** | Rule + Document Verification | Class-I ($\ge 50\%$) and Class-II ($\ge 20\%$) local content formula (`R-REG-01`) |
+| **Blacklisting / Debarment** | Mock Feed + Implemented Rule | CPPP / GeM national debarment registry matcher (`pipeline/compliance/cross_verifier.py`) |
+| **Tender-Specific Rules** | Implemented | 34 CPCL Goods criteria under GFR 2017 in declarative YAML (`rules/cpcl_goods_v1.yaml`) |
+
+### Synthetic Demonstration Data Guarantee
+
+All demonstration vendor packages, tax identifiers, and financial certificates are synthetic datasets generated for reproducible hackathon evaluation under CPCL Tender `CPCL/MM/2026/PUMP-217`:
 
 ```
 ┌─────────────────────────────────┬──────────────┬────────────┬────────────────────────────────────────────────────────┐
@@ -387,7 +452,7 @@ python scripts/release_audit.py
 │ 1. Meridian Flow Systems        │ PASS         │ 0.0 (LOW)  │ Clean, fully compliant Tier-1 pump manufacturer.       │
 │ 2. Sri Kaveri Engineering Works │ REVIEW       │ 22.0 (LOW) │ Minor MSE legal suffix variation; turnover exempted.   │
 │ 3. Bharat Hydrotech Corp        │ FAIL         │ 65.0 (HIGH)│ Hard PAN-in-GSTIN mismatch & local content deficit.    │
-│ 4. Nova Pumps & Systems Ltd     │ WARN         │ 72.0 (HIGH)│ Forensic PDF timestamp edit & prompt injection token.  │
+│ 4. Nova Pumps & Systems Ltd     │ WARN         │ 72.0 (HIGH)│ PDF metadata modification & prompt injection token.    │
 │ 5. Zenith Infra Tech Pvt Ltd    │ FAIL         │ 95.0 (HIGH)│ Cancelled GSTIN registration & active CVC debarment.   │
 └─────────────────────────────────┴──────────────┴────────────┴────────────────────────────────────────────────────────┘
 ```
@@ -471,7 +536,7 @@ cd frontend && npm run dev
 ```
 SIH26100/
 ├── backend/          # FastAPI REST API, SQLAlchemy 2.0 models, authentication, and services
-├── frontend/         # React 18 + Vite + TypeScript application with vigilance dark theme
+├── frontend/         # React 18 + Vite + TypeScript interface for reviewing procurement exceptions and evidence
 ├── pipeline/         # 11-step asynchronous bid verification and document processing pipeline
 ├── rules/            # Declarative YAML rule definitions (34 CPCL Goods rules under GFR 2017)
 ├── data/             # Content-Addressable Storage (CAS) for raw PDF assets
@@ -492,7 +557,7 @@ SIH26100/
 |---|---|---|---|
 | **Ritik** | Lead System Architect & Backend Engineer | Modular monolith architecture, FastAPI services, SQLAlchemy ORM, SHA-256 audit ledger | [Contributors](https://github.com/ratnesh-ml/SIH26100/graphs/contributors) |
 | **Ratnesh** | AI Pipeline & OCR Engineer | 11-step pipeline orchestration, hybrid OCR, TF-IDF classification, entity resolution | [Contributors](https://github.com/ratnesh-ml/SIH26100/graphs/contributors) |
-| **Team Member 3** | Frontend & UX Design Engineer | React 18 UI, split-screen evidence inspector, vigilance dark theme, demo tour | [Contributors](https://github.com/ratnesh-ml/SIH26100/graphs/contributors) |
+| **Team Member 3** | Frontend & UX Design Engineer | React 18 UI, split-screen evidence inspector, exception review interface, demo tour | [Contributors](https://github.com/ratnesh-ml/SIH26100/graphs/contributors) |
 | **Team Member 4** | Domain Rules & Compliance Specialist | 34 CPCL Goods criteria, GFR 2017 mapping, CVC dossier generator | [Contributors](https://github.com/ratnesh-ml/SIH26100/graphs/contributors) |
 | **Team Member 5** | Security & DevOps Engineer | Ingestion defenses, CAS storage, Docker Compose stack, release audit runner | [Contributors](https://github.com/ratnesh-ml/SIH26100/graphs/contributors) |
 | **Team Member 6** | QA & Evaluation Lead | Test suite development (380 backend tests), benchmarking, evaluation dataset | [Contributors](https://github.com/ratnesh-ml/SIH26100/graphs/contributors) |
