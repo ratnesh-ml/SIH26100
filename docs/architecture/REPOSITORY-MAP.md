@@ -75,25 +75,29 @@ SIH26100/
 │   ├── evaluate.py                # Ground-truth accuracy and benchmark evaluation harness
 │   └── backup_restore.py          # Standalone JSON snapshot backup and restore engine
 │
-└── docs/                          # Humanized & Categorized Technical Documentation
-    ├── README.md                  # Central documentation navigation hub
-    ├── ONE-MINUTE-TOUR.md         # 60-second executive overview for evaluators
-    ├── REPOSITORY-ORGANIZATION-AUDIT.md # Audit of redundancy, naming, and DX
-    ├── REFACTOR-MAP.md            # Mapping of old paths to new domain locations
-    ├── architecture/              # REPOSITORY-MAP.md, DATA-FLOW.md, FEATURE-TRACEABILITY.md
-    ├── development/               # DEVELOPER-GUIDE.md, WHERE-TO-CHANGE.md, INTERFACE-CONTRACTS.md
-    ├── ai/                        # OCR.md, EXTRACTION.md, NORMALIZATION.md, REGISTRY.md
-    ├── compliance/                # RULE-ENGINE.md (34 GFR 2017 & CPCL Goods rules)
-    ├── risk/                      # RISK-ENGINE.md, ANOMALIES.md, GRAPH.md
-    ├── evidence/                  # EVIDENCE.md, PDF-CONTRACT.md
-    ├── security/                  # SECURITY.md, SECURITY-AUDIT.md, AUTH.md
-    ├── api/                       # FINAL-API.md (24 REST endpoint specifications)
-    ├── database/                  # FINAL-DATABASE.md (18 relational tables)
-    ├── deployment/                # FINAL-SETUP.md (Zero-Docker & Docker Compose manual)
-    ├── testing/                   # RELEASE-CHECKLIST.md, EVALUATION.md, PERFORMANCE.md
-    ├── demo/                      # DEMO-NARRATIVE.md, DEMO-SCRIPT.md, SCREENSHOTS.md, README.md
-    ├── decisions/                 # ADR-001 through ADR-008 (Key architectural decisions)
-    └── archive/                   # Historical 00–06 research and legacy phase logs
+├── docs/                          # Humanized & Categorized Technical Documentation
+│   ├── README.md                  # Central documentation navigation hub
+│   ├── ONE-MINUTE-TOUR.md         # 60-second executive overview for evaluators
+│   ├── REPOSITORY-ORGANIZATION-AUDIT.md # Audit of redundancy, naming, and DX
+│   ├── REFACTOR-MAP.md            # Mapping of old paths to new domain locations
+│   ├── architecture/              # REPOSITORY-MAP.md, DATA-FLOW.md, FINAL-ROOT-DECISION.md, FEATURE-TRACEABILITY.md
+│   ├── development/               # DEVELOPER-GUIDE.md, WHERE-TO-CHANGE.md, WHERE-EVERYTHING-LIVES.md
+│   ├── ai/                        # OCR.md, EXTRACTION.md, NORMALIZATION.md, REGISTRY.md
+│   ├── compliance/                # RULE-ENGINE.md (34 GFR 2017 & CPCL Goods rules)
+│   ├── risk/                      # RISK-ENGINE.md, ANOMALIES.md, GRAPH.md
+│   ├── evidence/                  # EVIDENCE.md, PDF-CONTRACT.md
+│   ├── security/                  # SECURITY.md, SECURITY-AUDIT.md, AUTH.md
+│   ├── api/                       # FINAL-API.md (24 REST endpoint specifications)
+│   ├── database/                  # FINAL-DATABASE.md (18 relational tables)
+│   ├── deployment/                # FINAL-SETUP.md (Zero-Docker & Docker Compose manual)
+│   ├── testing/                   # RELEASE-CHECKLIST.md, EVALUATION.md, PERFORMANCE.md
+│   ├── demo/                      # DEMO-NARRATIVE.md, DEMO-SCRIPT.md, SCREENSHOTS.md, README.md
+│   ├── decisions/                 # ADR-001 through ADR-008 (Key architectural decisions)
+│   └── archive/                   # Historical 00–06 research and legacy phase logs
+│
+└── archive/                       # Top-Level Archive for Deprecated Assets
+    ├── README.md                  # Archival policy and catalog
+    └── legacy-ui/                 # Offline marked.js viewer (index.html, css, js)
 ```
 
 ---
