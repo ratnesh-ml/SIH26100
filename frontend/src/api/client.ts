@@ -25,7 +25,8 @@ import {
   RAGKnowledgeBaseStatus,
 } from '../types';
 
-const API_BASE = (import.meta.env.VITE_API_URL ? `${(import.meta.env.VITE_API_URL as string).replace(/\/$/, '')}/api/v1` : '/api/v1');
+const envApiUrl = typeof import.meta !== 'undefined' && (import.meta as any)?.env?.VITE_API_URL;
+const API_BASE = envApiUrl ? `${String(envApiUrl).replace(/\/$/, '')}/api/v1` : '/api/v1';
 const TOKEN_STORAGE_KEY = 'vigilbid_auth_token';
 const REQUEST_TIMEOUT_MS = 15_000;
 
