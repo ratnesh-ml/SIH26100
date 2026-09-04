@@ -58,8 +58,8 @@ for fname, url in target_mapping.items():
         print(f"Skipping {fname} - no URL", flush=True)
         continue
     dest = os.path.join(screenshots_dir, fname)
-    print(f"Downloading {fname}...", flush=True)
-    res = subprocess.run(['curl.exe', '-s', '-L', '-o', dest, url])
+    full_res_url = url + '=s0' if not url.endswith('=s0') else url
+    res = subprocess.run(['curl.exe', '-s', '-L', '-o', dest, full_res_url])
     if res.returncode == 0 and os.path.exists(dest) and os.path.getsize(dest) > 1000:
         print(f"  Downloaded {fname} successfully ({os.path.getsize(dest)} bytes)", flush=True)
     else:
