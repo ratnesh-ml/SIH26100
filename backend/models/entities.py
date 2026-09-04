@@ -27,6 +27,7 @@ from backend.models.base import Base, TimestampMixin, UUIDPrimaryKeyMixin
 # Dialect-adaptive types: native on PostgreSQL, compatible on SQLite
 JSON_TYPE = JSON().with_variant(JSONB, "postgresql")
 UUID_TYPE = Uuid(as_uuid=True)
+BIGINT_PK = BigInteger().with_variant(Integer, "sqlite")
 
 
 class User(Base, UUIDPrimaryKeyMixin, TimestampMixin):
@@ -194,7 +195,7 @@ class DocumentPage(Base):
         Index("ix_document_pages_doc_id", "document_id"),
     )
 
-    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(BIGINT_PK, primary_key=True, autoincrement=True)
     document_id: Mapped[uuid.UUID] = mapped_column(UUID_TYPE, ForeignKey("documents.id"), nullable=False)
     page_no: Mapped[int] = mapped_column(Integer, nullable=False)
     text: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
@@ -213,7 +214,7 @@ class ExtractedField(Base):
         Index("ix_extracted_fields_field_name", "field_name"),
     )
 
-    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(BIGINT_PK, primary_key=True, autoincrement=True)
     document_id: Mapped[uuid.UUID] = mapped_column(UUID_TYPE, ForeignKey("documents.id"), nullable=False)
     field_name: Mapped[str] = mapped_column(String(100), nullable=False)
     value: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
@@ -232,7 +233,7 @@ class VerificationEvent(Base):
     __tablename__ = "verification_events"
     __table_args__ = (Index("ix_verification_events_bidder_id", "bidder_id"),)
 
-    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(BIGINT_PK, primary_key=True, autoincrement=True)
     bidder_id: Mapped[uuid.UUID] = mapped_column(UUID_TYPE, ForeignKey("bidders.id"), nullable=False)
     document_id: Mapped[Optional[uuid.UUID]] = mapped_column(UUID_TYPE, ForeignKey("documents.id"), nullable=True)
     verifier: Mapped[str] = mapped_column(String(100), nullable=False)
@@ -280,7 +281,7 @@ class AnomalySignal(Base):
     __tablename__ = "anomaly_signals"
     __table_args__ = (Index("ix_anomaly_signals_bidder_id", "bidder_id"),)
 
-    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(BIGINT_PK, primary_key=True, autoincrement=True)
     bidder_id: Mapped[uuid.UUID] = mapped_column(UUID_TYPE, ForeignKey("bidders.id"), nullable=False)
     code: Mapped[str] = mapped_column(String(50), nullable=False)
     severity: Mapped[str] = mapped_column(String(20), nullable=False)
@@ -295,7 +296,7 @@ class RiskDriver(Base):
     __tablename__ = "risk_drivers"
     __table_args__ = (Index("ix_risk_drivers_bidder_id", "bidder_id"),)
 
-    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(BIGINT_PK, primary_key=True, autoincrement=True)
     bidder_id: Mapped[uuid.UUID] = mapped_column(UUID_TYPE, ForeignKey("bidders.id"), nullable=False)
     driver: Mapped[str] = mapped_column(String(255), nullable=False)
     points: Mapped[int] = mapped_column(Integer, default=0)
@@ -335,7 +336,7 @@ class BidderLink(Base):
     __tablename__ = "bidder_links"
     __table_args__ = (Index("ix_bidder_links_tender_id", "tender_id"),)
 
-    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(BIGINT_PK, primary_key=True, autoincrement=True)
     tender_id: Mapped[uuid.UUID] = mapped_column(UUID_TYPE, ForeignKey("tenders.id"), nullable=False)
     bidder_a: Mapped[uuid.UUID] = mapped_column(UUID_TYPE, ForeignKey("bidders.id"), nullable=False)
     bidder_b: Mapped[uuid.UUID] = mapped_column(UUID_TYPE, ForeignKey("bidders.id"), nullable=False)
@@ -374,7 +375,7 @@ class AuditLog(Base):
         Index("ix_audit_log_action", "action"),
     )
 
-    seq: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    seq: Mapped[int] = mapped_column(BIGINT_PK, primary_key=True, autoincrement=True)
     ts: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     actor_id: Mapped[Optional[uuid.UUID]] = mapped_column(UUID_TYPE, nullable=True)
     role: Mapped[str] = mapped_column(String(50), nullable=False)

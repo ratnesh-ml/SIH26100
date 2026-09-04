@@ -1,6 +1,7 @@
 """Document Service orchestrating file ingestion, deduplication, storage safety, and database persistence."""
 
 from collections import OrderedDict
+from datetime import datetime, timezone
 import logging
 from pathlib import Path
 from typing import BinaryIO, Optional
@@ -133,7 +134,7 @@ class DocumentService:
                             page_count=item.page_count,
                             doc_type="UNKNOWN",
                             storage_path=str(dest_path),
-                            created_at=doc.created_at if hasattr(doc, "created_at") and doc.created_at else None,
+                            created_at=(doc.created_at if hasattr(doc, "created_at") and doc.created_at else datetime.now(timezone.utc)),
                         )
                     )
 

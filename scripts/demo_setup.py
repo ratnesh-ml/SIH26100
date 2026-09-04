@@ -403,6 +403,12 @@ async def run_stage_8_process_and_precompute(session):
     """Stage 8: Process & Precompute Findings, Anomalies, Risk, Decisions, Links, Audit & Cache."""
     logger.info("[Stage 8/9] Processing demo data, populating criteria findings, forensic anomalies & audit chain...")
 
+    # Idempotency check: if demo data is already precomputed, skip insertion
+    existing_dec = await session.get(Decision, uuid.uuid5(BIDDER_IDS["meridian"], "ACCEPT"))
+    if existing_dec:
+        logger.info("Demo findings, decisions, and audit trail already precomputed. Skipping redundant population.")
+        return
+
     officer_id = DEV_USERS[0]["id"]
     prev_hash = GENESIS_HASH
 
@@ -461,27 +467,34 @@ async def run_stage_8_process_and_precompute(session):
         ],
     }
 
+    from sqlalchemy import delete
+    # Ensure idempotency across runs
+    await session.execute(delete(Finding).where(Finding.bidder_id.in_(list(BIDDER_IDS.values()))))
+    await session.execute(delete(AnomalySignal).where(AnomalySignal.bidder_id.in_(list(BIDDER_IDS.values()))))
+    await session.execute(delete(RiskDriver).where(RiskDriver.bidder_id.in_(list(BIDDER_IDS.values()))))
+    await session.execute(delete(BidderLink).where(BidderLink.tender_id == TENDER_ID))
+    await session.execute(delete(Decision).where(Decision.bidder_id.in_(list(BIDDER_IDS.values()))))
+    await session.commit()
+
     # Clean existing findings & populate
     for bidder_id, f_list in findings_spec.items():
         for crit_code, rule_id, status, title, expl, doc_name, page_no, bbox in f_list:
             crit_id = CRITERIA_IDS[crit_code]
             fid = uuid.uuid5(bidder_id, f"{crit_code}_{rule_id}")
-            existing_f = await session.get(Finding, fid)
-            if not existing_f:
-                finding = Finding(
-                    id=fid,
-                    bidder_id=bidder_id,
-                    criterion_id=crit_id,
-                    rule_id=rule_id,
-                    rule_version="1.0",
-                    status=status,
-                    title=title,
-                    explanation=expl,
-                    citation={"document": doc_name, "page": page_no, "bbox": bbox},
-                    evidence=[{"field": crit_code, "status": status, "doc": doc_name}],
-                    confidence=0.98,
-                )
-                session.add(finding)
+            finding = Finding(
+                id=fid,
+                bidder_id=bidder_id,
+                criterion_id=crit_id,
+                rule_id=rule_id,
+                rule_version="1.0",
+                status=status,
+                title=title,
+                explanation=expl,
+                citation={"document": doc_name, "page": page_no, "bbox": bbox},
+                evidence=[{"field": crit_code, "status": status, "doc": doc_name}],
+                confidence=0.98,
+            )
+            session.add(finding)
 
     # 2. Populate Forensic Anomalies (Bidder D Nova Pumps)
     nova_anomalies = [
@@ -653,6 +666,8 @@ async def orchestrate_demo_setup(reset: bool = False, quick: bool = False, seed_
 
     if seed_only:
         logger.info("Seed-only mode active: Skipping application launch.")
+        engine = get_async_engine()
+        await engine.dispose()
         return
 
     # Stage 9

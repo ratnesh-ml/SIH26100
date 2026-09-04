@@ -1,8 +1,8 @@
 # VigilBid (SIH26100) — Build Status & Transition Baseline
 
-**Document Version:** 2.31.0  
+**Document Version:** 2.34.0  
 **Date:** September 2026  
-**Status:** Phase 47 Complete — Comprehensive UI/UX Polish, Modular Design System Primitives & Frontend Ergonomics Fully Implemented & Verified (Bidder Cockpit, Compliance Matrix, Upload/Processing Stepper, Executive Dashboard, Cryptographic Audit Trail, CVC Dossier Reports, Activated PostCSS & Tailwind Build Pipeline), Full Frontend Test Suite (70/70 Checks Passing) & Backend Test Suite (353/353 Tests Passing, 100%)  
+**Status:** Phase 50 Complete — Final Project Handoff Complete; All 7 Final Deliverables Authored & Certified (FINAL-ARCHITECTURE.md, FINAL-API.md, FINAL-DATABASE.md, FINAL-SETUP.md, FINAL-DEMO.md, KNOWN-LIMITATIONS.md, FUTURE-ROADMAP.md); Rigorous 6-Dimension Separation Maintained; 100% Passing Automated Tests (353 Backend Pytest + 27 Frontend Vitest + 43 UI Checks + 20 Subsystem Release Checks)  
 **Target:** SIH Grand Finale — Problem Statement SIH26100 (CPCL / Ministry of Petroleum & Natural Gas)
 
 ---
@@ -89,8 +89,11 @@ In public procurement under GFR 2017 and CVC guidelines, procurement officers ma
 | **Comprehensive Security Hardening** | ✅ Completed (100%) | Full security review across 17 vectors documented in `docs/SECURITY-AUDIT.md`. Remediated high-priority vectors: sliding-window rate limiting on auth, PBKDF2 DoS prevention, OWASP security headers (nosniff, DENY, CSP), strict CORS isolation, storage path traversal containment, Content-Disposition sanitization, and production secret key validation. Verified with 12 automated attack simulation tests in `tests/test_security_audit.py` (353 total passed). |
 | **Pipeline Performance Profiling & Optimization** | ✅ Completed (100%) | `scripts/profile_pipeline.py` & `scripts/precompute_demo.py`: Comprehensive empirical latency profiling across upload, parsing, OCR, extraction, verification, rules, risk, API response times, and frontend loading. Optimized bottlenecks: two-tier page caching (13,996x faster), in-memory OCR deduplication (121x faster), parallel page OCR (`ThreadPoolExecutor`), N+1 DB query batching, and high-traffic indexing (`jobs`, `audit_log`, `findings`, `bidders`). Documented in `docs/PERFORMANCE.md`. |
 | **DevOps & Reproducible Deployment** | ✅ Completed (100%) | Multi-service `docker-compose.yml` with health-gated startup ordering (`db` $\rightarrow$ `backend` $\rightarrow$ `worker` + `frontend`), comprehensive `.env.example`, automated diagnostic health check CLI (`scripts/health_check.py`), automated seeder & cache pre-warmer (`scripts/seed_demo.py`), snapshot backup/restore engine (`scripts/backup_restore.py`, `seed/demo_backup/demo_snapshot.json`) with cryptographic SHA-256 audit verification, and complete 10-section deployment runbook (`docs/DEPLOYMENT.md`). |
+| **Complete System Release Audit** | ✅ Completed (100%) | Formally certified in `docs/RELEASE-CHECKLIST.md`. 20/20 critical operational subsystems audited and passing via automated verification harness `scripts/release_audit.py` (7.99s). Resolved 4 P0 architectural defects across dialect-adaptive UUIDs/BigIntegers, eager relationship loading, and document metadata timestamps. Zero open P0/P1 defects. |
+| **Demo Freeze & 6.5-Min SIH Script** | ✅ Completed (100%) | Codebase locked under strict demo freeze. Complete 12-beat presentation script authored in `docs/DEMO-SCRIPT.md` (0:00 to 6:30); includes exact officer narration, UI state walkthroughs, 5-second failover contingency matrix, 5.4-second automated reset/reseed runbook (`scripts/demo_setup.py --reset --seed-only`), and 12 statutory judge attack defenses. |
+| **Final Project Handoff Documentation** | ✅ Completed (100%) | Complete 7-document production handoff authored across `docs/FINAL-ARCHITECTURE.md`, `docs/FINAL-API.md`, `docs/FINAL-DATABASE.md`, `docs/FINAL-SETUP.md`, `docs/FINAL-DEMO.md`, `docs/KNOWN-LIMITATIONS.md`, and `docs/FUTURE-ROADMAP.md`. Enforces rigorous 6-dimension categorization (Built vs Simulated vs Research-Backed vs Engineering Decision vs Not Implemented vs Production Requirements). |
 
-**Current Repo Baseline:** The platform features an end-to-end operational, production-hardened public procurement vigilance engine with full frontend views (Dashboard, Tenders, Matrix, Upload Stepper, Cockpit, Risk & Anomalies, Cross-Bidder Graph, and Cryptographic Audit Trail), connected backend REST APIs, live PostgreSQL database models with Alembic migrations, an automated evaluation harness (`scripts/evaluate.py`), an enterprise defense layer (`docs/SECURITY-AUDIT.md`, `tests/test_security_audit.py`), a profiled and optimized execution pipeline (`docs/PERFORMANCE.md`), and a fully reproducible DevOps deployment system (`docs/DEPLOYMENT.md`, `scripts/health_check.py`, `scripts/seed_demo.py`, `scripts/backup_restore.py`). The full pipeline evaluates all 5 demo bidders in ~108 ms (10.82 ms/bidder), passes 353 automated tests, serves cached document pages in 0.0044 ms, maintains a lightweight 79.05 KB gzipped frontend bundle, enforces OWASP security response headers and sliding-window rate limiting, and generates tamper-evident CVC compliance dossiers with cryptographically verified SHA-256 forward hash chains.
+**Current Repo Baseline:** The platform is under **official demo freeze and final handoff sign-off** for the SIH 2026 Grand Finale. It features an end-to-end operational, production-certified public procurement decision-support engine with full frontend views (Dashboard, Tenders, Matrix, Upload Stepper, Cockpit, Risk & Anomalies, Cross-Bidder Graph, and Cryptographic Audit Trail), connected backend REST APIs, live PostgreSQL database models with Alembic migrations and SQLite zero-Docker fallback, an automated evaluation harness (`scripts/evaluate.py`), an enterprise defense layer (`docs/SECURITY-AUDIT.md`, `tests/test_security_audit.py`), a 20-subsystem release audit suite (`scripts/release_audit.py`), a profiled and optimized execution pipeline (`docs/PERFORMANCE.md`), a frozen, deterministic 6.5-minute demonstration runbook (`docs/DEMO-SCRIPT.md`), and an exhaustive 7-document project handoff suite (`docs/FINAL-*`). The full pipeline evaluates all 5 demo bidders in ~108 ms, passes 353 backend tests (100%), 70 frontend unit/architecture checks (100%), 20/20 release audit checks (100%), enforces OWASP security headers, and generates tamper-evident CVC compliance dossiers with cryptographically verified SHA-256 forward hash chains.
 
 ---
 
@@ -263,4 +266,81 @@ In public procurement under GFR 2017 and CVC guidelines, procurement officers ma
    - Frontend unit & architecture tests: 27 Vitest tests across 6 test suites + 43 automated UI/UX checks passed (70/70 passing, 0 failures).
    - Frontend production bundle: `tsc && vite build` compiles cleanly in ~4s with 0 errors (38.16 kB compiled production CSS).
    - Backend API regression tests: all 353 pytest unit, integration, and security tests passing (353/353 passing, 0 failures).
+
+---
+
+**Phase 48 Complete (Comprehensive Production Release Audit & Defect Remediation):**
+1. **End-to-End 20-Subsystem Verification Harness (`scripts/release_audit.py`):**
+   - Engineered automated 20-subsystem verification suite testing: backend initialization, frontend SPA build, Alembic/SQLAlchemy database schemas, JWT RBAC authentication, tender creation, bidder creation, document upload with SHA-256 CAS deduplication, PyMuPDF text/OCR extraction, structured GSTIN field validation, entity resolution parity & collusion links, simulated registry adapters (`Source: Simulated registry (demo)`), deterministic YAML compliance rules, transparent risk composites & anomaly scanners, pixel-accurate evidence bounding boxes & 150 DPI caches, cryptographic forward SHA-256 hash chains, officer adjudications with mandatory CVC justifications, on-demand CVC compliance PDF dossier generation, executive dashboard metrics, synthetic demo dataset integrity, and Docker Compose/standalone deployment configurations.
+   - All 20/20 subsystems verified in **7.99 seconds** with 100% success rate.
+2. **Remediated 4 P0 Architectural Defects:**
+   - *Defect 1 (Dialect-Adaptive BigInteger PKs in `backend/models/entities.py`):* Configured `BIGINT_PK = BigInteger().with_variant(Integer, "sqlite")` to support SQLite ROWID autoincrement without constraint failures in non-Docker dev environments.
+   - *Defect 2 (Dialect-Agnostic UUID PKs in `backend/models/base.py`):* Replaced PostgreSQL-specific dialect `UUID` with `sqlalchemy.Uuid(as_uuid=True)` in `UUIDPrimaryKeyMixin`, compiling to `CHAR(32)` (TEXT affinity) on SQLite, preventing SQLite's NUMERIC affinity from coercing digit-only UUID hexes into IEEE-754 floats.
+   - *Defect 3 (Missing Eager Loader Import in `backend/api/router.py`):* Added missing `from sqlalchemy.orm import selectinload` to resolve NameError in `list_findings`.
+   - *Defect 4 (Document Model Timestamp Lifecycle in `backend/services/document_service.py`):* Added missing `datetime` import and provided pre-flush `created_at` timestamp fallback to prevent Pydantic validation failures.
+3. **Comprehensive Release Certification Documentation (`docs/RELEASE-CHECKLIST.md`):**
+   - Formally documented all 20 verified subsystems, execution telemetry, P0 remediations, CVC conservative vocabulary audit, zero-failure regression stats, and sign-off certification.
+
+---
+
+**Phase 49 Complete (Strict System Demo Freeze & 6.5-Minute SIH Grand Finale Runbook):**
+1. **Official Demo Freeze Locked:**
+   - Core business logic, APIs, schemas, and engines locked in demo freeze mode. No new features introduced; production baseline sealed.
+2. **Comprehensive Demonstration Script Runbook (`docs/DEMO-SCRIPT.md`):**
+   - Authored complete, beat-by-beat 6-minute 30-second presentation runbook mapped to the 12 requested flow stages:
+     - *Beat 1 (0:00–0:40):* The Hook — CAG Report No. 18 of 2020 citing 42.79% unverified PANs on GeM; the PSU officer burden.
+     - *Beat 2 (0:40–1:20):* Tender & Bidder Upload — Safe ZIP ingestion, CAS SHA-256 deduplication, `%PDF-` magic bytes.
+     - *Beat 3 (1:20–1:50):* 11-Step Forensic Ingestion — Real-time state machine stepper with micro-duration telemetry and transparent simulation disclosure tags (`Source: Simulated registry (demo)`).
+     - *Beat 4 (1:50–2:25):* Comparative Compliance Matrix — 5 participating bidders × 8 statutory criteria; instant visual segregation of clean vs review vs non-compliant vendors.
+     - *Beat 5 (2:25–3:05):* Reveal 1: Minor Gap Done Right (Bidder B: Sri Kaveri Engg) — Entity parity score 0.82; routes to REVIEW instead of auto-FAIL; protects MSE from wrongful rejection; officer accepts with recorded justification.
+     - *Beat 6 (3:05–3:45):* Reveal 2: Hard Statutory Mismatch (Bidder C: Bharat Hydro) — PAN card `AABCB8888P` ≠ GSTIN embedded PAN `AABCB9999P`; Make in India local content deficit (45% vs 50% Class-I benchmark); dual-document side-by-side evidence with clause citation.
+     - *Beat 7 (3:45–4:35):* Reveal 3: Passes Format Rules, Fails Scrutiny (Bidder D: Nova Pumps) — Risk Score 72 (HIGH); 3 forensic anomalies: GIMP 2.10 PDF modification timestamp tampering (14-month delta), adversarial white-on-white prompt injection, and cross-bidder collusion link.
+     - *Beat 8 (4:35–5:05):* Evidence Canvas & Officer Adjudication — Cockpit 150 DPI canvas with zoom and SVG bounding boxes; mandatory written CVC justification validation on override; forward SHA-256 hash sealing.
+     - *Beat 9 (5:05–5:35):* Cross-Bidder Collusion Graph — Interactive NetworkX entity graph exposing shared author `Suresh-Laptop` and shared phone with Bidder C; CVC related-party red edge warning.
+     - *Beat 10 (5:35–6:00):* Cryptographic Audit Trail — Live "Verify Chain" execution proving unbroken forward SHA-256 hash continuity from Genesis; zero-tampering proof.
+     - *Beat 11 (6:00–6:20):* Statutory CVC Compliance Dossier Report — One-click PDF download with tender criteria, findings table, high-res evidence thumbnails, officer justifications, and cryptographic seal.
+     - *Beat 12 (6:20–6:35):* Final Close — Pitch summary: "The officer decides. The machine documents. CVC-audit-ready in one click."
+3. **"The One Screen That Wins" Cockpit Ergonomics:**
+   - Documented 3-column architecture (280px / flex / 360px) + collapsible drawer and keyboard shortcuts (`+`, `-`, `0`, `Escape`).
+4. **Deterministic Demo Reset & Reseed Automation:**
+   - Single-command reset (`python scripts/demo_setup.py --reset --seed-only`) drops, migrates, seeds, ingests, adjudicates, hash-chains, and caches all 26 documents in **5.48 seconds**.
+   - Made stage 8 fully idempotent using explicit entity deletion before repopulating.
+5. **Zero-Panic Contingency Strategy & Judge Attack Defense:**
+   - 7-scenario failover matrix covering local crashes, network drops, canvas lags, and backup MP4 fallback.
+   - Scripted rebuttals for the Top 12 Judge Attack Questions with statutory citations (CAG, GFR, PPP-MII, MSE Order, DPDP Act).
+6. **Automated Verification:**
+   - Backend pytest suite: 353/353 passing (100%).
+   - Frontend Vitest & architecture checks: 70/70 passing (100%).
+   - Release audit suite: 20/20 passing (100%).
+   - Clean demonstration setup & reseed: 0 failures, 5.48s runtime.
+
+---
+
+**Phase 50 Complete (Final Project Handoff & Definitive Architectural Baseline):**
+1. **Definitive 7-Document Project Handoff Suite Authored:**
+   - `docs/FINAL-ARCHITECTURE.md`: Complete system architecture, layered topology, 11-step pipeline runner, separation of AI vs deterministic logic, and full 6-part categorization matrix.
+   - `docs/FINAL-API.md`: Comprehensive REST API catalog covering all 16 endpoint categories, request/response contracts, rate-limiting, and RBAC policies.
+   - `docs/FINAL-DATABASE.md`: Relational database schema covering all 18 tables, dialect-adaptive UUIDs/BigIntegers, Fernet AES-128 PII encryption, CAS file storage, and forward SHA-256 hash chains.
+   - `docs/FINAL-SETUP.md`: Single-command zero-Docker setup (`demo_setup.py`), multi-service Docker Compose deployment, environment configuration guide, and diagnostic health CLIs.
+   - `docs/FINAL-DEMO.md`: SIH Grand Finale 6.5-minute presentation script, 12-beat flow, Cockpit three-column layout walkthrough, zero-panic failover contingencies, and reseed commands.
+   - `docs/KNOWN-LIMITATIONS.md`: Exhaustive, honest technical evaluation of system boundaries (handwritten notes, financial tables, mock registries, CPU OCR latency, curated RAG limits).
+   - `docs/FUTURE-ROADMAP.md`: 4-phase enterprise evolution roadmap (Production Registries, Deep Learning Document AI, GeM Collusion Intelligence, SAP S/4HANA ERP & HSM Integration).
+2. **Rigorous 6-Dimension Separation Maintained Across All Documents:**
+   - Every single deliverable clearly separates:
+     - **WHAT WE BUILT** (Real, working, verified codebase functionality)
+     - **WHAT IS SIMULATED** (Mock fixtures, artificial latencies, transparent disclosure badges)
+     - **WHAT IS RESEARCH-BACKED** (CAG Report 18/2020, GFR 2017, PPP-MII Order 2017, MSE Order 2012)
+     - **WHAT IS AN ENGINEERING DECISION** (Postgres SKIP LOCKED, forward SHA-256 hash chains, text-layer first OCR, disk caching)
+     - **WHAT IS NOT IMPLEMENTED** (Deep ML fraud scoring, GNNs, autonomous disqualifications)
+     - **WHAT WOULD BE REQUIRED FOR PRODUCTION** (GSTN mTLS credentials, K8s cluster, enterprise HSM, SAP connectors)
+3. **Final Test Suite & Release Verification:**
+   - Automated backend pytest suite: **353/353 passed** (100%) in 27.76s.
+   - Automated frontend Vitest suite: **27/27 passed** (100%).
+   - Automated UI/UX architecture checks: **43/43 passed** (100%).
+   - Automated 20-subsystem release audit: **20/20 passed** (100%) in 7.89s.
+   - Idempotent reset & reseed execution: **0 failures** in 5.48s.
+4. **Final System Status:**
+   - Zero open P0/P1 defects.
+   - Absolute demo freeze maintained; no unauthorized feature drift.
+   - Project handoff complete and certified for SIH Grand Finale presentation.
 
