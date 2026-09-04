@@ -1,0 +1,47 @@
+services:
+  # 1. FastAPI Python Backend Web Service
+  - type: web
+    name: vigilbid-backend
+    env: docker
+    dockerfilePath: backend/Dockerfile
+    dockerContext: .
+    plan: free
+    region: singapore
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: PORT
+        value: 8000
+      - key: PROJECT_NAME
+        value: VigilBid (SIH26100)
+      - key: SECRET_KEY
+        generateValue: true
+      - key: FERNET_KEY
+        value: uE_3m_9sF9yKz6T-Yh1N9P0wZ7vL5k4j2h1g8f7e6d4=
+      - key: STORAGE_DIR
+        value: /app/data/storage
+      - key: DATABASE_URL
+        value: sqlite:///./data/vigilbid.db
+      - key: DATABASE_SYNC_URL
+        value: sqlite:///./data/vigilbid.db
+      - key: PRIMARY_OCR
+        value: tesseract
+      - key: FALLBACK_OCR
+        value: tesseract
+      - key: LLM_ENABLED
+        value: "false"
+
+  # 2. Vite React Frontend Static Site
+  - type: web
+    name: vigilbid-frontend
+    env: static
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: VITE_API_URL
+        value: https://vigilbid-backend.onrender.com
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
