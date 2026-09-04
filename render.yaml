@@ -17,7 +17,7 @@ services:
       - key: SECRET_KEY
         generateValue: true
       - key: FERNET_KEY
-        value: uE_3m_9sF9yKz6T-Yh1N9P0wZ7vL5k4j2h1g8f7e6d4=
+        value: eEfm-ufKTI-05Mh-zaVDtcx0LoRrsungXqFM7ihu34U=
       - key: STORAGE_DIR
         value: /app/data/storage
       - key: DATABASE_URL
