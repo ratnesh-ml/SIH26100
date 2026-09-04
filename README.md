@@ -612,21 +612,40 @@ We believe in complete transparency regarding the current implementation scope:
 
 ---
 
-## 🎯 SIH Traceability Matrix
+## 🎯 SIH26100 Requirement Coverage & Evaluator Audit
 
-| SIH26100 Requirement | VigilBid Capability | Implementation Details | Codebase Artifact |
-|---|---|---|---|
-| **Multi-document ingestion** | Safe ZIP extraction & CAS storage | Validates magic bytes, enforces 100:1 ratio, assigns SHA-256 paths | `pipeline/steps/step01_ingest.py` |
-| **Document classification** | Automated document typing | Identifies 13 document types via TF-IDF tokenization and layout heuristics | `pipeline/steps/step02_classify.py` |
-| **Scanned document OCR** | Hybrid text layer & local OCR | Fast PyMuPDF extraction with automatic fallback to Tesseract 5.0 | `pipeline/ocr/ocr_engine.py` |
-| **Entity resolution** | Cross-document consistency | PAN-in-GSTIN containment checks & Jaro-Winkler string similarity | `pipeline/steps/step06_entity_resolution.py` |
-| **GFR & CVC compliance** | Deterministic rule engine | Evaluates 34 CPCL Goods rules using reproducible Python logic | `pipeline/rules/rule_engine.py` |
-| **Risk & anomaly detection** | Explainable 4-factor risk scoring | Decomposes 0–100 score into Identity, Financial, Compliance, and Anomaly factors | `pipeline/risk/risk_engine.py` |
-| **Evidence traceability** | Bounding box coordinates | Maps findings to exact PDF pages with bounding box highlight overlays | `backend/models/entities.py` |
-| **Auditability** | SHA-256 hash-chained ledger | Immutably chains all logins, evaluations, overrides, and exports | `backend/services/audit_service.py` |
-| **Reporting** | CVC compliance dossiers | Programmatically compiles formal compliance PDFs via ReportLab | `pipeline/reports/dossier_generator.py` |
+The table below provides a transparent accounting of all 24 official capability areas defined under SIH26100:
 
-*For the complete traceability mapping, see [docs/architecture/FEATURE-TRACEABILITY.md](docs/architecture/FEATURE-TRACEABILITY.md).*
+| Category | SIH26100 Requirement Area | Implementation Status | Implementation Mechanism / Code Artifact |
+|---|---|:---:|---|
+| **Identity & Registries** | Government Portal Integration | `MOCK/SIMULATED` | High-fidelity sandbox adapter (`pipeline/registry_adapters/mock_adapter.py`) |
+| | Udyam / MSME Verification | `IMPLEMENTED` *(Rule)* / `MOCK` *(API)* | Udyam extraction (`pipeline/extraction/udyam.py`), Rules `R-UDY-01`, `R-UDY-02` |
+| | GST Registration Check | `IMPLEMENTED` *(Rule)* / `MOCK` *(API)* | Mod-36 checksum validator, Rules `R-GST-01`, `R-ID-01`, `R-DOC-01` |
+| | GST Return Filing Compliance | `PARTIALLY IMPLEMENTED` | Return filing frequency fields in mock response; multi-month rule planned |
+| | PAN Card Verification | `IMPLEMENTED` *(Rule)* / `MOCK` *(API)* | PAN syntax validator, Rule `R-PAN-01`, Embedded PAN Linkage `R-GST-02` |
+| | Income Tax Compliance | `PARTIALLY IMPLEMENTED` | ITR acknowledgment classification & Section 206AB status check in adapter |
+| | Blacklisting & Debarment | `IMPLEMENTED` *(Rule)* / `MOCK` *(Feed)* | CPPP / GeM blacklist matcher (`pipeline/compliance/cross_verifier.py`), Rule `R-REG-03` |
+| **Statutory Criteria** | Make in India (PPP-MII 2017) | `IMPLEMENTED` | Class-I (>=50%) and Class-II (>=20%) local content calculator, Rule `R-REG-01` |
+| | Land Border Rule 144(xi) | `IMPLEMENTED` | Mandatory declaration parser & origin verification, Rule `R-REG-02` |
+| | Financial Turnover & Net Worth | `IMPLEMENTED` | 3-year turnover threshold (`R-FIN-01`), Net Worth (`R-FIN-02`), ICAI UDIN (`R-FIN-03`) |
+| | EMD Proof & MSE Exemption | `IMPLEMENTED` | DD/BG transaction receipt or MSE/Udyam exemption waiver, Rule `R-COM-01` |
+| | OEM Authorization | `IMPLEMENTED` | Manufacturer authorization form (MAF) tender-specific validator, Rule `R-TEC-01` |
+| | Startup India Exemption | `PARTIALLY IMPLEMENTED` | Document classifier pattern `STARTUP_CERT` & regulatory citations under GFR 173(i) |
+| | NSIC Registration | `PARTIALLY IMPLEMENTED` | SPRS EMD waiver verification processed under unified rule `R-COM-01` |
+| | DigiLocker Verification | `MOCK/SIMULATED` | SHA-256 Content-Addressable Storage (CAS) document fingerprinting |
+| | EPFO & ESIC Compliance | `PLANNED` | Base registry adapter schemas and statutory labor law citations in KB |
+| **Document AI & Logic** | Missing Document Detection | `IMPLEMENTED` | Document presence rule `R-DOC-01`, mandatory document list checks |
+| | Inconsistent Data Detection | `IMPLEMENTED` | Cross-document PAN-in-GSTIN parity & Jaro-Winkler entity name matcher |
+| | Non-Compliant Information | `IMPLEMENTED` | PDF metadata tampering detection (GIMP modifications, creation date delta) |
+| | Adversarial Prompt Defense | `IMPLEMENTED` | Input quarantined in `<DOCUMENT_DATA>` tags; deterministic logic supersedes LLM |
+| **Scoring & Governance** | Overall Compliance Score | `IMPLEMENTED` | 0–100 explainable composite score (`pipeline/risk/scorer.py`) |
+| | Risk Level Classification | `IMPLEMENTED` | Deterministic risk banding: `LOW` (0–30), `MEDIUM` (31–60), `HIGH` (61–100) |
+| | AI Recommendation | `IMPLEMENTED` | Evidence-grounded advisory findings (`PASS`, `WARN`, `REVIEW`, `FAIL`) |
+| | Evidence & Bounding Boxes | `IMPLEMENTED` | Source PDF coordinate bounding box inspector (`pipeline/evidence/highlighter.py`) |
+| | Cryptographic Audit Ledger | `IMPLEMENTED` | Tamper-evident SHA-256 forward-linked commit chain (`backend/services/audit_service.py`) |
+| | Human Officer Final Authority | `IMPLEMENTED` | Adjudication cockpit; mandatory written justification required for overrides |
+
+*For the complete requirement-to-code traceability audit with test coverage and evidence references, see [docs/architecture/SIH26100-REQUIREMENT-MATRIX.md](docs/architecture/SIH26100-REQUIREMENT-MATRIX.md).*
 
 ---
 
