@@ -101,6 +101,11 @@ class PDFProcessResult:
     pages: list[PageProcessResult] = field(default_factory=list)
     overall_text_source: str = "EMPTY"  # 'TEXT_LAYER' | 'SCANNED' | 'HYBRID' | 'EMPTY'
 
+    @property
+    def metadata(self) -> DocumentMetadata:
+        """Compatibility property for doc_metadata."""
+        return self.doc_metadata
+
     def to_dict(self) -> dict[str, Any]:
         return {
             "is_valid": self.is_valid,

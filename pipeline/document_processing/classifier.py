@@ -89,7 +89,8 @@ ANCHOR_RULES: dict[DocumentType, dict[str, Any]] = {
         "required_any": [
             [r"income\s+tax\s+department", r"permanent\s+account\s+number"],
             [r"govt\.?\s+of\s+india", r"permanent\s+account\s+number"],
-            [r"pan\s+card"],
+            [r"income\s+tax\s+department", r"pan"],
+            [r"permanent\s+account\s+number\s+card"],
         ],
         "keywords": [r"father'?s\s+name", r"date\s+of\s+birth", r"signature", r"photo"],
         "filename_patterns": [r"pan", r"pancard", r"pan_card"],

@@ -24,5 +24,44 @@
     "pan": "AABCD5678F",
     "dic": "Mumbai",
     "nic_codes": ["70200"]
+  },
+  "UDYAM-TN-02-0012345": {
+    "udyam_no": "UDYAM-TN-02-0012345",
+    "name": "MERIDIAN FLOW SYSTEMS PRIVATE LIMITED",
+    "status": "ACTIVE",
+    "enterprise_type": "SMALL",
+    "major_activity": "MANUFACTURING",
+    "registration_date": "2020-09-01",
+    "state": "Tamil Nadu",
+    "district": "Chennai",
+    "pan": "AABCM1234A",
+    "dic": "Chennai",
+    "nic_codes": ["28132"]
+  },
+  "UDYAM-TN-08-0054321": {
+    "udyam_no": "UDYAM-TN-08-0054321",
+    "name": "SRI KAVERI ENGINEERING WORKS",
+    "status": "ACTIVE",
+    "enterprise_type": "MICRO",
+    "major_activity": "MANUFACTURING",
+    "registration_date": "2020-11-15",
+    "state": "Tamil Nadu",
+    "district": "Tiruchirappalli",
+    "pan": "AABCS1234D",
+    "dic": "Trichy",
+    "nic_codes": ["28132"]
+  },
+  "UDYAM-MH-12-0098765": {
+    "udyam_no": "UDYAM-MH-12-0098765",
+    "name": "BHARAT HYDRO EQUIPMENTS LIMITED",
+    "status": "ACTIVE",
+    "enterprise_type": "MEDIUM",
+    "major_activity": "MANUFACTURING",
+    "registration_date": "2021-04-10",
+    "state": "Maharashtra",
+    "district": "Mumbai",
+    "pan": "AABCB9999P",
+    "dic": "Mumbai",
+    "nic_codes": ["28132"]
   }
 }

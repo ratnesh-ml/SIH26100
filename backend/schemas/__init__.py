@@ -57,6 +57,7 @@ from backend.schemas.graph import (
     GraphSummaryOut,
     BidderLinkGraphOut,
 )
+from backend.schemas.dashboard import DashboardMetricsOut
 
 __all__ = [
     "ErrorDetail",

@@ -4,6 +4,12 @@ from typing import Any, Optional
 
 from pipeline.document_processing.classifier import DocumentType
 from pipeline.extraction.base import BaseExtractor, ExtractedFieldDTO
+from pipeline.extraction.declarations import (
+    IntegrityPactExtractor,
+    LandBorderDeclarationExtractor,
+    MIIDeclarationExtractor,
+    OEMAuthorizationExtractor,
+)
 from pipeline.extraction.financial import FinancialExtractor
 from pipeline.extraction.gst import GSTExtractor
 from pipeline.extraction.pan import PANExtractor
@@ -28,6 +34,10 @@ def initialize_default_extractors() -> None:
     pan_ext = PANExtractor()
     udyam_ext = UdyamExtractor()
     fin_ext = FinancialExtractor()
+    mii_ext = MIIDeclarationExtractor()
+    oem_ext = OEMAuthorizationExtractor()
+    lb_ext = LandBorderDeclarationExtractor()
+    ip_ext = IntegrityPactExtractor()
 
     register_extractor(DocumentType.GST_CERT, gst_ext)
     register_extractor(DocumentType.PAN_CARD, pan_ext)
@@ -35,6 +45,10 @@ def initialize_default_extractors() -> None:
     register_extractor(DocumentType.CA_TURNOVER_CERT, fin_ext)
     register_extractor(DocumentType.AUDITED_FINANCIALS, fin_ext)
     register_extractor(DocumentType.ITR_ACK, fin_ext)
+    register_extractor(DocumentType.MII_DECLARATION, mii_ext)
+    register_extractor(DocumentType.OEM_AUTH, oem_ext)
+    register_extractor(DocumentType.LAND_BORDER_DECL, lb_ext)
+    register_extractor(DocumentType.INTEGRITY_PACT, ip_ext)
 
 
 # Auto-initialize standard extractors on import

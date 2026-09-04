@@ -310,3 +310,47 @@ export interface UploadPackageResponse {
   rejected: RejectedFile[];
 }
 
+export interface AuditEventOut {
+  seq: number;
+  ts: string;
+  actor_id?: string | null;
+  role: string;
+  action: string;
+  target_type: string;
+  target_id: string;
+  payload?: Record<string, any> | null;
+  prev_hash: string;
+  curr_hash: string;
+}
+
+export interface AuditVerifyOut {
+  ok: boolean;
+  length: number;
+  first_broken_seq?: number | null;
+  head_hash?: string | null;
+}
+
+export interface ProcessingPerformance {
+  total_jobs: number;
+  completed_jobs: number;
+  failed_jobs: number;
+  active_jobs: number;
+  total_audit_events: number;
+  success_rate_percent: number;
+}
+
+export interface DashboardMetricsOut {
+  total_tenders: number;
+  total_bidders: number;
+  verified_bidders: number;
+  pending_bidders: number;
+  high_risk_bidders: number;
+  compliance_distribution: Record<string, number>;
+  risk_distribution: Record<string, number>;
+  avg_risk_score: number;
+  finding_counts: Record<string, any>;
+  processing_performance: ProcessingPerformance;
+}
+
+
+

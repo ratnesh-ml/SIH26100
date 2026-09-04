@@ -23,5 +23,29 @@
     "status": "VALID",
     "category": "Partnership Firm",
     "incorporation_date": "2017-09-10"
+  },
+  "AABCM1234A": {
+    "pan": "AABCM1234A",
+    "name": "MERIDIAN FLOW SYSTEMS PRIVATE LIMITED",
+    "entity_type": "Company",
+    "status": "VALID",
+    "category": "Domestic Company",
+    "incorporation_date": "2016-03-22"
+  },
+  "AABCB8888P": {
+    "pan": "AABCB8888P",
+    "name": "BHARAT HYDRO EQUIPMENT LLP",
+    "entity_type": "Limited Liability Partnership",
+    "status": "VALID",
+    "category": "LLP",
+    "incorporation_date": "2019-06-14"
+  },
+  "AABCN7777N": {
+    "pan": "AABCN7777N",
+    "name": "NOVA PUMPS AND VALVES PRIVATE LIMITED",
+    "entity_type": "Company",
+    "status": "VALID",
+    "category": "Domestic Company",
+    "incorporation_date": "2020-01-15"
   }
 }

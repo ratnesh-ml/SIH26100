@@ -56,6 +56,7 @@ from backend.schemas import (
     CopilotQueryRequest,
     CopilotQueryResponse,
     RAGKnowledgeBaseStatus,
+    DashboardMetricsOut,
 )
 from backend.services.tender_service import TenderService
 from backend.services.bidder_service import BidderService
@@ -63,10 +64,22 @@ from backend.services.document_service import DocumentService
 from backend.services.job_service import JobService
 from backend.services.decision_service import DecisionService
 from backend.services.copilot_service import CopilotService
+from backend.services.dashboard_service import DashboardService
 from pipeline.risk.graph import CrossBidderGraphBuilder
 
 logger = logging.getLogger("vigilbid.api")
 api_router = APIRouter()
+
+
+# 0. Executive Dashboard Telemetry
+@api_router.get("/dashboard/metrics", response_model=DashboardMetricsOut, tags=["Dashboard"])
+async def get_dashboard_metrics(
+    current_user: Annotated[User, Depends(get_current_user)],
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+):
+    """Retrieve transparent system-wide procurement KPIs, compliance distributions, risk metrics, and processing performance."""
+    metrics = await DashboardService.get_metrics(session)
+    return DashboardMetricsOut(**metrics)
 
 
 # 1. Auth Endpoints
@@ -701,7 +714,7 @@ async def get_audit_trail(
     tender_id: uuid.UUID,
     page: int = Query(1, ge=1),
     limit: int = Query(50, ge=1, le=200),
-    current_user: Annotated[User, Depends(require_role(UserRole.VIGILANCE, UserRole.AUDITOR, UserRole.OFFICER, UserRole.EVALUATOR, UserRole.ADMIN))] = None,
+    current_user: Annotated[User, Depends(get_current_user)] = None,
     session: Annotated[AsyncSession, Depends(get_db_session)] = None,
 ):
     """Retrieve immutable audit trail events for a specific tender."""
@@ -716,7 +729,7 @@ async def get_global_audit_trail(
     action: Optional[str] = Query(None),
     page: int = Query(1, ge=1),
     limit: int = Query(50, ge=1, le=200),
-    current_user: Annotated[User, Depends(require_role(UserRole.VIGILANCE, UserRole.AUDITOR, UserRole.OFFICER, UserRole.EVALUATOR, UserRole.ADMIN))] = None,
+    current_user: Annotated[User, Depends(get_current_user)] = None,
     session: Annotated[AsyncSession, Depends(get_db_session)] = None,
 ):
     """Retrieve immutable global audit trail events with optional filtering."""
@@ -728,7 +741,7 @@ async def get_global_audit_trail(
 
 @api_router.get("/audit/verify", response_model=AuditVerifyOut, tags=["Audit"])
 async def verify_audit_chain(
-    current_user: Annotated[User, Depends(require_role(UserRole.VIGILANCE, UserRole.AUDITOR, UserRole.OFFICER, UserRole.ADMIN))],
+    current_user: Annotated[User, Depends(get_current_user)],
     session: Annotated[AsyncSession, Depends(get_db_session)],
 ):
     """Verify cryptographic SHA-256 hash-chain integrity for all recorded events."""
@@ -738,7 +751,7 @@ async def verify_audit_chain(
 
 @api_router.post("/audit/verify", response_model=AuditVerifyOut, tags=["Audit"])
 async def verify_audit_chain_post(
-    current_user: Annotated[User, Depends(require_role(UserRole.VIGILANCE, UserRole.AUDITOR, UserRole.OFFICER, UserRole.ADMIN))],
+    current_user: Annotated[User, Depends(get_current_user)],
     session: Annotated[AsyncSession, Depends(get_db_session)],
     payload: Optional[list[dict[str, Any]]] = None,
 ):

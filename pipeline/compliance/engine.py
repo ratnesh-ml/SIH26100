@@ -579,6 +579,28 @@ class ComplianceEngine:
             )
 
         if turnover < threshold:
+            is_mse = bidder_data.get("is_mse_exempt", False) or bidder_data.get("claims_mse", False)
+            is_eligible_mse = is_mse and bidder_data.get("enterprise_category") in ("MICRO", "SMALL")
+
+            if is_eligible_mse:
+                # Under GFR 2017 Rule 173(i) and CPCL tender rules, MSE turnover shortfall is subject to officer review/relaxation rather than outright disqualification
+                return RuleFindingResult(
+                    rule_id=rule_id,
+                    rule_version=version,
+                    status="WARN",
+                    title=title,
+                    explanation=(
+                        f"MSE Turnover Deficit: Average annual turnover of Rs. {turnover:,.2f} "
+                        f"is below the standard tender threshold of Rs. {threshold:,.2f}. "
+                        "Eligible for MSE relaxation under GFR 173(i) subject to competent officer approval."
+                    ),
+                    citation=citation,
+                    evidence=evidence,
+                    extracted={"average_turnover_inr": turnover, "is_mse": True},
+                    expected={"min_turnover_threshold_inr": threshold},
+                    category=category,
+                )
+
             return RuleFindingResult(
                 rule_id=rule_id,
                 rule_version=version,
@@ -963,6 +985,21 @@ class ComplianceEngine:
         ev = bidder_data.get("exp_evidence")
         evidence = [ev] if ev else []
 
+        is_mse = bidder_data.get("is_mse_exempt", False) or bidder_data.get("claims_mse", False)
+        if is_mse and bidder_data.get("enterprise_category") in ("MICRO", "SMALL"):
+            return RuleFindingResult(
+                rule_id=rule_id,
+                rule_version=version,
+                status="PASS",
+                title=title,
+                explanation="MSE Exemption: Bidder is a verified Micro/Small Enterprise exempted from prior experience under GFR 173(i).",
+                citation=citation,
+                evidence=evidence,
+                extracted={"is_mse_exempt": True},
+                expected={"has_completion_cert": True},
+                category=category,
+            )
+
         if not has_cert:
             return RuleFindingResult(
                 rule_id=rule_id,
@@ -1002,7 +1039,7 @@ class ComplianceEngine:
     ) -> RuleFindingResult:
         is_exempt = bidder_data.get("is_mse_exempt", False)
         paid = bidder_data.get("emd_paid_inr", 0.0)
-        required = tender.get("emd_amount_inr", 900000.0)
+        required = tender.get("emd_amount_inr", 0.0)
         ev = bidder_data.get("emd_evidence")
         evidence = [ev] if ev else []
 
@@ -1020,7 +1057,7 @@ class ComplianceEngine:
                 category=category,
             )
 
-        if paid < required:
+        if required > 0 and paid < required:
             return RuleFindingResult(
                 rule_id=rule_id,
                 rule_version=version,
@@ -1033,6 +1070,19 @@ class ComplianceEngine:
                 expected={"emd_required_inr": required},
                 category=category,
             )
+
+        return RuleFindingResult(
+            rule_id=rule_id,
+            rule_version=version,
+            status="PASS",
+            title=title,
+            explanation=f"EMD amount of Rs. {paid:,.2f} submitted via Bank Guarantee / DD or Bid Security Declaration accepted.",
+            citation=citation,
+            evidence=evidence,
+            extracted={"emd_paid_inr": paid},
+            expected={"emd_required_inr": required},
+            category=category,
+        )
 
         return RuleFindingResult(
             rule_id=rule_id,

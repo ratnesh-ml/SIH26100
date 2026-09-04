@@ -11,6 +11,8 @@ import { PipelineStepperView } from './components/PipelineStepperView';
 import { ComplianceMatrixView } from './components/ComplianceMatrixView';
 import { RiskAnomalyView } from './components/RiskAnomalyView';
 import { CrossBidderGraphView } from './components/CrossBidderGraphView';
+import { AuditTrailView } from './components/AuditTrailView';
+import { DashboardView } from './components/DashboardView';
 import { BidderSummary, TenderDetail, TenderSummary, UploadPackageResponse, User } from './types';
 
 export default function App() {
@@ -20,8 +22,16 @@ export default function App() {
 
   // Navigation & View State
   const [activeView, setActiveView] = useState<
-    'tenders' | 'matrix' | 'bidders' | 'bidder-detail' | 'pipeline' | 'risk-anomalies' | 'graph'
-  >('tenders');
+    | 'dashboard'
+    | 'tenders'
+    | 'matrix'
+    | 'bidders'
+    | 'bidder-detail'
+    | 'pipeline'
+    | 'risk-anomalies'
+    | 'graph'
+    | 'audit'
+  >('dashboard');
   const [selectedTender, setSelectedTender] = useState<TenderSummary | null>(null);
   const [selectedBidderId, setSelectedBidderId] = useState<string | null>(null);
   const [activeJobId, setActiveJobId] = useState<string | null>(null);
@@ -128,6 +138,16 @@ export default function App() {
           <LoginView onLoginSuccess={handleLoginSuccess} />
         ) : (
           <>
+            {activeView === 'dashboard' && (
+              <DashboardView
+                currentUser={currentUser}
+                onNavigate={(view) => {
+                  if (view === 'bidders') setSelectedTender(null);
+                  setActiveView(view);
+                }}
+              />
+            )}
+
             {activeView === 'tenders' && (
               <TenderListView
                 key={tenderListKey}
@@ -209,6 +229,13 @@ export default function App() {
                   setSelectedBidderId(bId);
                   setActiveView('bidder-detail');
                 }}
+              />
+            )}
+
+            {activeView === 'audit' && (
+              <AuditTrailView
+                tenderId={selectedTender?.id}
+                onBack={() => setActiveView('dashboard')}
               />
             )}
 

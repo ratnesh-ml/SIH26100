@@ -165,8 +165,8 @@ class PipelineRunner:
         for doc in ctx.documents:
             doc_id = doc.get("id") or str(uuid.uuid4())
             filename = doc.get("filename") or doc.get("name") or "document.pdf"
-            file_path = doc.get("storage_path") or doc.get("path")
-            file_bytes = doc.get("bytes")
+            file_path = doc.get("storage_path") or doc.get("path") or doc.get("file_path")
+            file_bytes = doc.get("raw_bytes") or doc.get("bytes")
 
             if not file_bytes and file_path and Path(file_path).exists():
                 file_bytes = Path(file_path).read_bytes()
@@ -212,7 +212,11 @@ class PipelineRunner:
                 proc_res = self.pdf_processor.process(pdf_source=raw_bytes, doc_id=doc["id"])
                 doc["page_count"] = proc_res.page_count
                 doc["pages_data"] = [p.to_dict() for p in proc_res.pages]
-                doc["metadata"] = proc_res.metadata.to_dict() if proc_res.metadata else {}
+                doc_meta_dict = proc_res.doc_metadata.to_dict() if getattr(proc_res, "doc_metadata", None) else (
+                    proc_res.metadata.to_dict() if getattr(proc_res, "metadata", None) else {}
+                )
+                doc["metadata"] = doc_meta_dict
+                doc["forensic"] = proc_res.forensic.to_dict() if getattr(proc_res, "forensic", None) else {}
                 total_pages += proc_res.page_count
             else:
                 # Handle in-memory mock or text documents
@@ -395,6 +399,22 @@ class PipelineRunner:
         gstin = ""
         udyam = ""
 
+        # Prioritize dedicated statutory certificates for authoritative identifiers
+        for doc in ctx.documents:
+            doc_id = doc.get("id")
+            doc_type = doc.get("doc_type")
+            doc_fields = ctx.extracted_fields.get(doc_id, {})
+            if doc_type == "PAN_CARD" and "pan" in doc_fields:
+                pan = str(doc_fields["pan"]["value"])
+            elif doc_type == "GST_CERT" and "gstin" in doc_fields:
+                gstin = str(doc_fields["gstin"]["value"])
+            elif doc_type == "UDYAM_CERT":
+                for ukey in ("udyam_number", "udyam_registration_number", "udyam"):
+                    if ukey in doc_fields:
+                        udyam = str(doc_fields[ukey]["value"])
+                        break
+
+        # Fallback to any extracted fields
         for doc_fields in ctx.extracted_fields.values():
             if not declared_name and "legal_name" in doc_fields:
                 declared_name = str(doc_fields["legal_name"]["value"])
@@ -402,8 +422,12 @@ class PipelineRunner:
                 pan = str(doc_fields["pan"]["value"])
             if not gstin and "gstin" in doc_fields:
                 gstin = str(doc_fields["gstin"]["value"])
+            if not udyam and "udyam_number" in doc_fields:
+                udyam = str(doc_fields["udyam_number"]["value"])
             if not udyam and "udyam_registration_number" in doc_fields:
                 udyam = str(doc_fields["udyam_registration_number"]["value"])
+            if not udyam and "udyam" in doc_fields:
+                udyam = str(doc_fields["udyam"]["value"])
 
         declared_record = EntityRecord(
             company_name=declared_name or "Declared Bidder",
@@ -509,12 +533,33 @@ class PipelineRunner:
         if "gstin" in ctx.registry_results and ctx.registry_results["gstin"].get("found"):
             flat_fields["gstin_status"] = ctx.registry_results["gstin"].get("status")
 
+        if "debarment" in ctx.registry_results:
+            deb_info = ctx.registry_results["debarment"]
+            if deb_info.get("status") == "DEBARRED" or deb_info.get("data", {}).get("debarred"):
+                flat_fields["debarred"] = True
+                hits = deb_info.get("data", {}).get("hits", [])
+                if hits:
+                    flat_fields["debarment_reason"] = hits[0].get("reason")
+                    flat_fields["debarment_order_no"] = hits[0].get("order_number")
+
+        # Ensure Udyam keys are normalized for compliance rules
+        udyam_val = (
+            flat_fields.get("udyam")
+            or flat_fields.get("udyam_no")
+            or flat_fields.get("udyam_number")
+            or flat_fields.get("udyam_registration_number")
+        )
+        if udyam_val:
+            flat_fields["udyam"] = udyam_val
+            flat_fields["udyam_no"] = udyam_val
+            flat_fields["udyam_number"] = udyam_val
+
         # Automatically derive MSE exemption if Udyam registration is submitted
         enterprise_type = str(flat_fields.get("enterprise_type") or flat_fields.get("enterprise_category") or "").upper()
-        if "MICRO" in enterprise_type or "SMALL" in enterprise_type or flat_fields.get("udyam") or flat_fields.get("udyam_registration_number"):
+        if "MICRO" in enterprise_type or "SMALL" in enterprise_type or udyam_val:
             flat_fields.setdefault("is_mse_exempt", True)
             flat_fields.setdefault("claims_mse", True)
-            flat_fields.setdefault("enterprise_category", enterprise_type if enterprise_type in ("MICRO", "SMALL") else "SMALL")
+            flat_fields.setdefault("enterprise_category", enterprise_type if enterprise_type in ("MICRO", "SMALL", "MEDIUM") else "SMALL")
 
         bidder_data = dict(flat_fields)
         bidder_data.update({
@@ -527,9 +572,13 @@ class PipelineRunner:
         })
 
         # Run ComplianceEngine
+        tender_ctx = {"tender_id": ctx.tender_id}
+        if "tender_meta" in ctx.metadata:
+            tender_ctx.update(ctx.metadata["tender_meta"])
+
         summary = self.compliance_engine.evaluate_bidder(
             bidder_data=bidder_data,
-            tender_context={"tender_id": ctx.tender_id},
+            tender_context=tender_ctx,
         )
 
         ctx.findings = [f.to_dict() for f in summary.findings]
@@ -725,6 +774,10 @@ class PipelineRunner:
                 logger.error("Pipeline stopped due to critical registration failure.")
                 break
         return results
+
+    def run(self, ctx: PipelineContext) -> list[StepExecutionResult]:
+        """Convenience alias executing all pipeline steps."""
+        return self.run_all(ctx)
 
     def run_from_step(self, start_step: int, ctx: PipelineContext) -> list[StepExecutionResult]:
         """Resume pipeline from a specific step number (e.g. after retagging a document)."""

@@ -40,5 +40,41 @@
     "state_code": "27",
     "address": "Plot 12, Wagle Industrial Estate, Thane, Maharashtra, 400604",
     "pan": "AABCS1234D"
+  },
+  "33AABCM1234A1Z5": {
+    "gstin": "33AABCM1234A1Z5",
+    "legal_name": "MERIDIAN FLOW SYSTEMS PRIVATE LIMITED",
+    "trade_name": "Meridian Flow Systems",
+    "status": "ACTIVE",
+    "taxpayer_type": "Regular",
+    "registration_date": "2016-03-22",
+    "state": "Tamil Nadu",
+    "state_code": "33",
+    "address": "Plot 88, SIDCO Industrial Estate, Ambattur, Chennai 600098",
+    "pan": "AABCM1234A"
+  },
+  "27AABCB9999P1Z1": {
+    "gstin": "27AABCB9999P1Z1",
+    "legal_name": "BHARAT HYDRO EQUIPMENTS LIMITED",
+    "trade_name": "Bharat Hydro",
+    "status": "ACTIVE",
+    "taxpayer_type": "Regular",
+    "registration_date": "2018-11-10",
+    "state": "Maharashtra",
+    "state_code": "27",
+    "address": "Unit 401, MIDC Andheri East, Mumbai, Maharashtra 400093",
+    "pan": "AABCB9999P"
+  },
+  "27AABCN7777N1Z8": {
+    "gstin": "27AABCN7777N1Z8",
+    "legal_name": "NOVA PUMPS AND VALVES PRIVATE LIMITED",
+    "trade_name": "Nova Pumps",
+    "status": "ACTIVE",
+    "taxpayer_type": "Regular",
+    "registration_date": "2020-01-15",
+    "state": "Maharashtra",
+    "state_code": "27",
+    "address": "Plot 55, Bhosari Industrial Area, Pune, Maharashtra 411026",
+    "pan": "AABCN7777N"
   }
 }

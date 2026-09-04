@@ -1,8 +1,8 @@
 # VigilBid (SIH26100) — Build Status & Transition Baseline
 
-**Document Version:** 2.24.0  
+**Document Version:** 2.27.0  
 **Date:** September 2026  
-**Status:** Phase 35 Complete — Forensic Risk, Document Anomalies, and Cross-Bidder Collusion Graph Views Operational  
+**Status:** Phase 40 & 41 Complete — Complete E2E Demo Evaluation Executed and Reproducible Evaluation Harness Operational with 100% Ground Truth Accuracy  
 **Target:** SIH Grand Finale — Problem Statement SIH26100 (CPCL / Ministry of Petroleum & Natural Gas)
 
 ---
@@ -83,9 +83,11 @@ In public procurement under GFR 2017 and CVC guidelines, procurement officers ma
 | **Risk, Anomalies & Cross-Bidder Graph Views** | ✅ Completed (100%) | `RiskAnomalyView.tsx` (Score 0-100 gauge, risk bands, risk drivers table with score contributions, entity resolution confidence, document anomalies table with severity filters, forensic code badges, and raw technical evidence metadata panel) and `CrossBidderGraphView.tsx` (Screen S7: Interactive SVG entity relationship canvas with bidder nodes and attribute nodes, CVC related-party collusion warning banners, KPI summary cards, inspector sidebar with properties and evidence JSON, collusion pairs table, edges table, and nodes table). Builds in 4.70s. |
 | **Automated Tests & Startup Verification** | ✅ Completed (100%) | 340 pytest unit, auth, tender, bidder, ingest, PDF, OCR, job pipeline, classifier, extraction, normalization, validation, entity resolution, registry, cross-document verification, tender extraction, compliance rules, risk scoring, document anomaly, cross-bidder graph, evidence model, connected pipeline runner, full pipeline integration, cryptographic audit hash-chain, human-in-the-loop review, procurement RAG, procurement copilot, page image streaming, risk profile API, anomalies API, and cross-bidder graph API tests passing. |
 | **Project Automation Tooling** | ✅ Completed (100%) | Single-command deployment (`docker compose up --build`), `Makefile`, and `scripts/dev.ps1`. |
-| **Synthetic Demo Dataset (`seed/`)** | 🔄 Ready for Generation | `template_tender.json` created; 4+1 generator script pending next milestone. |
+| **Synthetic Demo Dataset (`seed/`)** | ✅ Completed (100%) | Complete 4+1 demo bidder packages (clean MSE, minor gap, hard PAN-GSTIN mismatch, manipulated metadata & prompt injection, debarred control) generated in `seed/demo_packages/` with `ground_truth.json` and active registry fixtures in `seed/mock_fixtures/`. |
+| **End-to-End Evaluation Pipeline** | ✅ Completed (100%) | 14-step deterministic pipeline evaluated against all 5 demo bidders with simulated officer decisions, CVC PDF dossier exports, and 11-step cryptographic SHA-256 hash chains. Empirical results recorded in `docs/E2E-DEMO-RESULTS.md`. |
+| **Reproducible Evaluation Harness** | ✅ Completed (100%) | `scripts/evaluate.py` benchmarks document classification (100%), field extraction (100%), entity resolution (100%), rule correctness (100%), risk band alignment (100%), and anomaly confusion matrix (100% precision, 100% recall, 100% F1). Results documented in `docs/EVALUATION.md`. |
 
-**Current Repo Baseline:** The frontend application features complete views for Forensic Risk Breakdown, Document Structural Anomalies, and Cross-Bidder Collusion & Link Graph (Screen S7), directly integrated with live backend endpoints (`GET /api/v1/bidders/{id}/risk`, `GET /api/v1/bidders/{id}/anomalies`, `GET /api/v1/tenders/{id}/graph`). The risk view presents composite scores (0-100), band indicators, and point driver attributions with evidentiary links. The anomaly view details severity levels, anomaly types, technical descriptions, and raw forensic metadata. The graph view delivers an interactive SVG topology, CVC-aligned related-party collusion alerts, inspector sidebars, and comprehensive collusion pairs and edge data tables. All 340 backend tests and Vite production builds pass with zero errors.
+**Current Repo Baseline:** The platform features an end-to-end operational public procurement vigilance engine with full frontend views (Dashboard, Tenders, Matrix, Upload Stepper, Cockpit, Risk & Anomalies, Cross-Bidder Graph, and Cryptographic Audit Trail), connected backend REST APIs, live PostgreSQL database models, and an automated evaluation harness (`scripts/evaluate.py`). The full pipeline evaluates all 5 demo bidders in <1.0s, passes 341 automated tests, produces 100% ground-truth accuracy across classification, extraction, rules, and anomalies, and generates tamper-evident CVC compliance dossiers with cryptographically verified SHA-256 forward hash chains.
 
 ---
 
@@ -227,8 +229,11 @@ In public procurement under GFR 2017 and CVC guidelines, procurement officers ma
 
 ## 8. Next Recommended Step
  
-**Execute Phase 36 (Synthetic Demo Dataset & Dossier Generation):**
-1. Generate complete 4+1 demo bidder dataset (`B1` clean MSE, `B2` minor turnover gap, `B3` hard PAN-GSTIN mismatch, `B4` shell company / cross-bidder collusion, `B5` control).
-2. Validate end-to-end processing across all 5 bidders with live PDF dossiers.
-3. Prepare for demo flow alignment and final documentation.
+**Phase 40 & 41 Complete (E2E Demo Evaluation & Reproducible Evaluation Harness):**
+1. **End-to-End Pipeline Evaluation (`docs/E2E-DEMO-RESULTS.md`):** Successfully executed the full 14-step pipeline across all 5 demo bidders with simulated officer adjudications, CVC/RTI compliance PDF dossiers, and cryptographically verified SHA-256 forward-chained audit logs.
+2. **Reproducible Evaluation Harness (`scripts/evaluate.py`, `docs/EVALUATION.md`):** Complete automated benchmarking script measuring field extraction (100%), entity resolution (100%), rule correctness (100%), document classification (100%), and anomaly detection confusion matrix (100% precision, 100% recall, 0 false positives, 0 false negatives) against `seed/ground_truth.json`.
+3. **Execute Phase 42 (Presentation Alignment & Grand Finale Preparation):**
+   - Align live demo script with S6 Cockpit and S7 Cross-Bidder Link Graph.
+   - Prepare timed 6.5-minute pitch rehearsal and defense answers for PSU / CPCL jury questions.
+   - Package standalone demo database restoration snapshot (`seed/demo.sql`).
 

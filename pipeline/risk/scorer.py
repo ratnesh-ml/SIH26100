@@ -130,6 +130,25 @@ class RiskScorer:
         review_findings = [f for f in findings if (getattr(f, "status", None) == "REVIEW" or (isinstance(f, dict) and f.get("status") == "REVIEW"))]
         warn_findings = [f for f in findings if (getattr(f, "status", None) == "WARN" or (isinstance(f, dict) and f.get("status") == "WARN"))]
 
+        # Statutory debarment/blacklisting match represents severe compliance risk
+        has_debar = any(
+            (getattr(f, "rule_id", None) == "R-REG-03" or (isinstance(f, dict) and f.get("rule_id") == "R-REG-03"))
+            and (getattr(f, "status", None) == "FAIL" or (isinstance(f, dict) and f.get("status") == "FAIL"))
+            for f in findings
+        )
+        if has_debar:
+            drivers.append(
+                RiskFactor(
+                    factor_id="RF-STAT-DEBAR",
+                    category="COMPLIANCE",
+                    title="Active Statutory Debarment Match",
+                    weight=55,
+                    score=55,
+                    evidence_reference={"debarred": True},
+                    explanation="Critical risk signal: Entity identified on national debarment registry pursuant to GFR 2017 Rule 151.",
+                )
+            )
+
         if fail_findings:
             # +25 points per HARD FAIL, capped at 50 points
             points = min(50, len(fail_findings) * 25)
@@ -172,6 +191,25 @@ class RiskScorer:
                     score=points,
                     evidence_reference={"warn_rule_count": len(warn_findings)},
                     explanation=f"Risk signal: {len(warn_findings)} soft observation(s) noted on submitted documents.",
+                )
+            )
+
+        # Financial turnover shortfall below NIT benchmark
+        has_fin_shortfall = any(
+            (getattr(f, "rule_id", None) == "R-FIN-01" or (isinstance(f, dict) and f.get("rule_id") == "R-FIN-01"))
+            and (getattr(f, "status", None) in ("WARN", "REVIEW") or (isinstance(f, dict) and f.get("status") in ("WARN", "REVIEW")))
+            for f in findings
+        )
+        if has_fin_shortfall:
+            drivers.append(
+                RiskFactor(
+                    factor_id="RF-FIN-DEFICIT",
+                    category="FINANCIAL",
+                    title="Financial Turnover Threshold Deficit",
+                    weight=15,
+                    score=12,
+                    evidence_reference={"turnover_deficit": True},
+                    explanation="Risk signal: Average turnover is below standard NIT benchmark — elevated financial risk.",
                 )
             )
 

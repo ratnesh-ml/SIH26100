@@ -15,6 +15,9 @@ import {
   CompleteReviewResponse,
   BidderLinkGraphOut,
   AnomalySignalOut,
+  AuditEventOut,
+  AuditVerifyOut,
+  DashboardMetricsOut,
   JobStatus,
   User,
 } from '../types';
@@ -91,6 +94,11 @@ export async function fetchCurrentUser(): Promise<User> {
   return request<User>(`${API_BASE}/auth/me`);
 }
 
+// 2b. Executive Dashboard Metrics
+export async function fetchDashboardMetrics(): Promise<DashboardMetricsOut> {
+  return request<DashboardMetricsOut>(`${API_BASE}/dashboard/metrics`);
+}
+
 export async function logout(): Promise<void> {
   try {
     await request<{ status: string }>(`${API_BASE}/auth/logout`, {
@@ -160,6 +168,33 @@ export async function fetchBidderAnomalies(bidderId: string): Promise<AnomalySig
 
 export async function fetchTenderGraph(tenderId: string): Promise<BidderLinkGraphOut> {
   return request<BidderLinkGraphOut>(`${API_BASE}/tenders/${tenderId}/graph`);
+}
+
+// 4b. Audit Trail & Cryptographic Chain Verification
+export async function fetchAuditTrail(
+  tenderId?: string,
+  targetType?: string,
+  targetId?: string,
+  action?: string,
+  page = 1,
+  limit = 50
+): Promise<AuditEventOut[]> {
+  const params = new URLSearchParams();
+  if (page) params.append('page', String(page));
+  if (limit) params.append('limit', String(limit));
+  if (targetType) params.append('target_type', targetType);
+  if (targetId) params.append('target_id', targetId);
+  if (action) params.append('action', action);
+
+  const endpoint = tenderId
+    ? `${API_BASE}/tenders/${tenderId}/audit?${params.toString()}`
+    : `${API_BASE}/audit/trail?${params.toString()}`;
+
+  return request<AuditEventOut[]>(endpoint);
+}
+
+export async function verifyAuditChain(): Promise<AuditVerifyOut> {
+  return request<AuditVerifyOut>(`${API_BASE}/audit/verify`);
 }
 
 // 5. Ingestion & Document Uploads

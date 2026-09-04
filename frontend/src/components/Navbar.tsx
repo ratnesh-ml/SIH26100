@@ -4,8 +4,17 @@ import { User } from '../types';
 
 interface NavbarProps {
   currentUser: User | null;
-  activeView: 'tenders' | 'matrix' | 'bidders' | 'bidder-detail' | 'pipeline' | 'risk-anomalies' | 'graph';
-  onNavigate: (view: 'tenders' | 'bidders') => void;
+  activeView:
+    | 'dashboard'
+    | 'tenders'
+    | 'matrix'
+    | 'bidders'
+    | 'bidder-detail'
+    | 'pipeline'
+    | 'risk-anomalies'
+    | 'graph'
+    | 'audit';
+  onNavigate: (view: 'dashboard' | 'tenders' | 'bidders' | 'audit') => void;
   onLogout: () => void;
   healthStatus?: string;
 }
@@ -17,17 +26,19 @@ export const Navbar: React.FC<NavbarProps> = ({
   onLogout,
   healthStatus,
 }) => {
+  const isDashboardActive = activeView === 'dashboard';
   const isTendersActive = activeView === 'tenders' || activeView === 'matrix' || activeView === 'graph';
   const isBiddersActive =
     activeView === 'bidders' ||
     activeView === 'bidder-detail' ||
     activeView === 'pipeline' ||
     activeView === 'risk-anomalies';
+  const isAuditActive = activeView === 'audit';
 
   return (
     <header className="border-b border-slate-800 bg-slate-900/90 backdrop-blur px-6 py-3.5 flex items-center justify-between sticky top-0 z-40">
       <div className="flex items-center gap-6">
-        <div className="flex items-center gap-3 cursor-pointer" onClick={() => onNavigate('tenders')}>
+        <div className="flex items-center gap-3 cursor-pointer" onClick={() => onNavigate('dashboard')}>
           <div className="p-2 rounded-lg bg-sky-500/10 border border-sky-500/20 text-sky-400">
             <Shield className="w-5 h-5" />
           </div>
@@ -44,6 +55,16 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         {currentUser && (
           <nav className="flex items-center gap-1 border-l border-slate-800 pl-6">
+            <button
+              onClick={() => onNavigate('dashboard')}
+              className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+                isDashboardActive
+                  ? 'bg-sky-500/15 text-sky-400 border border-sky-500/30'
+                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+              }`}
+            >
+              Dashboard
+            </button>
             <button
               onClick={() => onNavigate('tenders')}
               className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
@@ -63,6 +84,16 @@ export const Navbar: React.FC<NavbarProps> = ({
               }`}
             >
               All Bidders
+            </button>
+            <button
+              onClick={() => onNavigate('audit')}
+              className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+                isAuditActive
+                  ? 'bg-sky-500/15 text-sky-400 border border-sky-500/30'
+                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+              }`}
+            >
+              Audit Trail
             </button>
           </nav>
         )}

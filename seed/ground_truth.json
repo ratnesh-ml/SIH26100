@@ -1,0 +1,74 @@
+{
+  "tender": {
+    "nit_no": "CPCL/MM/2026/PUMP-217",
+    "title": "Supply of 12 Centrifugal Process Pumps (API 610) for Manali Refinery",
+    "min_turnover_cr": 6.0,
+    "min_mii_content": 50.0
+  },
+  "bidders": {
+    "bidder_a_meridian": {
+      "name": "MERIDIAN FLOW SYSTEMS PRIVATE LIMITED",
+      "pan": "AABCM1234A",
+      "gstin": "33AABCM1234A1Z5",
+      "udyam": "UDYAM-TN-02-0012345",
+      "avg_turnover_cr": 8.23,
+      "local_content_pct": 68.0,
+      "expected_overall_status": "PASS",
+      "expected_risk_band": "LOW",
+      "expected_anomalies_count": 0
+    },
+    "bidder_b_kaveri": {
+      "name": "SRI KAVERI ENGINEERING WORKS",
+      "pan": "AABCS1234D",
+      "gstin": "33AABCS1234D1Z2",
+      "udyam": "UDYAM-TN-08-0054321",
+      "avg_turnover_cr": 5.13,
+      "local_content_pct": 54.0,
+      "expected_overall_status": "REVIEW",
+      "expected_risk_band": "MEDIUM",
+      "flags": [
+        "Turnover below 6 Cr threshold",
+        "Name variant SRI KAVERI ENGG WORKS",
+        "OEM authorization short validity"
+      ]
+    },
+    "bidder_c_bharat": {
+      "name": "BHARAT HYDRO EQUIPMENTS LIMITED",
+      "pan": "AABCB8888P",
+      "gstin": "27AABCB9999P1Z1",
+      "udyam": "UDYAM-MH-12-0098765",
+      "avg_turnover_cr": 9.27,
+      "local_content_pct": 45.0,
+      "expected_overall_status": "FAIL",
+      "expected_risk_band": "HIGH",
+      "flags": [
+        "PAN-GSTIN segment mismatch (AABCB8888P != AABCB9999P)",
+        "Medium enterprise claiming MSE",
+        "Local content 45% below 50% threshold"
+      ]
+    },
+    "bidder_d_nova": {
+      "name": "NOVA PUMPS AND VALVES PRIVATE LIMITED",
+      "pan": "AABCN7777N",
+      "gstin": "27AABCN7777N1Z8",
+      "expected_overall_status": "REVIEW",
+      "expected_risk_band": "HIGH",
+      "flags": [
+        "Prompt injection detected in white text",
+        "Suspicious producer GIMP 2.10",
+        "Cross-bidder collusion link with Bidder C (shared phone & author)"
+      ]
+    },
+    "bidder_e_debarred": {
+      "name": "COROMANDEL ENGINEERING WORKS",
+      "pan": "AAACD9876K",
+      "gstin": "33AAACD9876K1Z9",
+      "expected_overall_status": "FAIL",
+      "expected_risk_band": "HIGH",
+      "flags": [
+        "Exact PAN hit on CPPP Debarment Registry",
+        "Suo-moto cancelled GSTIN"
+      ]
+    }
+  }
+}
