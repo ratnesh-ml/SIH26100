@@ -71,9 +71,9 @@ def test_alembic_migration_and_user_seeding():
     """Test running Alembic upgrade head, validating tables, and seeding users in a fresh DB."""
     with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as tmp_file:
         tmp_db_path = tmp_file.name
-
     try:
-        db_url = f"sqlite:///{tmp_db_path.replace('\\', '/')}"
+        clean_db_path = tmp_db_path.replace("\\", "/")
+        db_url = f"sqlite:///{clean_db_path}"
         
         # Configure Alembic
         cfg = Config("alembic.ini")
