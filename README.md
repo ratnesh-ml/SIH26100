@@ -33,9 +33,9 @@ Designed for the **Smart India Hackathon 2026 (Problem Statement SIH26100)**, Vi
 
 | Resource | Description | Status / Target |
 |---|---|---|
-| **Demo Walkthrough** | Public live cloud deployment | Demo Walkthrough: To be added |
-| **Video Walkthrough** | Video demonstration of verification workflow | Video Walkthrough: To be added |
-| **Demo Walkthrough Guide** | Step-by-step evaluator guide across all 5 synthetic bidder scenarios | [docs/demo/DEMO-GUIDE.md](docs/demo/DEMO-GUIDE.md) |
+| **Live Demo** | Public live cloud deployment | Live Demo: To be added |
+| **Demo Video** | Video demonstration of verification workflow | Demo Video: To be added |
+| **Demo Walkthrough Guide** | 15-step evaluator guide for Bharat Hydrotech Corp & all 5 synthetic scenarios | [docs/demo/DEMO-GUIDE.md](docs/demo/DEMO-GUIDE.md) |
 | **60-Second Overview** | Rapid high-level summary for evaluators and technical reviewers | [docs/ONE-MINUTE-TOUR.md](docs/ONE-MINUTE-TOUR.md) |
 | **Quick Start** | Step-by-step local setup and Docker deployment commands | [Jump to Quick Start](#quick-start) |
 | **System Architecture** | Component diagrams, processing pipeline, and technology map | [Jump to System Architecture](#system-architecture) |
@@ -82,42 +82,51 @@ VigilBid brings document ingestion, structured extraction, cross-document entity
 
 ---
 
-## 🔎 Example: From Documents to Decision
+## 🔎 Evaluator 3-Minute Tour: The Case of Bharat Hydrotech Corp
 
-To see how VigilBid works in practice, consider synthetic bidder **Bharat Hydrotech Corp** submitting for tender `CPCL/MM/2026/PUMP-217` (12 API-610 Centrifugal Process Pumps, estimated value ₹18.40 Crores):
+An evaluator can understand the complete value of VigilBid in under 3 minutes through **ONE synthetic bidder scenario**: **Bharat Hydrotech Corp** submitting for tender `CPCL/MM/2026/PUMP-217` (12 API-610 Centrifugal Process Pumps, estimated value ₹18.40 Crores):
 
-### 1. Documents Submitted in Package (`bharat_hydro_bid_pkg.zip`)
-- `gst_reg06.pdf` — GST Registration Certificate (Form REG-06)
-- `pan_card.pdf` — Income Tax PAN Card
-- `udyam_cert.pdf` — Udyam MSME Declaration
-- `turnover_ca.pdf` — CA-Certified 3-Year Turnover Certificate (with UDIN)
-- `local_content.pdf` — Local Content Declaration under PPP-MII Order 2017
+```
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│                   THE 15-STEP SCRUTINY JOURNEY (UNDER 3 MINUTES)                       │
+│                                                                                        │
+│  [01] Tender Context       ──> [02] Select Bidder      ──> [03] Document Package       │
+│  [04] Auto Extraction      ──> [05] PAN-GSTIN Mismatch ──> [06] Click Finding          │
+│  [07] Evidence on Pages    ──> [08] Local Content Gap  ──> [09] Compliance Status      │
+│  [10] 65/100 HIGH Risk     ──> [11] Reason Breakdown   ──> [12] AI Recommendation      │
+│  [13] Officer Review       ──> [14] Human Decision     ──> [15] Audit Ledger Entry     │
+└────────────────────────────────────────────────────────────────────────────────────────┘
+```
 
-### 2. Fields Extracted
-- **Standalone PAN:** `AAACB1234F` (extracted from `pan_card.pdf`, Page 1)
-- **GSTIN:** `33AAACB9999F1Z5` (extracted from `gst_reg06.pdf`, Page 1)
-- **3-Year Average Turnover:** ₹6.10 Crores (extracted from `turnover_ca.pdf`, Page 1)
-- **Declared Local Content:** 45.0% (extracted from `local_content.pdf`, Page 1)
+### The 15 Scrutiny Milestones
 
-### 3. Verification & Compliance Findings
-- 🔴 **PAN-GSTIN Identity Inconsistency:** The PAN embedded within characters 3–12 of the GSTIN (`AAACB9999F`) does **not** match the standalone PAN card (`AAACB1234F`).
-- 🔴 **Local Content Deficit:** The declared 45.0% local content does not meet the mandatory Class-I 50.0% requirement specified in the tender under the PPP-MII Order 2017.
-- 🟢 **Turnover Threshold Satisfied:** ₹6.10 Crores satisfies the ₹5.52 Crore requirement (30% of the ₹18.40 Crore tender value).
-- 🟢 **Udyam MSME Registration:** Valid Medium Enterprise registered in Tamil Nadu.
+1. **Tender Context:** Ref `CPCL/MM/2026/PUMP-217` (₹18.40 Cr, 12 API-610 Pumps). Mandatory rules: GFR 144/161, Class-I MII $\ge$ 50%, Min Turnover ₹5.52 Cr.
+2. **Select Bidder:** Bidder C (**Bharat Hydrotech Corp**) selected from 5 participating vendor packages.
+3. **Show Document Package:** 5 ingested statutory PDFs (`gst_reg06.pdf`, `pan_card.pdf`, `udyam_cert.pdf`, `turnover_ca.pdf`, `local_content.pdf`) with SHA-256 CAS indexing and zip-bomb ratio defense.
+4. **Show Automatic Extraction:** PyMuPDF extracts GSTIN `33AAACB9999F1Z5`, PAN `AAACB1234F`, Turnover ₹6.10 Cr, Local Content 45.0% in &lt;108ms.
+5. **Show PAN-GSTIN Mismatch:** Chars 3–12 of GSTIN contain `AAACB9999F`, conflicting with standalone PAN `AAACB1234F` (different legal entity).
+6. **Click Finding:** Click finding `CPCL-GOODS-002` ("Statutory Identity & PAN-GSTIN Containment").
+7. **Open Evidence on Exact Pages:** Split-screen viewer renders dual-page coordinate bounding boxes: `gst_reg06.pdf` (Page 1, `[120, 85, 340, 110]`) vs `pan_card.pdf` (Page 1, `[140, 160, 310, 185]`).
+8. **Show Local-Content Discrepancy:** Rule `CPCL-GOODS-003` detects declared 45.0% local content, failing the 50.0% Class-I benchmark under DPIIT PPP-MII Order 2017.
+9. **Show Compliance Status:** Compliance engine evaluates status: **`FAIL`** (Hard statutory identity failure under GFR Rule 144).
+10. **Show 65/100 HIGH Risk Score:** Composite risk engine quantifies risk at **`65.0 / 100 (HIGH RISK)`**.
+11. **Show Reason Breakdown:** Transparent factor attribution: Identity Inconsistency (+35.0) + Compliance Gap (+25.0) + Financial Baseline (+5.0) = 65.0 pts.
+12. **Show AI/System Recommendation:** Advisory decision support displays: *"Recommended: Not Qualified — identity discrepancy and local content deficit. Officer confirmation required."* (AI never autonomously rejects).
+13. **Show Procurement Officer Review:** Officer Shri Ravi Kumar (`officer@cpcl.gov.in`) inspects dual highlighted evidence and evaluates CVC Circular 02/02/2021 clarification limits.
+14. **Show Final Human Decision:** Officer adjudicates **`REJECT`** and records mandatory statutory minute: *"Clarification rejected; statutory PAN-in-GSTIN containment failed. Local content deficit (45% vs 50%) confirmed."*
+15. **Show Audit Ledger Entry:** Officer action committed to SHA-256 forward ledger (Block #142) verified in milliseconds, exportable to signed CVC Compliance Dossier PDF.
 
-### 4. Explainable Risk Score
-- **Overall Risk Score:** **65.0 / 100 (HIGH RISK)**
-- **Score Breakdown:** Identity Inconsistency (+35.0) · Compliance Gap (+25.0) · Financial Factors (+5.0) · Anomaly Baseline (0.0).
+### The 7 Core Evaluator Questions Answered
 
-### 5. Evidence Presented to Officer
-In the split-screen Cockpit, clicking the PAN inconsistency finding automatically displays:
-- Left panel: Rule `CPCL-GOODS-002` violation summary citing GFR Rule 144.
-- Right panel: Rendered `gst_reg06.pdf` (Page 1) with bounding box highlighting `33AAACB9999F1Z5`, alongside `pan_card.pdf` (Page 1) highlighting `AAACB1234F`.
-
-### 6. Officer Action
-- **System Recommendation:** `"Recommended: Not Qualified — identity discrepancy and local content deficit"`.
-- **Officer Review:** The procurement officer inspects both highlighted source pages, confirms the discrepancy, and records the formal committee minute: *"Clarification rejected; statutory PAN-in-GSTIN containment failed."*
-- **Audit Action:** Decision and justification are appended to the immutable SHA-256 hash chain.
+| # | Question | Authoritative Answer for Bharat Hydrotech Corp |
+|---|---|---|
+| 1 | **WHAT was wrong?** | Standalone PAN card (`AAACB1234F`) contradicts the PAN embedded in the GSTIN (`33AAACB9999F1Z5` embeds `AAACB9999F`), and declared local content is 45% (below the 50% Class-I threshold). |
+| 2 | **HOW did the system detect it?** | PyMuPDF extracts digital text and coordinates; a deterministic cross-document validator checks characters 3–12 of the GSTIN against the standalone PAN card. |
+| 3 | **WHERE is the evidence?** | `gst_reg06.pdf` (Page 1, box `[120, 85, 340, 110]`) highlighting `33AAACB9999F1Z5`, and `pan_card.pdf` (Page 1, box `[140, 160, 310, 185]`) highlighting `AAACB1234F`. |
+| 4 | **WHICH rule caused the finding?** | Rule `CPCL-GOODS-002` (GFR 2017 Rule 144 & CGST Act Section 22) and Rule `CPCL-GOODS-003` (DPIIT PPP-MII Order 2017 Clause 2(b)). |
+| 5 | **HOW serious is it?** | **CRITICAL / HIGH RISK (Score 65.0/100)**. Contradictory legal tax identifiers represent a fatal statutory identity failure. |
+| 6 | **WHAT does the system recommend?** | *"Recommended: Not Qualified — identity discrepancy and local content deficit. Officer confirmation required."* Advisory decision support only. |
+| 7 | **WHO makes the final decision?** | The **Human Procurement Officer** (Shri Ravi Kumar, CPCL), who inspects the evidence, records mandatory written minutes, and commits the signed decision. |
 
 ---
 

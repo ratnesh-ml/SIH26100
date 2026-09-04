@@ -22,6 +22,7 @@ This document defines the 11 key UI screenshots required for official documentat
 | `09-graph.png` | Collusion Network Graph (`/graph`) | Visualizes cross-bidder entity relationships | Node graph connecting bidders via shared PAN, bank accounts, authorized signatories, or identical file hashes | None (synthetic linkages only) |
 | `10-audit.png` | Audit Ledger (`/audit`) | Proves cryptographic tamper-evidence of officer decisions | Sequential event list, SHA-256 hash chains, green "Ledger Verified" badge, event timestamp and user role | Real user email addresses |
 | `11-report.png` | CVC PDF Dossier Preview (`/reports`) | Demonstrates formal compliance documentation export | Official CPCL header, criteria compliance summary table, highlighted evidence excerpts, digital signature block | Local print driver dialogs |
+| `12-demo-walkthrough.png` | Evaluator Guided Tour (`/#/demo`) | 3-minute evaluator journey for Bharat Hydrotech Corp | 15-step interactive stepper, 7 core answers card, synthetic disclaimer banner, dual bounding boxes | OS taskbar, developer extensions |
 
 ---
 
