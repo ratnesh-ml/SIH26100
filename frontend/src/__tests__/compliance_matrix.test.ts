@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { BidderMatrixRow, FindingStatus } from '../types';
+import { BidderMatrixRow } from '../types';
 
 export function computeMatrixStatusCounts(bidders: BidderMatrixRow[]) {
   const counts = { PASS: 0, WARN: 0, REVIEW: 0, FAIL: 0, PENDING: 0, TOTAL: 0 };
