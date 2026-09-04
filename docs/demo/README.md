@@ -2,6 +2,10 @@
 
 This directory contains resources, guides, scripts, and media guidelines for demonstrating the VigilBid platform during presentations, evaluations, and video walkthroughs.
 
+- **Demo Walkthrough:** Demo Walkthrough: To be added
+- **Video Walkthrough:** Video Walkthrough: To be added
+- **Demonstration Guide:** See [docs/demo/DEMO-GUIDE.md](DEMO-GUIDE.md) for the complete scenario walkthrough.
+
 ---
 
 ## 1. Overview of the In-App `/demo` Page

@@ -84,6 +84,8 @@ Every external and internal link in the repository documentation has been review
 | `https://img.shields.io/badge/SIH%202026-SIH26100-purple` | README Header Badge | Verified / Public | Retained |
 | `https://github.com/ratnesh-ml/SIH26100/actions/...` | README CI Badge | Verified / Public | Retained |
 | `https://github.com/ratnesh-ml/SIH26100.git` | Git Clone Target | Verified / Public | Retained |
+| `Demo Walkthrough: To be added` | Quick Links / Demo Section | Documented Policy | Retained (Honest placeholder) |
+| `Video Walkthrough: To be added` | Quick Links / Demo Section | Documented Policy | Retained (Honest placeholder) |
 | `Live Demo: To be added` | Quick Links / Demo Section | Documented Policy | Retained (Honest placeholder) |
 | `Demo Video: To be added` | Quick Links / Demo Section | Documented Policy | Retained (Honest placeholder) |
 | `http://localhost:5173/#/demo` | Developer Setup Guide | Local Development Only | Retained strictly in local execution commands |

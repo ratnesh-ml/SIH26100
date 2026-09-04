@@ -33,8 +33,8 @@ Designed for the **Smart India Hackathon 2026 (Problem Statement SIH26100)**, Vi
 
 | Resource | Description | Status / Target |
 |---|---|---|
-| **Live Deployed Demo** | Public cloud deployment | Live Demo: To be added |
-| **Demo Video** | Video demonstration of verification workflow | Demo Video: To be added |
+| **Demo Walkthrough** | Public live cloud deployment | Demo Walkthrough: To be added |
+| **Video Walkthrough** | Video demonstration of verification workflow | Video Walkthrough: To be added |
 | **Demo Walkthrough Guide** | Step-by-step evaluator guide across all 5 synthetic bidder scenarios | [docs/demo/DEMO-GUIDE.md](docs/demo/DEMO-GUIDE.md) |
 | **60-Second Overview** | Rapid high-level summary for evaluators and technical reviewers | [docs/ONE-MINUTE-TOUR.md](docs/ONE-MINUTE-TOUR.md) |
 | **Quick Start** | Step-by-step local setup and Docker deployment commands | [Jump to Quick Start](#quick-start) |
@@ -310,8 +310,8 @@ The following metrics are verified directly from the codebase:
 
 ## 🎥 Demonstration & Guided Tour
 
-- **Live Deployed Demo:** Live Demo: To be added
-- **Demo Video:** Demo Video: To be added
+- **Demo Walkthrough:** Demo Walkthrough: To be added
+- **Video Walkthrough:** Video Walkthrough: To be added
 - **Local Interactive Tour:** Follow [Quick Start](#quick-start) to launch the application locally, then access `http://localhost:5173/#/demo` in your browser.
 - **Demo Walkthrough Guide:** See [docs/demo/DEMO-GUIDE.md](docs/demo/DEMO-GUIDE.md) for the complete workflow breakdown and scenario guide.
 
