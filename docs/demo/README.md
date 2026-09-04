@@ -2,7 +2,8 @@
 
 This directory contains resources, guides, scripts, and media guidelines for demonstrating the VigilBid platform during presentations, evaluations, and video walkthroughs.
 
-- **Live Demo:** To be added
+- **Live Demo (Frontend):** [https://vigilbid-frontend.onrender.com](https://vigilbid-frontend.onrender.com)
+- **Backend API & Swagger:** [https://vigilbid-backend.onrender.com/api/v1/docs](https://vigilbid-backend.onrender.com/api/v1/docs)
 - **Demo Video:** To be added
 - **Demonstration Guide:** See [docs/demo/DEMO-GUIDE.md](DEMO-GUIDE.md) for the complete scenario walkthrough.
 

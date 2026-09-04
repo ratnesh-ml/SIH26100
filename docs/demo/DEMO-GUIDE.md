@@ -205,8 +205,8 @@ The demonstration suite uses 5 synthetic vendor packages in `seed/demo_packages/
 
 ## 6. Demonstration Resources
 
+- **Live Demo (Frontend):** [https://vigilbid-frontend.onrender.com](https://vigilbid-frontend.onrender.com)
+- **Backend API & Swagger:** [https://vigilbid-backend.onrender.com/api/v1/docs](https://vigilbid-backend.onrender.com/api/v1/docs)
 - **Demo Video:** To be added
-- **Live Demo:** To be added
-- **REST API Documentation:** Interactive Swagger UI available under `/docs` on the active backend port
 - **Full Architecture Specification:** [docs/architecture/REPOSITORY-MAP.md](../architecture/REPOSITORY-MAP.md)
 - **SIH 24-Requirement Traceability:** [docs/architecture/SIH26100-REQUIREMENT-MATRIX.md](../architecture/SIH26100-REQUIREMENT-MATRIX.md)

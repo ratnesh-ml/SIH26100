@@ -4,9 +4,10 @@ This document reserves the evaluator-facing locations for final visual and video
 
 ## Public links
 
-| Asset | Placeholder | Final action |
+| Asset | Status / Target | Final action |
 |---|---|---|
-| Live demo | `[ADD LIVE DEMO URL]` | Replace with the public, tested URL. |
+| Live demo (Frontend) | [https://vigilbid-frontend.onrender.com](https://vigilbid-frontend.onrender.com) | Active public deployment instance on Render. |
+| Backend API & Docs | [https://vigilbid-backend.onrender.com/api/v1/docs](https://vigilbid-backend.onrender.com/api/v1/docs) | Active public FastAPI Swagger docs instance. |
 | YouTube walkthrough | `[ADD YOUTUBE VIDEO URL]` | Replace with the final public video URL. |
 | Project repository | [SIH26100 GitHub repository](https://github.com/ratnesh-ml/SIH26100) | Keep unchanged. |
 

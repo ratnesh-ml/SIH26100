@@ -16,9 +16,10 @@ The current repository contains a reproducible synthetic demonstration environme
 
 The following assets will be added before the final submission. The placeholders are intentional so the repository can be prepared now without requiring last-minute restructuring.
 
-| Asset | Status | Placeholder |
+| Asset | Status | Link / Target |
 |---|---|---|
-| Public live demo | To be added | `[ADD LIVE DEMO URL]` |
+| Public live demo | Active | [https://vigilbid-frontend.onrender.com](https://vigilbid-frontend.onrender.com) |
+| Backend API & Swagger | Active | [https://vigilbid-backend.onrender.com/api/v1/docs](https://vigilbid-backend.onrender.com/api/v1/docs) |
 | YouTube walkthrough | To be added | `[ADD YOUTUBE VIDEO URL]` |
 | Dashboard screenshot | To be added | `docs/demo/screenshots/01-dashboard.png` |
 | Bidder cockpit screenshot | To be added | `docs/demo/screenshots/02-bidder-cockpit.png` |

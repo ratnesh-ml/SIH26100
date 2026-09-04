@@ -21,7 +21,8 @@
 
 | Asset | Current status |
 |---|---|
-| Live demo URL | `[ADD LIVE DEMO URL]` |
+| Live demo URL | [https://vigilbid-frontend.onrender.com](https://vigilbid-frontend.onrender.com) |
+| Backend API & Docs | [https://vigilbid-backend.onrender.com/api/v1/docs](https://vigilbid-backend.onrender.com/api/v1/docs) |
 | YouTube walkthrough | `[ADD YOUTUBE VIDEO URL]` |
 | Dashboard screenshot | `docs/demo/screenshots/01-dashboard.png` — to be added |
 | Bidder cockpit screenshot | `docs/demo/screenshots/02-bidder-cockpit.png` — to be added |
@@ -84,7 +85,8 @@ Public procurement scrutiny takes **8 to 10 hours per bidder**, leaving evaluati
 
 | Demonstration Channel | Access Status | Verification Notes |
 |---|---|---|
-| **Live Demo** | `[ADD LIVE DEMO URL]` | Public demonstration instance; link to be added before final submission |
+| **Live Demo (Frontend)** | **[https://vigilbid-frontend.onrender.com](https://vigilbid-frontend.onrender.com)** | Public live deployment instance hosted on Render (Vite React SPA) |
+| **Backend API & Swagger** | **[https://vigilbid-backend.onrender.com/api/v1/docs](https://vigilbid-backend.onrender.com/api/v1/docs)** | Public FastAPI backend service with interactive Swagger / OpenAPI docs |
 | **Demo Video** | `[ADD YOUTUBE VIDEO URL]` | Comprehensive video walkthrough; link to be added before final submission |
 | **Interactive Tour** | **Available in Local Build (`/#/demo`)** | Self-contained, zero-setup 15-step interactive scrutiny tour |
 | **Evaluator Walkthrough Guide** | **[docs/demo/DEMO-GUIDE.md](docs/demo/DEMO-GUIDE.md)** | Step-by-step evaluator manual with exact coordinates, telemetry, and citations |
