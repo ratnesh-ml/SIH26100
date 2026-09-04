@@ -2,12 +2,12 @@
 
 from datetime import datetime
 import uuid
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class LoginRequest(BaseModel):
-    email: str
-    password: str
+    email: str = Field(..., min_length=3, max_length=254, description="User email address")
+    password: str = Field(..., min_length=1, max_length=128, description="User plaintext password")
 
 
 class UserOut(BaseModel):

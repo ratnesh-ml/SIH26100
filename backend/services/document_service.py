@@ -213,8 +213,20 @@ class DocumentService:
     ) -> bytes:
         """Render a specific 1-indexed page of a PDF document to raster PNG bytes."""
         doc = await DocumentService.get_document(session, doc_id)
-        doc_path = Path(doc.storage_path)
-        if not doc_path.exists():
+        doc_path = Path(doc.storage_path).resolve()
+        storage_root = Path(settings.STORAGE_DIR).resolve()
+        is_safe = doc_path.is_relative_to(storage_root)
+        if not is_safe and settings.ENVIRONMENT.lower() in ("development", "test", "testing"):
+            import tempfile
+            is_safe = doc_path.is_relative_to(Path(tempfile.gettempdir()).resolve())
+
+        if not is_safe:
+            logger.error("Security alert: Attempted path escape for render_document_page on doc %s: %s", doc_id, doc.storage_path)
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Access outside storage root denied",
+            )
+        if not doc_path.exists() or not doc_path.is_file():
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Document storage file not found at '{doc.storage_path}'.",

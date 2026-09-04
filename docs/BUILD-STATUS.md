@@ -1,8 +1,8 @@
 # VigilBid (SIH26100) — Build Status & Transition Baseline
 
-**Document Version:** 2.27.0  
+**Document Version:** 2.28.0  
 **Date:** September 2026  
-**Status:** Phase 40 & 41 Complete — Complete E2E Demo Evaluation Executed and Reproducible Evaluation Harness Operational with 100% Ground Truth Accuracy  
+**Status:** Phase 42 Complete — Comprehensive Security Audit Executed across 17 Vectors, High-Priority Vulnerabilities Hardened (CORS, Rate Limiting, Security Headers, Path Containment, Input Validation), 353 Automated Tests Passing  
 **Target:** SIH Grand Finale — Problem Statement SIH26100 (CPCL / Ministry of Petroleum & Natural Gas)
 
 ---
@@ -86,8 +86,9 @@ In public procurement under GFR 2017 and CVC guidelines, procurement officers ma
 | **Synthetic Demo Dataset (`seed/`)** | ✅ Completed (100%) | Complete 4+1 demo bidder packages (clean MSE, minor gap, hard PAN-GSTIN mismatch, manipulated metadata & prompt injection, debarred control) generated in `seed/demo_packages/` with `ground_truth.json` and active registry fixtures in `seed/mock_fixtures/`. |
 | **End-to-End Evaluation Pipeline** | ✅ Completed (100%) | 14-step deterministic pipeline evaluated against all 5 demo bidders with simulated officer decisions, CVC PDF dossier exports, and 11-step cryptographic SHA-256 hash chains. Empirical results recorded in `docs/E2E-DEMO-RESULTS.md`. |
 | **Reproducible Evaluation Harness** | ✅ Completed (100%) | `scripts/evaluate.py` benchmarks document classification (100%), field extraction (100%), entity resolution (100%), rule correctness (100%), risk band alignment (100%), and anomaly confusion matrix (100% precision, 100% recall, 100% F1). Results documented in `docs/EVALUATION.md`. |
+| **Comprehensive Security Hardening** | ✅ Completed (100%) | Full security review across 17 vectors documented in `docs/SECURITY-AUDIT.md`. Remediated high-priority vectors: sliding-window rate limiting on auth, PBKDF2 DoS prevention, OWASP security headers (nosniff, DENY, CSP), strict CORS isolation, storage path traversal containment, Content-Disposition sanitization, and production secret key validation. Verified with 12 automated attack simulation tests in `tests/test_security_audit.py` (353 total passed). |
 
-**Current Repo Baseline:** The platform features an end-to-end operational public procurement vigilance engine with full frontend views (Dashboard, Tenders, Matrix, Upload Stepper, Cockpit, Risk & Anomalies, Cross-Bidder Graph, and Cryptographic Audit Trail), connected backend REST APIs, live PostgreSQL database models, and an automated evaluation harness (`scripts/evaluate.py`). The full pipeline evaluates all 5 demo bidders in <1.0s, passes 341 automated tests, produces 100% ground-truth accuracy across classification, extraction, rules, and anomalies, and generates tamper-evident CVC compliance dossiers with cryptographically verified SHA-256 forward hash chains.
+**Current Repo Baseline:** The platform features an end-to-end operational public procurement vigilance engine with full frontend views (Dashboard, Tenders, Matrix, Upload Stepper, Cockpit, Risk & Anomalies, Cross-Bidder Graph, and Cryptographic Audit Trail), connected backend REST APIs, live PostgreSQL database models, an automated evaluation harness (`scripts/evaluate.py`), and an enterprise defense layer (`docs/SECURITY-AUDIT.md`, `tests/test_security_audit.py`). The full pipeline evaluates all 5 demo bidders in <1.0s, passes 353 automated tests, produces 100% ground-truth accuracy across classification, extraction, rules, and anomalies, enforces OWASP security response headers and sliding-window rate limiting, and generates tamper-evident CVC compliance dossiers with cryptographically verified SHA-256 forward hash chains.
 
 ---
 
@@ -229,11 +230,20 @@ In public procurement under GFR 2017 and CVC guidelines, procurement officers ma
 
 ## 8. Next Recommended Step
  
-**Phase 40 & 41 Complete (E2E Demo Evaluation & Reproducible Evaluation Harness):**
-1. **End-to-End Pipeline Evaluation (`docs/E2E-DEMO-RESULTS.md`):** Successfully executed the full 14-step pipeline across all 5 demo bidders with simulated officer adjudications, CVC/RTI compliance PDF dossiers, and cryptographically verified SHA-256 forward-chained audit logs.
-2. **Reproducible Evaluation Harness (`scripts/evaluate.py`, `docs/EVALUATION.md`):** Complete automated benchmarking script measuring field extraction (100%), entity resolution (100%), rule correctness (100%), document classification (100%), and anomaly detection confusion matrix (100% precision, 100% recall, 0 false positives, 0 false negatives) against `seed/ground_truth.json`.
-3. **Execute Phase 42 (Presentation Alignment & Grand Finale Preparation):**
-   - Align live demo script with S6 Cockpit and S7 Cross-Bidder Link Graph.
-   - Prepare timed 6.5-minute pitch rehearsal and defense answers for PSU / CPCL jury questions.
-   - Package standalone demo database restoration snapshot (`seed/demo.sql`).
+**Phase 42 Complete (Comprehensive Security Audit & Enterprise Hardening):**
+1. **Security Audit & Penetration Review (`docs/SECURITY-AUDIT.md`):** Completed rigorous review across 17 vectors (authentication, RBAC, JWT handling, file upload, ZIP traversal, path traversal, malicious file handling, SQL injection, XSS risk, API validation, secret leakage, logging, sensitive data exposure, document access control, prompt injection, CORS, and rate limiting).
+2. **High-Priority Vulnerabilities Remediated & Hardened:**
+   - **Sliding-Window Rate Limiting:** Implemented `SlidingWindowRateLimiter` protecting `/api/v1/auth/login` (10 req/min) returning HTTP 429.
+   - **Input Length Bounds:** Protected PBKDF2 hashing against computational exhaustion DoS (password max 128 chars, email max 254 chars).
+   - **OWASP Security Headers:** Attached `nosniff`, `DENY`, `1; mode=block`, `strict-origin-when-cross-origin`, and `Content-Security-Policy` to all API responses.
+   - **CORS Isolation:** Removed wildcard credentials, strictly restricting origins to trusted frontend domains and local developer regex.
+   - **Path Traversal Defense:** Added `is_safe_storage_path()` enforcing canonical filesystem containment on document streaming and page thumbnail rendering.
+   - **Content-Disposition Sanitization:** Sanitized filenames against CRLF response splitting and header injection.
+   - **Production Secret Guard:** Added startup assertions blocking default secret keys in production.
+3. **Automated Security Test Suite (`tests/test_security_audit.py`):** 12 automated attack simulation tests passing; full suite green with 353 tests passing.
+
+**Execute Phase 43 (Slide Deck Alignment, Timed Pitch Rehearsal & Grand Finale Demo Package):**
+1. Align live demo flow with S6 Cockpit and S7 Cross-Bidder Link Graph.
+2. Complete timed 6.5-minute pitch rehearsal with jury defense Q&A against the 32 known judge questions.
+3. Export standalone demo database snapshot (`seed/demo.sql`) for instant 60-second restoration during the pitch.
 

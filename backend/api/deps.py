@@ -33,7 +33,7 @@ async def get_current_token_payload(
     except Exception as exc:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=f"Invalid or expired token: {str(exc)}",
+            detail="Invalid or expired token",
             headers={"WWW-Authenticate": "Bearer"},
         )
 

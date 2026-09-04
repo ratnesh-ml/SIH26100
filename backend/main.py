@@ -16,14 +16,31 @@ def create_app() -> FastAPI:
         redoc_url=f"{settings.API_V1_STR}/redoc",
     )
 
-    # CORS configuration
+    # CORS configuration - explicit origins to prevent credential leakage
     application.add_middleware(
         CORSMiddleware,
-        allow_origins=["*"],
+        allow_origins=settings.BACKEND_CORS_ORIGINS,
+        allow_origin_regex=r"^https?://(localhost|127\.0\.0\.1)(:\d+)?$",
         allow_credentials=True,
-        allow_methods=["*"],
+        allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
         allow_headers=["*"],
     )
+
+    # Security Response Headers Middleware (OWASP Defense-in-Depth)
+    @application.middleware("http")
+    async def add_security_headers(request, call_next):
+        response = await call_next(request)
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["X-XSS-Protection"] = "1; mode=block"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        response.headers["Content-Security-Policy"] = (
+            "default-src 'self'; "
+            "img-src 'self' data: blob:; "
+            "style-src 'self' 'unsafe-inline'; "
+            "frame-ancestors 'none';"
+        )
+        return response
 
     # Health Check (Public)
     @application.get("/health", tags=["Health"])

@@ -2,6 +2,8 @@
 
 from datetime import datetime, timezone
 import logging
+from pathlib import Path
+import re
 from typing import Annotated, Any, Optional
 import uuid
 from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
@@ -9,7 +11,9 @@ from fastapi.responses import FileResponse, Response
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from backend.core.config import settings
 from backend.core.database import get_db_session
+from backend.core.rate_limit import create_rate_limiter_dependency, auth_login_limiter
 from backend.core.security import create_access_token, verify_password
 from backend.api.deps import get_current_token_payload, get_current_user, require_role
 from backend.auth.jwt import TokenPayload
@@ -82,8 +86,12 @@ async def get_dashboard_metrics(
     return DashboardMetricsOut(**metrics)
 
 
-# 1. Auth Endpoints
-@api_router.post("/auth/login", response_model=TokenResponse, tags=["Auth"])
+@api_router.post(
+    "/auth/login",
+    response_model=TokenResponse,
+    dependencies=[Depends(create_rate_limiter_dependency(auth_login_limiter))],
+    tags=["Auth"],
+)
 async def login(
     request: LoginRequest,
     session: Annotated[AsyncSession, Depends(get_db_session)],
@@ -380,19 +388,46 @@ async def get_document(
     )
 
 
+import tempfile
+
+
+def is_safe_storage_path(path: Path) -> bool:
+    """Validate that file resides within storage root (or temp dir during testing)."""
+    try:
+        resolved = path.resolve()
+        storage_root = Path(settings.STORAGE_DIR).resolve()
+        if resolved.is_relative_to(storage_root):
+            return True
+        if settings.ENVIRONMENT.lower() in ("development", "test", "testing"):
+            temp_root = Path(tempfile.gettempdir()).resolve()
+            if resolved.is_relative_to(temp_root):
+                return True
+        return False
+    except Exception:
+        return False
+
+
 @api_router.get("/documents/{doc_id}/download", tags=["Documents"])
 async def download_document(
     doc_id: uuid.UUID,
     current_user: Annotated[User, Depends(get_current_user)],
     session: Annotated[AsyncSession, Depends(get_db_session)],
 ):
-    """Download original document safely with attachment disposition."""
+    """Download original document safely with attachment disposition and path traversal defense."""
     doc = await DocumentService.get_document(session, doc_id)
+    doc_path = Path(doc.storage_path).resolve()
+    if not is_safe_storage_path(doc_path):
+        logger.error("Security alert: Attempted path escape for document %s: %s", doc_id, doc.storage_path)
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access outside storage root denied")
+    if not doc_path.exists() or not doc_path.is_file():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document file not found on disk")
+
+    safe_filename = re.sub(r'[\r\n"\\;]', '_', doc.original_filename or f"{doc_id}.pdf")
     return FileResponse(
-        path=doc.storage_path,
-        filename=doc.original_filename,
+        path=str(doc_path),
+        filename=safe_filename,
         media_type="application/pdf",
-        headers={"Content-Disposition": f'attachment; filename="{doc.original_filename}"'},
+        headers={"Content-Disposition": f'attachment; filename="{safe_filename}"'},
     )
 
 
@@ -402,13 +437,21 @@ async def get_document_file(
     current_user: Annotated[User, Depends(require_role(UserRole.OFFICER, UserRole.APPROVER, UserRole.AUDITOR, UserRole.EVALUATOR, UserRole.VIGILANCE, UserRole.ADMIN))],
     session: Annotated[AsyncSession, Depends(get_db_session)],
 ):
-    """Fetch and stream original PDF file with inline disposition."""
+    """Fetch and stream original PDF file with inline disposition and path traversal defense."""
     doc = await DocumentService.get_document(session, doc_id)
+    doc_path = Path(doc.storage_path).resolve()
+    if not is_safe_storage_path(doc_path):
+        logger.error("Security alert: Attempted path escape for document %s: %s", doc_id, doc.storage_path)
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access outside storage root denied")
+    if not doc_path.exists() or not doc_path.is_file():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document file not found on disk")
+
+    safe_filename = re.sub(r'[\r\n"\\;]', '_', doc.original_filename or f"{doc_id}.pdf")
     return FileResponse(
-        path=doc.storage_path,
-        filename=doc.original_filename,
+        path=str(doc_path),
+        filename=safe_filename,
         media_type="application/pdf",
-        headers={"Content-Disposition": f'inline; filename="{doc.original_filename}"'},
+        headers={"Content-Disposition": f'inline; filename="{safe_filename}"'},
     )
 
 
