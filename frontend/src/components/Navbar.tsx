@@ -13,8 +13,9 @@ interface NavbarProps {
     | 'pipeline'
     | 'risk-anomalies'
     | 'graph'
-    | 'audit';
-  onNavigate: (view: 'dashboard' | 'tenders' | 'bidders' | 'audit') => void;
+    | 'audit'
+    | 'demo';
+  onNavigate: (view: 'dashboard' | 'tenders' | 'bidders' | 'audit' | 'demo') => void;
   onLogout: () => void;
   healthStatus?: string;
 }
@@ -26,6 +27,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onLogout,
   healthStatus,
 }) => {
+  const isDemoActive = activeView === 'demo';
   const isDashboardActive = activeView === 'dashboard';
   const isTendersActive = activeView === 'tenders' || activeView === 'matrix' || activeView === 'graph';
   const isBiddersActive =
@@ -95,11 +97,36 @@ export const Navbar: React.FC<NavbarProps> = ({
             >
               Audit Trail
             </button>
+            <button
+              onClick={() => onNavigate('demo')}
+              className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-colors flex items-center gap-1.5 ${
+                isDemoActive
+                  ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-sm'
+                  : 'text-amber-400/90 hover:text-amber-300 hover:bg-amber-500/10'
+              }`}
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+              Guided Demo
+            </button>
           </nav>
         )}
       </div>
 
       <div className="flex items-center gap-4">
+        {!currentUser && (
+          <button
+            onClick={() => onNavigate('demo')}
+            className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-colors flex items-center gap-1.5 ${
+              isDemoActive
+                ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
+                : 'text-amber-400 hover:text-amber-300 hover:bg-amber-500/10 border border-amber-500/30'
+            }`}
+          >
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+            Guided Demo Tour
+          </button>
+        )}
+
         {healthStatus && (
           <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-800/80 border border-slate-700/80 text-[11px] text-slate-300">
             <span

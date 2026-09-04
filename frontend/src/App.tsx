@@ -13,6 +13,7 @@ import { RiskAnomalyView } from './components/RiskAnomalyView';
 import { CrossBidderGraphView } from './components/CrossBidderGraphView';
 import { AuditTrailView } from './components/AuditTrailView';
 import { DashboardView } from './components/DashboardView';
+import { DemoView } from './components/DemoView';
 import { BidderSummary, TenderDetail, TenderSummary, UploadPackageResponse, User } from './types';
 
 export default function App() {
@@ -31,6 +32,7 @@ export default function App() {
     | 'risk-anomalies'
     | 'graph'
     | 'audit'
+    | 'demo'
   >('dashboard');
   const [selectedTender, setSelectedTender] = useState<TenderSummary | null>(null);
   const [selectedBidderId, setSelectedBidderId] = useState<string | null>(null);
@@ -67,6 +69,17 @@ export default function App() {
     } else {
       setInitialLoading(false);
     }
+
+    // 3. Hash-based route listener (e.g. #/demo)
+    const handleHash = () => {
+      const hash = window.location.hash.toLowerCase();
+      if (hash === '#/demo' || hash === '#demo' || window.location.pathname === '/demo') {
+        setActiveView('demo');
+      }
+    };
+    handleHash();
+    window.addEventListener('hashchange', handleHash);
+    return () => window.removeEventListener('hashchange', handleHash);
   }, []);
 
   const handleLoginSuccess = (user: User) => {
@@ -135,7 +148,17 @@ export default function App() {
             <span className="text-xs text-slate-400 font-medium">Initializing VigilBid Portal...</span>
           </div>
         ) : !currentUser ? (
-          <LoginView onLoginSuccess={handleLoginSuccess} />
+          activeView === 'demo' ? (
+            <DemoView
+              onEnterApp={() => setActiveView('dashboard')}
+              onOpenAudit={() => setActiveView('demo')}
+            />
+          ) : (
+            <LoginView
+              onLoginSuccess={handleLoginSuccess}
+              onExploreDemo={() => setActiveView('demo')}
+            />
+          )
         ) : (
           <>
             {activeView === 'dashboard' && (
@@ -248,6 +271,13 @@ export default function App() {
                   setSelectedBidderId(bId);
                   setActiveView('bidder-detail');
                 }}
+              />
+            )}
+
+            {activeView === 'demo' && (
+              <DemoView
+                onEnterApp={() => setActiveView('dashboard')}
+                onOpenAudit={() => setActiveView('audit')}
               />
             )}
           </>

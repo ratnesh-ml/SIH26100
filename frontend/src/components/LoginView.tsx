@@ -5,9 +5,10 @@ import { User } from '../types';
 
 interface LoginViewProps {
   onLoginSuccess: (user: User) => void;
+  onExploreDemo?: () => void;
 }
 
-export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
+export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess, onExploreDemo }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -105,6 +106,19 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
             )}
           </button>
         </form>
+
+        {onExploreDemo && (
+          <div className="mt-4">
+            <button
+              type="button"
+              onClick={onExploreDemo}
+              className="w-full py-2.5 px-4 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 font-medium text-xs transition-colors flex items-center justify-center gap-2 shadow-sm"
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+              <span>Explore Interactive Guided Demo Tour (No Login Needed)</span>
+            </button>
+          </div>
+        )}
 
         <div className="mt-8 pt-6 border-t border-slate-800">
           <div className="text-[11px] font-medium uppercase tracking-wider text-slate-400 mb-3 text-center">
