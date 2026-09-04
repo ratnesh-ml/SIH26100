@@ -10,16 +10,21 @@ import {
   User,
   Hash,
   FileCode,
-  AlertTriangle,
   ChevronDown,
   ChevronRight,
   Copy,
   Check,
-  Loader2,
   Lock,
 } from 'lucide-react';
 import { fetchAuditTrail, verifyAuditChain } from '../api/client';
 import { AuditEventOut, AuditVerifyOut } from '../types';
+import {
+  StatusChip,
+  Button,
+  EmptyState,
+  LoadingState,
+  ErrorState,
+} from './ui';
 
 interface AuditTrailViewProps {
   tenderId?: string;
@@ -119,28 +124,30 @@ export const AuditTrailView: React.FC<AuditTrailViewProps> = ({
 
   return (
     <div className="space-y-4">
-      {/* Top Bar with Navigation & Actions */}
-      <div className="px-4 py-3 rounded-xl bg-slate-900/80 border border-slate-800 flex flex-wrap items-center justify-between gap-3 shadow-md">
+      {/* 1. Top Bar with Navigation & Actions */}
+      <header className="px-4 py-3 rounded-xl bg-slate-900/80 border border-slate-800 flex flex-wrap items-center justify-between gap-3 shadow-md">
         <div className="flex items-center gap-3">
           {onBack && (
             <>
-              <button
+              <Button
+                variant="outline"
+                size="xs"
                 onClick={onBack}
-                className="p-1.5 rounded-lg bg-slate-950 border border-slate-800 hover:border-slate-700 text-slate-400 hover:text-white transition-colors inline-flex items-center gap-1 text-xs font-medium"
+                leftIcon={<ArrowLeft className="w-4 h-4" />}
+                aria-label="Back to previous view"
               >
-                <ArrowLeft className="w-4 h-4" />
-                <span>Back</span>
-              </button>
-              <div className="h-4 w-px bg-slate-800" />
+                Back
+              </Button>
+              <div className="h-4 w-px bg-slate-800" aria-hidden="true" />
             </>
           )}
 
           <div>
             <div className="flex items-center gap-2">
               <Lock className="w-4 h-4 text-sky-400" />
-              <h2 className="text-lg font-bold text-white tracking-tight">
+              <h1 className="text-lg font-bold text-white tracking-tight">
                 Cryptographic Audit Trail
-              </h2>
+              </h1>
             </div>
             <p className="text-xs text-slate-400 mt-0.5">
               {tenderId
@@ -152,34 +159,34 @@ export const AuditTrailView: React.FC<AuditTrailViewProps> = ({
 
         {/* Action Controls: Verify Chain & Refresh */}
         <div className="flex items-center gap-2">
-          <button
+          <Button
+            variant="primary"
+            size="sm"
             onClick={handleVerifyChain}
-            disabled={verifying || loading}
-            className="px-3.5 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-500 disabled:bg-sky-950 text-white font-medium text-xs inline-flex items-center gap-1.5 transition-colors shadow-sm shadow-sky-950"
+            isLoading={verifying}
+            disabled={loading}
+            leftIcon={<ShieldCheck className="w-3.5 h-3.5" />}
             title="Verify complete SHA-256 hash continuity across all events"
           >
-            {verifying ? (
-              <Loader2 className="w-3.5 h-3.5 animate-spin" />
-            ) : (
-              <ShieldCheck className="w-3.5 h-3.5" />
-            )}
-            <span>{verifying ? 'Verifying Chain...' : 'Verify chain'}</span>
-          </button>
+            {verifying ? 'Verifying Chain...' : 'Verify Chain Continuity'}
+          </Button>
 
-          <button
+          <Button
+            variant="outline"
+            size="icon"
             onClick={loadData}
-            disabled={loading}
-            className="p-2 rounded-lg bg-slate-950 border border-slate-800 text-slate-400 hover:text-white transition-colors"
-            title="Refresh Audit Log"
+            isLoading={loading}
+            aria-label="Refresh Audit Log"
           >
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-          </button>
+            <RefreshCw className="w-4 h-4" />
+          </Button>
         </div>
-      </div>
+      </header>
 
-      {/* Chain Status Verification Banner */}
+      {/* 2. Chain Status Verification Banner */}
       {verifyResult && (
         <div
+          role="status"
           className={`p-4 rounded-xl border transition-all shadow-lg ${
             verifyResult.ok
               ? 'bg-emerald-950/40 border-emerald-800/80 text-emerald-200'
@@ -190,21 +197,21 @@ export const AuditTrailView: React.FC<AuditTrailViewProps> = ({
             <div className="flex items-start gap-3">
               {verifyResult.ok ? (
                 <div className="p-2 rounded-lg bg-emerald-900/60 text-emerald-300 shrink-0 mt-0.5">
-                  <ShieldCheck className="w-5 h-5" />
+                  <ShieldCheck className="w-5 h-5" aria-hidden="true" />
                 </div>
               ) : (
                 <div className="p-2 rounded-lg bg-rose-900/90 text-rose-200 shrink-0 mt-0.5 animate-pulse">
-                  <ShieldAlert className="w-5 h-5" />
+                  <ShieldAlert className="w-5 h-5" aria-hidden="true" />
                 </div>
               )}
 
               <div className="space-y-1">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <h3 className="font-bold text-sm tracking-wide">
+                  <h2 className="font-bold text-sm tracking-wide">
                     {verifyResult.ok
                       ? 'AUDIT CHAIN STATUS: CRYPTOGRAPHICALLY VALID & INTACT'
                       : 'AUDIT CHAIN STATUS: CRITICAL DISCONTINUITY / TAMPERING DETECTED'}
-                  </h3>
+                  </h2>
                   <span
                     className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase tracking-wider ${
                       verifyResult.ok
@@ -243,17 +250,18 @@ export const AuditTrailView: React.FC<AuditTrailViewProps> = ({
         </div>
       )}
 
-      {/* Filters & Search Toolbar */}
-      <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800 flex flex-wrap items-center justify-between gap-3 text-xs">
+      {/* 3. Filters & Search Toolbar */}
+      <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800 flex flex-wrap items-center justify-between gap-3 text-xs shadow-xs">
         <div className="flex items-center gap-2.5 flex-wrap">
           <div className="flex items-center gap-1.5 text-slate-400">
-            <Filter className="w-3.5 h-3.5" />
-            <span className="font-medium">Action:</span>
+            <Filter className="w-3.5 h-3.5" aria-hidden="true" />
+            <label htmlFor="audit-action-filter" className="font-medium">Action:</label>
           </div>
           <select
+            id="audit-action-filter"
             value={actionFilter}
             onChange={(e) => setActionFilter(e.target.value)}
-            className="bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1 text-slate-200 focus:outline-none focus:border-sky-500"
+            className="bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1 text-slate-200 focus:outline-none focus:border-sky-500 transition-colors cursor-pointer"
           >
             <option value="ALL">All Actions ({events.length})</option>
             {distinctActions.map((act) => (
@@ -263,16 +271,17 @@ export const AuditTrailView: React.FC<AuditTrailViewProps> = ({
             ))}
           </select>
 
-          <div className="h-4 w-px bg-slate-800 hidden sm:block" />
+          <div className="h-4 w-px bg-slate-800 hidden sm:block" aria-hidden="true" />
 
           <div className="flex items-center gap-1.5 text-slate-400">
-            <User className="w-3.5 h-3.5" />
-            <span className="font-medium">Role:</span>
+            <User className="w-3.5 h-3.5" aria-hidden="true" />
+            <label htmlFor="audit-role-filter" className="font-medium">Role:</label>
           </div>
           <select
+            id="audit-role-filter"
             value={roleFilter}
             onChange={(e) => setRoleFilter(e.target.value)}
-            className="bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1 text-slate-200 focus:outline-none focus:border-sky-500"
+            className="bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1 text-slate-200 focus:outline-none focus:border-sky-500 transition-colors cursor-pointer"
           >
             <option value="ALL">All Roles</option>
             {distinctRoles.map((r) => (
@@ -285,43 +294,35 @@ export const AuditTrailView: React.FC<AuditTrailViewProps> = ({
 
         {/* Search */}
         <div className="relative">
-          <Search className="w-3.5 h-3.5 text-slate-500 absolute left-2.5 top-2.5" />
+          <Search className="w-3.5 h-3.5 text-slate-500 absolute left-2.5 top-2.5" aria-hidden="true" />
           <input
             type="text"
             placeholder="Search reason, actor, hash..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="bg-slate-950 border border-slate-800 rounded-lg pl-8 pr-2.5 py-1 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-sky-500 w-56 sm:w-64"
+            className="bg-slate-950 border border-slate-800 rounded-lg pl-8 pr-2.5 py-1 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-sky-500 w-56 sm:w-64 transition-colors"
           />
         </div>
       </div>
 
       {loading && (
-        <div className="p-16 rounded-xl bg-slate-900/40 border border-slate-800 text-center flex flex-col items-center justify-center gap-3">
-          <Loader2 className="w-7 h-7 text-sky-400 animate-spin" />
-          <span className="text-xs text-slate-400 font-medium">
-            Loading immutable audit events and verifying cryptographic chain...
-          </span>
-        </div>
+        <LoadingState
+          message="Loading immutable audit events and verifying cryptographic chain..."
+          size="lg"
+          className="rounded-xl bg-slate-900/40 border border-slate-800"
+        />
       )}
 
       {error && !loading && (
-        <div className="p-4 rounded-xl bg-rose-950/40 border border-rose-800 text-xs text-rose-300 flex items-start gap-2.5">
-          <AlertTriangle className="w-5 h-5 text-rose-400 shrink-0" />
-          <div className="flex-1">
-            <p className="font-semibold text-rose-200">Failed to load audit events</p>
-            <p className="mt-0.5 text-rose-400">{error}</p>
-            <button
-              onClick={loadData}
-              className="mt-2 px-3 py-1 bg-rose-900 text-rose-200 rounded font-medium"
-            >
-              Retry
-            </button>
-          </div>
-        </div>
+        <ErrorState
+          title="Failed to load audit events"
+          message={error}
+          onRetry={loadData}
+          variant="card"
+        />
       )}
 
-      {/* Events Timeline / List */}
+      {/* 4. Events Timeline / List */}
       {!loading && !error && (
         <div className="border border-slate-800 rounded-xl bg-slate-900/60 overflow-hidden shadow-lg">
           <div className="px-4 py-3 border-b border-slate-800 bg-slate-950/80 flex items-center justify-between text-xs">
@@ -367,21 +368,9 @@ export const AuditTrailView: React.FC<AuditTrailViewProps> = ({
                             #{evt.seq}
                           </span>
 
-                          <span
-                            className={`px-2 py-0.5 rounded font-mono font-bold text-[10px] uppercase tracking-wider ${
-                              evt.action.includes('OVERRIDE')
-                                ? 'bg-amber-950 text-amber-300 border border-amber-800/80'
-                                : evt.action.includes('REJECT')
-                                ? 'bg-rose-950 text-rose-300 border border-rose-800/80'
-                                : evt.action.includes('COMPLETE') || evt.action.includes('ACCEPT')
-                                ? 'bg-emerald-950 text-emerald-300 border border-emerald-800/80'
-                                : 'bg-sky-950 text-sky-300 border border-sky-800/80'
-                            }`}
-                          >
-                            {evt.action}
-                          </span>
+                          <StatusChip status={evt.action} size="xs" showIcon={false} />
 
-                          <span className="text-slate-400 font-mono text-[11px]">
+                          <span className="text-slate-400 font-mono text-[11px] bg-slate-950 px-1.5 py-0.5 rounded border border-slate-800">
                             {evt.target_type}:{evt.target_id.slice(0, 12)}…
                           </span>
 
@@ -424,9 +413,11 @@ export const AuditTrailView: React.FC<AuditTrailViewProps> = ({
                         <div className="flex items-center gap-1.5">
                           <span className="text-slate-500">Hash:</span>
                           <button
+                            type="button"
                             onClick={() => copyToClipboard(evt.curr_hash, `curr-${evt.seq}`)}
-                            className="bg-slate-950 hover:bg-slate-800 text-sky-400 px-2 py-0.5 rounded border border-slate-800 transition-colors inline-flex items-center gap-1"
+                            className="bg-slate-950 hover:bg-slate-850 text-sky-400 px-2 py-0.5 rounded border border-slate-800 transition-colors inline-flex items-center gap-1 cursor-pointer focus-visible:ring-2 focus-visible:ring-sky-400"
                             title="Click to copy full SHA-256 hash"
+                            aria-label={`Copy current hash for event ${evt.seq}`}
                           >
                             <span>{evt.curr_hash.slice(0, 8)}…</span>
                             {copiedHash === `curr-${evt.seq}` ? (
@@ -447,8 +438,9 @@ export const AuditTrailView: React.FC<AuditTrailViewProps> = ({
 
                         {/* Expand Details Button */}
                         <button
+                          type="button"
                           onClick={() => setExpandedSeq(isExpanded ? null : evt.seq)}
-                          className="mt-1 text-[11px] text-slate-400 hover:text-white inline-flex items-center gap-1 transition-colors"
+                          className="mt-1 text-[11px] text-slate-400 hover:text-white inline-flex items-center gap-1 transition-colors cursor-pointer"
                         >
                           <FileCode className="w-3 h-3 text-slate-500" />
                           <span>{isExpanded ? 'Hide Payload' : 'View Payload'}</span>
@@ -463,16 +455,17 @@ export const AuditTrailView: React.FC<AuditTrailViewProps> = ({
 
                     {/* Expandable JSON Payload Panel */}
                     {isExpanded && (
-                      <div className="mt-3 p-3 rounded-lg bg-slate-950 border border-slate-800 text-[11px] font-mono space-y-2">
+                      <div className="mt-3 p-3 rounded-lg bg-slate-950 border border-slate-800 text-[11px] font-mono space-y-2 shadow-inner">
                         <div className="flex items-center justify-between text-slate-400 border-b border-slate-800 pb-1.5">
                           <span className="font-bold text-slate-300">
                             Event Cryptographic Payload:
                           </span>
                           <button
+                            type="button"
                             onClick={() =>
                               copyToClipboard(JSON.stringify(evt, null, 2), `full-${evt.seq}`)
                             }
-                            className="hover:text-white inline-flex items-center gap-1 text-[10px]"
+                            className="hover:text-white inline-flex items-center gap-1 text-[10px] cursor-pointer"
                           >
                             <Copy className="w-2.5 h-2.5" />
                             <span>Copy Event JSON</span>
@@ -482,18 +475,18 @@ export const AuditTrailView: React.FC<AuditTrailViewProps> = ({
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-[10px]">
                           <div>
                             <span className="text-slate-500">Full Curr Hash:</span>
-                            <div className="text-sky-300 break-all">{evt.curr_hash}</div>
+                            <div className="text-sky-300 break-all select-all">{evt.curr_hash}</div>
                           </div>
                           <div>
                             <span className="text-slate-500">Full Prev Hash:</span>
-                            <div className="text-slate-400 break-all">{evt.prev_hash}</div>
+                            <div className="text-slate-400 break-all select-all">{evt.prev_hash}</div>
                           </div>
                         </div>
 
                         {evt.payload && (
                           <div className="pt-1">
                             <span className="text-slate-500 block mb-1">State & Metadata:</span>
-                            <pre className="text-slate-300 text-[10px] overflow-x-auto whitespace-pre-wrap leading-tight bg-slate-900/80 p-2 rounded border border-slate-800/80">
+                            <pre className="text-slate-300 text-[10px] overflow-x-auto whitespace-pre-wrap leading-tight bg-slate-900/80 p-2.5 rounded border border-slate-800/80">
                               {JSON.stringify(evt.payload, null, 2)}
                             </pre>
                           </div>
@@ -504,10 +497,11 @@ export const AuditTrailView: React.FC<AuditTrailViewProps> = ({
                 );
               })
             ) : (
-              <div className="p-16 text-center text-slate-500 text-xs">
-                <ShieldCheck className="w-6 h-6 mx-auto mb-2 text-slate-600" />
-                No audit events matched your search and filter criteria.
-              </div>
+              <EmptyState
+                icon={<ShieldCheck className="w-6 h-6 text-slate-500" />}
+                title="No Audit Events Matched"
+                description="No immutable audit events matched your search and filter criteria."
+              />
             )}
           </div>
         </div>

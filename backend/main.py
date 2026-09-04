@@ -69,6 +69,13 @@ def create_app() -> FastAPI:
     # Mount API v1 router
     application.include_router(api_router, prefix=settings.API_V1_STR)
 
+    # Mount static frontend SPA if prebuilt (enables single-port zero-npm demo)
+    from pathlib import Path
+    frontend_dist = Path(__file__).resolve().parent.parent / "frontend" / "dist"
+    if frontend_dist.exists() and (frontend_dist / "index.html").exists():
+        from fastapi.staticfiles import StaticFiles
+        application.mount("/", StaticFiles(directory=str(frontend_dist), html=True), name="frontend")
+
     return application
 
 

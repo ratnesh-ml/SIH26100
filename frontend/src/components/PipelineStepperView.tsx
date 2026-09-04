@@ -6,15 +6,21 @@ import {
   Clock,
   Loader2,
   RefreshCw,
-  AlertCircle,
   Play,
   FileText,
   Tag,
   ArrowRight,
   ShieldCheck,
+  Cpu,
 } from 'lucide-react';
 import { fetchBidder, fetchJobStatus, retagDocument, triggerJobProcessing } from '../api/client';
 import { BidderDetail, JobStatus } from '../types';
+import {
+  StatusChip,
+  Button,
+  LoadingState,
+  ErrorState,
+} from './ui';
 
 interface PipelineStepperViewProps {
   jobId: string;
@@ -106,12 +112,9 @@ export const PipelineStepperView: React.FC<PipelineStepperViewProps> = ({
     setRetaggingDocId(docId);
     try {
       const res = await retagDocument(bidderId, docId, newType);
-      // Reload bidder documents
       const refreshedBidder = await fetchBidder(bidderId);
       setBidder(refreshedBidder);
-      // If a new job was spawned for reprocessing, poll that
       if (res.job_id && res.job_id !== jobId) {
-        // Refresh status
         loadJobAndBidder();
       }
     } catch (err: any) {
@@ -124,13 +127,13 @@ export const PipelineStepperView: React.FC<PipelineStepperViewProps> = ({
   const getStepIcon = (status: string) => {
     switch (status) {
       case 'DONE':
-        return <CheckCircle2 className="w-5 h-5 text-emerald-400" />;
+        return <CheckCircle2 className="w-5 h-5 text-emerald-400" aria-hidden="true" />;
       case 'FAILED':
-        return <XCircle className="w-5 h-5 text-rose-400" />;
+        return <XCircle className="w-5 h-5 text-rose-400" aria-hidden="true" />;
       case 'RUNNING':
-        return <Loader2 className="w-5 h-5 text-sky-400 animate-spin" />;
+        return <Loader2 className="w-5 h-5 text-sky-400 animate-spin" aria-hidden="true" />;
       default:
-        return <Clock className="w-5 h-5 text-slate-600" />;
+        return <Clock className="w-5 h-5 text-slate-600" aria-hidden="true" />;
     }
   };
 
@@ -139,101 +142,97 @@ export const PipelineStepperView: React.FC<PipelineStepperViewProps> = ({
 
   return (
     <div className="space-y-6">
+      {/* 1. Header & Controls */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <button
+          <Button
+            variant="outline"
+            size="xs"
             onClick={onBackToBidders}
-            className="p-1.5 rounded-lg bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-400 hover:text-white transition-colors inline-flex items-center gap-1.5 text-xs font-medium"
+            leftIcon={<ArrowLeft className="w-4 h-4" />}
+            aria-label="Back to Bidders Roster"
           >
-            <ArrowLeft className="w-4 h-4" />
-            <span>Back to Bidders</span>
-          </button>
+            Bidders
+          </Button>
 
-          <div className="h-4 w-px bg-slate-800" />
+          <div className="h-5 w-px bg-slate-800" aria-hidden="true" />
 
           <div>
-            <h2 className="text-xl font-bold tracking-tight text-white flex items-center gap-2">
-              <span>Pipeline Processing Stepper</span>
-              <span
-                className={`text-[10px] font-mono px-2 py-0.5 rounded border uppercase tracking-wider ${
-                  isJobComplete
-                    ? 'bg-emerald-950 text-emerald-400 border-emerald-800'
-                    : isJobFailed
-                    ? 'bg-rose-950 text-rose-400 border-rose-800'
-                    : 'bg-sky-950 text-sky-400 border-sky-800 animate-pulse'
-                }`}
-              >
-                {job?.status || 'INITIALIZING'}
-              </span>
-            </h2>
+            <div className="flex items-center gap-2.5 flex-wrap">
+              <h1 className="text-xl font-bold tracking-tight text-white flex items-center gap-2">
+                <span>Pipeline Processing Stepper</span>
+              </h1>
+              <StatusChip status={job?.status || 'QUEUED'} size="sm" />
+            </div>
             <p className="text-xs text-slate-400 mt-0.5">
               Bidder: <span className="text-slate-200 font-semibold">{bidder?.declared_name || bidderId}</span>
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5 flex-wrap">
           {isJobFailed && (
-            <button
+            <Button
+              variant="destructive"
+              size="sm"
               onClick={handleRetry}
-              disabled={isRetrying}
-              className="py-1.5 px-3 rounded-lg bg-rose-600 hover:bg-rose-500 text-white font-medium text-xs flex items-center gap-1.5 transition-colors"
+              isLoading={isRetrying}
+              leftIcon={<Play className="w-3.5 h-3.5" />}
             >
-              {isRetrying ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Play className="w-3.5 h-3.5" />}
-              <span>Retry Full Pipeline</span>
-            </button>
+              Retry Full Pipeline
+            </Button>
           )}
 
           {isJobComplete && (
-            <button
+            <Button
+              variant="success"
+              size="sm"
               onClick={() => onViewBidderCockpit(bidderId)}
-              className="py-1.5 px-3.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-xs flex items-center gap-1.5 transition-colors shadow-sm shadow-emerald-950"
+              leftIcon={<ShieldCheck className="w-4 h-4" />}
+              rightIcon={<ArrowRight className="w-3.5 h-3.5" />}
             >
-              <ShieldCheck className="w-4 h-4" />
-              <span>Open Bidder Cockpit</span>
-              <ArrowRight className="w-3 h-3" />
-            </button>
+              Open Bidder Cockpit
+            </Button>
           )}
 
-          <button
+          <Button
+            variant="outline"
+            size="icon"
             onClick={() => loadJobAndBidder(false)}
-            disabled={loading}
-            title="Refresh Status"
-            className="p-2 rounded-lg bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-400 hover:text-white transition-colors"
+            isLoading={loading}
+            aria-label="Refresh Status"
           >
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-          </button>
+            <RefreshCw className="w-4 h-4" />
+          </Button>
         </div>
       </div>
 
       {error && (
-        <div className="p-4 rounded-xl bg-rose-950/40 border border-rose-800/60 flex items-start gap-3 text-xs text-rose-300">
-          <AlertCircle className="w-5 h-5 text-rose-400 shrink-0 mt-0.5" />
-          <div className="flex-1">
-            <p className="font-semibold text-rose-200">Processing Error Encountered</p>
-            <p className="mt-0.5 text-rose-400 font-mono text-[11px]">{error}</p>
-          </div>
-        </div>
+        <ErrorState
+          title="Processing Error Encountered"
+          message={error}
+          onRetry={() => loadJobAndBidder(false)}
+        />
       )}
 
-      {/* Pipeline 11-Step Stepper */}
-      <div className="border border-slate-800 rounded-xl bg-slate-900/60 p-6 space-y-6">
-        <div className="flex items-center justify-between">
-          <h3 className="text-sm font-bold text-white uppercase tracking-wider">
-            11-Step Forensic Evaluation Stepper
-          </h3>
-          <span className="text-xs font-mono text-slate-400">
+      {/* 2. Pipeline Stepper State Machine */}
+      <div className="border border-slate-800 rounded-xl bg-slate-900/60 p-5 sm:p-6 space-y-5 shadow-lg">
+        <div className="flex items-center justify-between pb-3 border-b border-slate-800/80">
+          <div className="flex items-center gap-2">
+            <Cpu className="w-4 h-4 text-sky-400" />
+            <h2 className="text-sm font-bold text-white uppercase tracking-wider">
+              11-Step Forensic Evaluation Stepper
+            </h2>
+          </div>
+          <span className="text-xs font-mono text-slate-400 bg-slate-950 px-2.5 py-1 rounded-md border border-slate-800">
             Step {job?.current_step ?? 0} of {job?.steps?.length || 11}
           </span>
         </div>
 
         {loading && !job ? (
-          <div className="p-8 text-center flex flex-col items-center gap-2">
-            <Loader2 className="w-6 h-6 text-sky-400 animate-spin" />
-            <span className="text-xs text-slate-400">Loading step state machine...</span>
-          </div>
+          <LoadingState message="Loading step state machine..." size="md" />
         ) : (
-          <div className="grid grid-cols-1 gap-2.5">
+          <div className="grid grid-cols-1 gap-2">
             {job?.steps?.map((st) => (
               <div
                 key={st.step_number}
@@ -272,22 +271,10 @@ export const PipelineStepperView: React.FC<PipelineStepperViewProps> = ({
                 </div>
 
                 <div className="flex items-center gap-3 text-[11px] font-mono">
-                  {st.meta?.duration_ms && (
+                  {st.meta?.duration_ms !== undefined && (
                     <span className="text-slate-500">{st.meta.duration_ms} ms</span>
                   )}
-                  <span
-                    className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider ${
-                      st.status === 'DONE'
-                        ? 'text-emerald-400 bg-emerald-950/60'
-                        : st.status === 'RUNNING'
-                        ? 'text-sky-400 bg-sky-950/80 animate-pulse'
-                        : st.status === 'FAILED'
-                        ? 'text-rose-400 bg-rose-950'
-                        : 'text-slate-500 bg-slate-900'
-                    }`}
-                  >
-                    {st.status}
-                  </span>
+                  <StatusChip status={st.status} size="xs" showIcon={false} />
                 </div>
               </div>
             ))}
@@ -295,24 +282,26 @@ export const PipelineStepperView: React.FC<PipelineStepperViewProps> = ({
         )}
       </div>
 
-      {/* Ingested Documents & Retagging Panel */}
+      {/* 3. Ingested Documents & Retagging Panel */}
       {bidder && bidder.documents && bidder.documents.length > 0 && (
-        <div className="border border-slate-800 rounded-xl bg-slate-900/60 p-6 space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+        <div className="border border-slate-800 rounded-xl bg-slate-900/60 p-5 sm:p-6 space-y-4 shadow-lg">
+          <div className="flex items-center justify-between pb-3 border-b border-slate-800/80 flex-wrap gap-2">
+            <div className="flex items-center gap-2">
               <FileText className="w-4 h-4 text-sky-400" />
-              <span>Ingested Filings & Document Classification Chips</span>
-            </h3>
+              <h2 className="text-sm font-bold text-white uppercase tracking-wider">
+                Ingested Filings & Document Classification Chips
+              </h2>
+            </div>
             <span className="text-xs text-slate-400">
-              Officer can re-tag document to trigger reprocessing from Step 4
+              Officer can re-tag document to trigger pipeline reprocessing
             </span>
           </div>
 
-          <div className="divide-y divide-slate-800/80 border border-slate-800 rounded-lg overflow-hidden bg-slate-950/50">
+          <div className="divide-y divide-slate-800/80 border border-slate-800 rounded-xl overflow-hidden bg-slate-950/50">
             {bidder.documents.map((doc) => (
               <div
                 key={doc.id}
-                className="p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs hover:bg-slate-900/30"
+                className="p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs hover:bg-slate-900/40 transition-colors"
               >
                 <div className="space-y-0.5 truncate pr-2">
                   <div className="font-medium text-slate-200 truncate">{doc.original_filename}</div>
@@ -323,12 +312,13 @@ export const PipelineStepperView: React.FC<PipelineStepperViewProps> = ({
 
                 <div className="flex items-center gap-3 shrink-0">
                   <div className="flex items-center gap-1.5">
-                    <Tag className="w-3.5 h-3.5 text-slate-400" />
+                    <Tag className="w-3.5 h-3.5 text-slate-400" aria-hidden="true" />
                     <select
+                      aria-label={`Document classification for ${doc.original_filename}`}
                       value={doc.doc_type || 'OTHER'}
                       disabled={retaggingDocId === doc.id}
                       onChange={(e) => handleRetag(doc.id, e.target.value)}
-                      className="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-slate-200 text-xs focus:outline-none focus:border-sky-500 disabled:opacity-50"
+                      className="bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1 text-slate-200 text-xs focus:outline-none focus:border-sky-500 disabled:opacity-50 transition-colors cursor-pointer"
                     >
                       {DOCUMENT_TYPES.map((t) => (
                         <option key={t} value={t}>
@@ -339,7 +329,7 @@ export const PipelineStepperView: React.FC<PipelineStepperViewProps> = ({
                   </div>
 
                   {retaggingDocId === doc.id && (
-                    <Loader2 className="w-3.5 h-3.5 text-sky-400 animate-spin" />
+                    <Loader2 className="w-3.5 h-3.5 text-sky-400 animate-spin" aria-hidden="true" />
                   )}
                 </div>
               </div>

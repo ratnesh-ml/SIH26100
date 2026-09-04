@@ -42,6 +42,20 @@ def get_async_engine() -> AsyncEngine:
     return _async_engine
 
 
+def reconfigure_engine(new_url: str) -> AsyncEngine:
+    """Reconfigure the global engine with a new connection string."""
+    global _async_engine, _async_session_maker
+    if _async_engine is not None:
+        try:
+            _async_engine.sync_engine.dispose()
+        except Exception:
+            pass
+    _async_engine = None
+    _async_session_maker = None
+    settings.DATABASE_URL = new_url
+    return get_async_engine()
+
+
 def get_session_maker() -> async_sessionmaker[AsyncSession]:
     """Return configured async session factory."""
     global _async_session_maker

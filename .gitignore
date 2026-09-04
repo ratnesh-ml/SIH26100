@@ -47,6 +47,8 @@ data/fixtures/*
 !data/fixtures/tenders/
 !data/fixtures/tenders/*
 *.log
+*.db
+*.sqlite
 
 # Large binary archives
 *.zip

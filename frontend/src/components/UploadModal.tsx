@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
-import { X, UploadCloud, File, AlertCircle, Loader2 } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { UploadCloud, File, Trash2, ShieldCheck } from 'lucide-react';
 import { uploadBidderPackage, uploadDocuments } from '../api/client';
 import { UploadPackageResponse } from '../types';
+import { Modal, Button, ErrorState } from './ui';
 
 interface UploadModalProps {
   isOpen: boolean;
@@ -23,6 +24,8 @@ export const UploadModal: React.FC<UploadModalProps> = ({
   const [isDragging, setIsDragging] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   if (!isOpen) return null;
 
@@ -58,11 +61,11 @@ export const UploadModal: React.FC<UploadModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (selectedFiles.length === 0) {
-      setError('Please select at least one PDF filing or ZIP package.');
+      setError('Please select at least one statutory PDF certificate or ZIP package.');
       return;
     }
     if (tenderId && !declaredName.trim()) {
-      setError('Declared Bidder Legal Name is required.');
+      setError('Declared Bidder Legal Name is strictly required.');
       return;
     }
 
@@ -95,145 +98,151 @@ export const UploadModal: React.FC<UploadModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-      <div className="bg-slate-900 border border-slate-800 rounded-xl w-full max-w-lg shadow-2xl p-6 relative">
-        <div className="flex items-center justify-between pb-4 border-b border-slate-800">
-          <div className="flex items-center gap-2.5">
-            <div className="p-1.5 rounded-lg bg-sky-500/10 border border-sky-500/20 text-sky-400">
-              <UploadCloud className="w-5 h-5" />
-            </div>
-            <div>
-              <h3 className="text-base font-bold text-white">
-                {tenderId ? 'Upload Bidder Submission Package' : 'Upload Additional Filings'}
-              </h3>
-              <p className="text-xs text-slate-400">
-                Safe ingestion with SHA-256 deduplication and zip-bomb protection
-              </p>
-            </div>
-          </div>
-          <button
-            onClick={onClose}
-            className="text-slate-400 hover:text-white p-1 rounded-md transition-colors"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={tenderId ? 'Upload Bidder Submission Package' : 'Upload Additional Statutory Filings'}
+      description="Safe CAS ingestion with SHA-256 deduplication and zip-bomb decompression limits."
+      icon={<UploadCloud className="w-5 h-5" />}
+      maxWidth="lg"
+    >
+      {error && (
+        <ErrorState
+          message={error}
+          onDismiss={() => setError(null)}
+          className="mb-4"
+        />
+      )}
 
-        {error && (
-          <div className="mt-4 p-3 rounded-lg bg-rose-950/50 border border-rose-800/80 flex items-start gap-2.5 text-rose-300 text-xs">
-            <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
-            <div className="flex-1">{error}</div>
+      <form onSubmit={handleSubmit} className="space-y-4 text-xs">
+        {tenderId && (
+          <div>
+            <label htmlFor="declared-name-input" className="block font-semibold text-slate-200 mb-1">
+              Declared Bidder Legal Name <span className="text-rose-400">*</span>
+            </label>
+            <input
+              id="declared-name-input"
+              type="text"
+              required
+              value={declaredName}
+              onChange={(e) => setDeclaredName(e.target.value)}
+              placeholder="e.g. Apex Industrial Solutions Private Limited"
+              className="w-full bg-slate-950 border border-slate-700/80 rounded-lg px-3 py-2 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-sky-500 transition-colors"
+            />
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4 mt-4 text-xs">
-          {tenderId && (
-            <div>
-              <label className="block font-medium text-slate-300 mb-1">Declared Bidder Name *</label>
-              <input
-                type="text"
-                required
-                value={declaredName}
-                onChange={(e) => setDeclaredName(e.target.value)}
-                placeholder="e.g. Apex Industrial Solutions Private Limited"
-                className="w-full bg-slate-950 border border-slate-700/80 rounded-lg px-3 py-2 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-sky-500"
-              />
-            </div>
-          )}
-
-          <div>
-            <label className="block font-medium text-slate-300 mb-1">
-              Select PDF Documents or ZIP Package *
-            </label>
-            <div
-              onDrop={handleDrop}
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              className={`border-2 border-dashed rounded-xl p-6 text-center transition-colors cursor-pointer ${
-                isDragging
-                  ? 'border-sky-500 bg-sky-500/10'
-                  : 'border-slate-700/80 hover:border-slate-600 bg-slate-950/60'
-              }`}
-              onClick={() => document.getElementById('file-upload-input')?.click()}
-            >
-              <UploadCloud className="w-8 h-8 text-sky-400 mx-auto mb-2" />
-              <p className="text-xs font-medium text-slate-200">
-                Drag & drop files here, or <span className="text-sky-400 underline">browse</span>
-              </p>
-              <p className="text-[11px] text-slate-500 mt-1">
-                Supports PDF, scanned filings, or compressed ZIP archive (Max 100 MB decompressed)
-              </p>
-              <input
-                id="file-upload-input"
-                type="file"
-                multiple
-                accept=".pdf,.zip,application/pdf,application/zip"
-                onChange={handleFileChange}
-                className="hidden"
-              />
-            </div>
+        <div>
+          <label className="block font-semibold text-slate-200 mb-1">
+            Select PDF Documents or ZIP Package <span className="text-rose-400">*</span>
+          </label>
+          <div
+            onDrop={handleDrop}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onClick={() => fileInputRef.current?.click()}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                fileInputRef.current?.click();
+              }
+            }}
+            tabIndex={0}
+            role="button"
+            aria-label="Upload files dropzone. Click to browse or drag and drop files here."
+            className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all outline-none focus-visible:ring-2 focus-visible:ring-sky-400 ${
+              isDragging
+                ? 'border-sky-400 bg-sky-950/30'
+                : 'border-slate-700/80 hover:border-slate-600 bg-slate-950/50'
+            }`}
+          >
+            <input
+              ref={fileInputRef}
+              type="file"
+              multiple
+              accept=".pdf,.zip,application/pdf,application/zip"
+              onChange={handleFileChange}
+              className="hidden"
+              tabIndex={-1}
+            />
+            <UploadCloud className="w-8 h-8 text-sky-400 mx-auto mb-2" aria-hidden="true" />
+            <p className="text-slate-200 font-semibold text-xs">
+              Click to browse or drag & drop files here
+            </p>
+            <p className="text-slate-400 text-[11px] mt-1">
+              Supports individual statutory PDF certificates or consolidated bidder ZIP archives
+            </p>
           </div>
+        </div>
 
-          {selectedFiles.length > 0 && (
-            <div className="space-y-2">
-              <span className="font-semibold text-slate-300 text-[11px] uppercase tracking-wider block">
-                Selected Filings ({selectedFiles.length})
-              </span>
-              <div className="max-h-36 overflow-y-auto space-y-1.5 pr-1">
-                {selectedFiles.map((file, idx) => (
-                  <div
-                    key={idx}
-                    className="p-2 rounded-lg bg-slate-950 border border-slate-800 flex items-center justify-between text-xs"
-                  >
-                    <div className="flex items-center gap-2 truncate pr-2">
-                      <File className="w-3.5 h-3.5 text-sky-400 shrink-0" />
-                      <span className="text-slate-200 truncate">{file.name}</span>
-                      <span className="text-[10px] text-slate-500 font-mono">
-                        ({formatSize(file.size)})
-                      </span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => removeFile(idx)}
-                      className="text-slate-500 hover:text-rose-400 p-0.5"
-                    >
-                      <X className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                ))}
+        {selectedFiles.length > 0 && (
+          <div className="space-y-1.5 max-h-44 overflow-y-auto pr-1">
+            <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between">
+              <span>Selected Files ({selectedFiles.length})</span>
+              <button
+                type="button"
+                onClick={() => setSelectedFiles([])}
+                className="text-rose-400 hover:text-rose-300 text-[10px] font-normal cursor-pointer"
+              >
+                Clear all
+              </button>
+            </div>
+            {selectedFiles.map((file, idx) => (
+              <div
+                key={idx}
+                className="flex items-center justify-between p-2 rounded-lg bg-slate-950 border border-slate-800 text-slate-200"
+              >
+                <div className="flex items-center gap-2 truncate pr-2">
+                  <File className="w-3.5 h-3.5 text-sky-400 shrink-0" aria-hidden="true" />
+                  <span className="truncate font-mono text-xs">{file.name}</span>
+                  <span className="text-slate-500 text-[10px] shrink-0 font-mono">
+                    ({formatSize(file.size)})
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    removeFile(idx);
+                  }}
+                  className="text-slate-400 hover:text-rose-400 p-1 rounded transition-colors cursor-pointer"
+                  title="Remove file"
+                  aria-label={`Remove file ${file.name}`}
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
               </div>
-            </div>
-          )}
-
-          <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-800">
-            <button
-              type="button"
-              onClick={onClose}
-              disabled={uploading}
-              className="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={uploading || selectedFiles.length === 0}
-              className="px-4 py-2 rounded-lg bg-sky-600 hover:bg-sky-500 text-white font-medium flex items-center gap-2 transition-colors disabled:opacity-50"
-            >
-              {uploading ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>Ingesting Package...</span>
-                </>
-              ) : (
-                <>
-                  <UploadCloud className="w-4 h-4" />
-                  <span>Start Pipeline</span>
-                </>
-              )}
-            </button>
+            ))}
           </div>
-        </form>
-      </div>
-    </div>
+        )}
+
+        {/* Security / Verification Badge */}
+        <div className="p-2.5 rounded-lg bg-sky-950/20 border border-sky-900/40 text-[11px] text-slate-400 flex items-center gap-2">
+          <ShieldCheck className="w-4 h-4 text-sky-400 shrink-0" />
+          <span>
+            Uploaded documents are hashed with SHA-256 and stored immutably in content-addressable storage (CAS).
+          </span>
+        </div>
+
+        <div className="pt-2 flex items-center justify-end gap-2.5 border-t border-slate-800">
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={onClose}
+          >
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            variant="primary"
+            isLoading={uploading}
+            disabled={selectedFiles.length === 0}
+            leftIcon={<UploadCloud className="w-4 h-4" />}
+          >
+            Upload & Ingest Package
+          </Button>
+        </div>
+      </form>
+    </Modal>
   );
 };
