@@ -24,6 +24,27 @@ import {
 
 const API_BASE = '/api/v1';
 const TOKEN_STORAGE_KEY = 'vigilbid_auth_token';
+const REQUEST_TIMEOUT_MS = 15_000;
+
+export type ApiError = {
+  status?: number;
+  code?: string;
+  message: string;
+  requestId?: string;
+};
+
+export function normalizeApiError(error: unknown): ApiError {
+  if (error instanceof Error) {
+    const typedError = error as Error & Partial<ApiError>;
+    return {
+      message: typedError.message,
+      ...(typeof typedError.status === 'number' ? { status: typedError.status } : {}),
+      ...(typeof typedError.code === 'string' ? { code: typedError.code } : {}),
+      ...(typeof typedError.requestId === 'string' ? { requestId: typedError.requestId } : {}),
+    };
+  }
+  return { message: 'An unexpected error occurred.' };
+}
 
 export function getStoredToken(): string | null {
   return localStorage.getItem(TOKEN_STORAGE_KEY);
@@ -39,43 +60,87 @@ export function clearStoredToken(): void {
 
 async function request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const token = getStoredToken();
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-    ...(options.headers as Record<string, string>),
-  };
-
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
+  const headers = new Headers(options.headers);
+  if (!headers.has('Content-Type') && !(options.body instanceof FormData)) {
+    headers.set('Content-Type', 'application/json');
   }
 
-  const response = await fetch(endpoint, {
-    ...options,
-    headers,
-  });
+  if (token) {
+    headers.set('Authorization', `Bearer ${token}`);
+  }
+
+  const controller = new AbortController();
+  let timedOut = false;
+  const timeoutId = window.setTimeout(() => {
+    timedOut = true;
+    controller.abort();
+  }, REQUEST_TIMEOUT_MS);
+
+  let response: Response;
+  try {
+    response = await fetch(endpoint, {
+      ...options,
+      headers,
+      signal: options.signal ?? controller.signal,
+    });
+  } catch (error) {
+    if (timedOut && error instanceof DOMException && error.name === 'AbortError') {
+      throw new Error(`Request timed out after ${REQUEST_TIMEOUT_MS / 1000} seconds.`);
+    }
+    throw error;
+  } finally {
+    window.clearTimeout(timeoutId);
+  }
 
   if (!response.ok) {
     let errorDetail = response.statusText;
+    let errorCode: string | undefined;
+    let requestId: string | undefined;
     try {
-      const errJson = await response.json();
+      const errJson = (await response.json()) as { detail?: unknown; code?: unknown; request_id?: unknown };
+      if (typeof errJson.code === 'string') {
+        errorCode = errJson.code;
+      }
+      if (typeof errJson.request_id === 'string') {
+        requestId = errJson.request_id;
+      }
       if (errJson.detail) {
         errorDetail = typeof errJson.detail === 'string' ? errJson.detail : JSON.stringify(errJson.detail);
       }
     } catch {
-      // ignore json parse error
+      // Keep the HTTP status text when the server does not return JSON.
     }
-    throw new Error(errorDetail || `HTTP ${response.status}`);
+    const error = new Error(errorDetail || `HTTP ${response.status}`) as Error & Partial<ApiError>;
+    error.status = response.status;
+    error.code = errorCode;
+    error.requestId = requestId;
+    throw error;
   }
 
-  return response.json();
+  if (response.status === 204) {
+    return undefined as T;
+  }
+  return response.json() as Promise<T>;
 }
 
 // 1. Health Probe
 export async function fetchHealth(): Promise<{ status: string; project: string; version: string }> {
-  const response = await fetch('/health');
-  if (!response.ok) {
-    throw new Error(`Health check failed: ${response.statusText}`);
+  const controller = new AbortController();
+  const timeoutId = window.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+  try {
+    const response = await fetch('/health', { signal: controller.signal });
+    if (!response.ok) {
+      throw new Error(`Health check failed: ${response.statusText || `HTTP ${response.status}`}`);
+    }
+    return response.json();
+  } catch (error) {
+    if (error instanceof DOMException && error.name === 'AbortError') {
+      throw new Error(`Health check timed out after ${REQUEST_TIMEOUT_MS / 1000} seconds.`);
+    }
+    throw error;
+  } finally {
+    window.clearTimeout(timeoutId);
   }
-  return response.json();
 }
 
 // 2. Authentication

@@ -33,7 +33,7 @@ docker-logs:
 
 install:
 	python -m pip install -r requirements.txt
-	cd frontend && npm install
+	cd frontend && npm ci
 
 verify:
 	python scripts/verify_structure.py
