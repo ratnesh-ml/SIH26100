@@ -356,23 +356,27 @@ SIH26100/
 │   ├── demo_setup.py         # One-click demo tender & bidder seeder
 │   └── release_audit.py      # Automated 20-subsystem release audit runner
 │
-└── docs/                     # Technical architecture, ADRs, guides, and specifications
-    ├── README.md             # Documentation hub index with role-based entry points
-    ├── ONE-MINUTE-TOUR.md    # 60-second executive summary for evaluators
-    ├── architecture/         # REPOSITORY-MAP.md, DATA-FLOW.md, FEATURE-TRACEABILITY.md
-    ├── development/          # DEVELOPER-GUIDE.md, WHERE-TO-CHANGE.md
-    ├── ai/                   # OCR.md, EXTRACTION.md, NORMALIZATION.md, REGISTRY.md
-    ├── compliance/           # RULE-ENGINE.md (34 GFR/CPCL Goods rules)
-    ├── risk/                 # RISK-ENGINE.md, ANOMALIES.md, GRAPH.md
-    ├── evidence/             # EVIDENCE.md, PDF-CONTRACT.md
-    ├── security/             # SECURITY.md, SECURITY-AUDIT.md, AUTH.md
-    ├── api/                  # FINAL-API.md (24 REST endpoint contracts)
-    ├── database/             # FINAL-DATABASE.md (18 relational tables)
-    ├── deployment/           # FINAL-SETUP.md (Zero-Docker & Docker Compose manual)
-    ├── testing/              # RELEASE-CHECKLIST.md, EVALUATION.md, PERFORMANCE.md
-    ├── demo/                 # DEMO-NARRATIVE.md, DEMO-SCRIPT.md, SCREENSHOTS.md
-    ├── decisions/            # ADR-001 through ADR-008
-    └── archive/              # Historical research 00-06 and legacy phase logs
+├── docs/                     # Technical architecture, ADRs, guides, and specifications
+│   ├── README.md             # Documentation hub index with role-based entry points
+│   ├── ONE-MINUTE-TOUR.md    # 60-second executive summary for evaluators
+│   ├── architecture/         # REPOSITORY-MAP.md, DATA-FLOW.md, FEATURE-TRACEABILITY.md
+│   ├── development/          # DEVELOPER-GUIDE.md, WHERE-TO-CHANGE.md, WHERE-EVERYTHING-LIVES.md
+│   ├── ai/                   # OCR.md, EXTRACTION.md, NORMALIZATION.md, REGISTRY.md
+│   ├── compliance/           # RULE-ENGINE.md (34 GFR/CPCL Goods rules)
+│   ├── risk/                 # RISK-ENGINE.md, ANOMALIES.md, GRAPH.md
+│   ├── evidence/             # EVIDENCE.md, PDF-CONTRACT.md
+│   ├── security/             # SECURITY.md, SECURITY-AUDIT.md, AUTH.md
+│   ├── api/                  # FINAL-API.md (24 REST endpoint contracts)
+│   ├── database/             # FINAL-DATABASE.md (18 relational tables)
+│   ├── deployment/           # FINAL-SETUP.md (Zero-Docker & Docker Compose manual)
+│   ├── testing/              # RELEASE-CHECKLIST.md, EVALUATION.md, PERFORMANCE.md
+│   ├── demo/                 # DEMO-NARRATIVE.md, DEMO-SCRIPT.md, SCREENSHOTS.md
+│   ├── decisions/            # ADR-001 through ADR-008
+│   └── archive/              # Historical research 00-06 and legacy phase logs
+│
+└── archive/                  # Archived Historical Assets (Non-Runtime)
+    ├── README.md             # Archive policy and catalog
+    └── legacy-ui/            # Early marked.js offline viewer (index.html, css, js)
 ```
 
 ---

@@ -24,8 +24,9 @@ Explore how components connect and how data flows through the 11-step pipeline:
 👉 [docs/architecture/DATA-FLOW.md](architecture/DATA-FLOW.md)  
 👉 [docs/architecture/REPOSITORY-MAP.md](architecture/REPOSITORY-MAP.md)
 
-### 4. "I want to know where to change a feature or debug"
-Check our developer quick-lookup directory to find the exact file to edit:
+### 4. "I want to know where to change a feature or where code lives"
+Check our developer quick-lookup directories to find the exact file to inspect or edit:
+👉 [docs/development/WHERE-EVERYTHING-LIVES.md](development/WHERE-EVERYTHING-LIVES.md)  
 👉 [docs/development/WHERE-TO-CHANGE.md](development/WHERE-TO-CHANGE.md)  
 👉 [docs/development/INTERFACE-CONTRACTS.md](development/INTERFACE-CONTRACTS.md)
 
@@ -73,10 +74,14 @@ docs/
 │   ├── FINAL-ARCHITECTURE.md          # Comprehensive end-to-end architecture
 │   ├── DATA-FLOW.md                   # Step-by-step data transformation pipeline
 │   ├── REPOSITORY-MAP.md              # Codebase module taxonomy & directory guide
+│   ├── CURRENT-REPOSITORY-MAP.md      # Component classification audit
+│   ├── TARGET-REPOSITORY-MAP.md       # Approved target architecture
+│   ├── RESTRUCTURE-BASELINE.md        # Pre- and post-restructuring test parity
 │   └── FEATURE-TRACEABILITY.md        # SIH26100 requirement-to-code traceability
 │
 ├── development/                       # Developer Experience & Contracts
 │   ├── DEVELOPER-GUIDE.md             # Local setup, running services, and debugging
+│   ├── WHERE-EVERYTHING-LIVES.md      # Comprehensive subsystem directory
 │   ├── WHERE-TO-CHANGE.md             # Quick-lookup table: "Where do I change X?"
 │   └── INTERFACE-CONTRACTS.md         # Internal service and API signatures
 │
