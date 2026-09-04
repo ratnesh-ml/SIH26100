@@ -3,7 +3,7 @@
 > **An evidence-first, human-in-the-loop decision-support platform for public procurement evaluation under GFR 2017 and CVC guidelines.**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Build Status](https://img.shields.io/badge/Build-Passing-emerald)](docs/RELEASE-CHECKLIST.md)
+[![Build Status](https://img.shields.io/badge/Build-Passing-emerald)](docs/testing/RELEASE-CHECKLIST.md)
 [![Tests: 353 Passing](https://img.shields.io/badge/Backend%20Tests-353%20Passing-brightgreen)](tests/)
 [![Frontend Tests: 70 Passing](https://img.shields.io/badge/Frontend%20Tests-70%20Passing-brightgreen)](frontend/)
 [![Audit: 20/20 Subsystems](https://img.shields.io/badge/Release%20Audit-20%2F20%20Certified-blue)](scripts/release_audit.py)
@@ -357,10 +357,22 @@ SIH26100/
 │   └── release_audit.py      # Automated 20-subsystem release audit runner
 │
 └── docs/                     # Technical architecture, ADRs, guides, and specifications
-    ├── architecture/         # REPOSITORY-MAP.md & FEATURE-TRACEABILITY.md
+    ├── README.md             # Documentation hub index with role-based entry points
+    ├── ONE-MINUTE-TOUR.md    # 60-second executive summary for evaluators
+    ├── architecture/         # REPOSITORY-MAP.md, DATA-FLOW.md, FEATURE-TRACEABILITY.md
+    ├── development/          # DEVELOPER-GUIDE.md, WHERE-TO-CHANGE.md
+    ├── ai/                   # OCR.md, EXTRACTION.md, NORMALIZATION.md, REGISTRY.md
+    ├── compliance/           # RULE-ENGINE.md (34 GFR/CPCL Goods rules)
+    ├── risk/                 # RISK-ENGINE.md, ANOMALIES.md, GRAPH.md
+    ├── evidence/             # EVIDENCE.md, PDF-CONTRACT.md
+    ├── security/             # SECURITY.md, SECURITY-AUDIT.md, AUTH.md
+    ├── api/                  # FINAL-API.md (24 REST endpoint contracts)
+    ├── database/             # FINAL-DATABASE.md (18 relational tables)
+    ├── deployment/           # FINAL-SETUP.md (Zero-Docker & Docker Compose manual)
+    ├── testing/              # RELEASE-CHECKLIST.md, EVALUATION.md, PERFORMANCE.md
+    ├── demo/                 # DEMO-NARRATIVE.md, DEMO-SCRIPT.md, SCREENSHOTS.md
     ├── decisions/            # ADR-001 through ADR-008
-    ├── demo/                 # Presentation runbooks, narrative, and screenshot specs
-    └── README.md             # Documentation hub index
+    └── archive/              # Historical research 00-06 and legacy phase logs
 ```
 
 ---
@@ -501,7 +513,7 @@ For complete disclosures, see [docs/KNOWN-LIMITATIONS.md](docs/KNOWN-LIMITATIONS
 
 VigilBid enforces strict ingestion defense, cryptographic audit tracking, and environment isolation.
 
-For vulnerability disclosure and security architecture details, see [SECURITY.md](SECURITY.md) and [docs/SECURITY.md](docs/SECURITY.md).
+For vulnerability disclosure and security architecture details, see [SECURITY.md](SECURITY.md) and [docs/security/SECURITY.md](docs/security/SECURITY.md).
 
 ---
 
