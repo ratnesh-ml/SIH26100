@@ -4,7 +4,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![CI Pipeline](https://github.com/ratnesh-ml/SIH26100/actions/workflows/ci.yml/badge.svg)](https://github.com/ratnesh-ml/SIH26100/actions/workflows/ci.yml)
-[![Backend Tests: 380 Passing](https://img.shields.io/badge/Backend%20Tests-380%20Passing-brightgreen)](tests/)
+[![Backend Tests: 381 Passing](https://img.shields.io/badge/Backend%20Tests-381%20Passing-brightgreen)](tests/)
 [![Frontend Tests: 70 Passing](https://img.shields.io/badge/Frontend%20Tests-70%20Passing-brightgreen)](frontend/)
 [![Release Audit: 20/20 Subsystems](https://img.shields.io/badge/Release%20Audit-20%2F20%20Certified-blue)](scripts/release_audit.py)
 [![Threat Model: Comprehensive](https://img.shields.io/badge/Threat%20Model-Certified-emerald)](docs/security/THREAT-MODEL.md)

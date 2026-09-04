@@ -52,7 +52,7 @@ python scripts/demo_setup.py
 ```
 
 This script:
-1. Re-initializes tender `CPCL/PROC/2026/PUMP-042` (API-610 Centrifugal Pumps).
+1. Re-initializes tender `CPCL/MM/2026/PUMP-217` (API-610 Centrifugal Pumps).
 2. Seeds all 5 synthetic vendor profiles with complete document packages.
 3. Populates mock registry records (GSTN, PAN, MCA, Udyam, Debarment).
 4. Runs the 11-step pipeline across all bidders.
