@@ -578,16 +578,23 @@ SIH26100/
 
 ---
 
-## 👥 The Team
+## 👥 Official SIH 2026 Team
 
-| Name | Role & Responsibility | Primary Contributions | GitHub / Contact |
-|---|---|---|---|
-| **Ritik** | Lead System Architect & Backend Engineer | Modular monolith architecture, FastAPI services, SQLAlchemy ORM, SHA-256 audit ledger | [Contributors](https://github.com/ratnesh-ml/SIH26100/graphs/contributors) |
-| **Ratnesh** | AI Pipeline & OCR Engineer | 11-step pipeline orchestration, hybrid OCR, TF-IDF classification, entity resolution | [Contributors](https://github.com/ratnesh-ml/SIH26100/graphs/contributors) |
-| **Team Member 3** | Frontend & UX Design Engineer | React 18 UI, split-screen evidence inspector, exception review interface, demo tour | [Contributors](https://github.com/ratnesh-ml/SIH26100/graphs/contributors) |
-| **Team Member 4** | Domain Rules & Compliance Specialist | 34 CPCL Goods criteria, GFR 2017 mapping, CVC dossier generator | [Contributors](https://github.com/ratnesh-ml/SIH26100/graphs/contributors) |
-| **Team Member 5** | Security & DevOps Engineer | Ingestion defenses, CAS storage, Docker Compose stack, release audit runner | [Contributors](https://github.com/ratnesh-ml/SIH26100/graphs/contributors) |
-| **Team Member 6** | QA & Evaluation Lead | Test suite development (381 backend tests), benchmarking, evaluation dataset | [Contributors](https://github.com/ratnesh-ml/SIH26100/graphs/contributors) |
+**Official SIH Team:** 6 members  
+**Hackathon:** Smart India Hackathon 2026 (Grand Finale)  
+**Problem Statement ID:** SIH26100  
+
+| # | Official Team Member |
+|:---:|---|
+| 1 | **Ratnesh Pratap Singh** |
+| 2 | **Uday Nankani** |
+| 3 | **Viyom Tiwari** |
+| 4 | **Ayan Shaikh** |
+| 5 | **Soumya Pandey** |
+| 6 | **Shreya Patkar** |
+
+> [!NOTE]
+> **Engineering & Submission Notice:** The official Smart India Hackathon 2026 team consists of the six members listed above. Core software development was primarily led by three members of the team. For git commit history and repository-level code contributions, see [Repository Contributors](https://github.com/ratnesh-ml/SIH26100/graphs/contributors).
 
 ---
 

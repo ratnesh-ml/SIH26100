@@ -155,7 +155,7 @@ In public procurement under GFR 2017 and CVC guidelines, procurement officers ma
 3. **Problem Decomposition & Requirements (`docs/01-understanding-requirements-architecture.md`):** Functional requirements FR-01 through FR-26, non-functional targets, user personas.
 4. **AI Architecture & Rule Definitions (`docs/02-ai-docai-rag-er-compliance-risk.md`):** AI vs Rules matrix, 13 document types, 34 compliance rules, ER scoring equation, risk weightings, prompt injection defense.
 5. **Full System Specification (`docs/03-frontend-backend-db-api.md`):** 8 MVP screen specs, 17-table relational schema, 24 REST API endpoints.
-6. **Dataset & Operational Design (`docs/04-dataset-mockapi-security-devops-mvpcut-team.md`):** Synthetic 4+1 bidder dataset story, mock registry interface, security hardening, MVP cut-line, 3-person role distribution.
+6. **Dataset & Operational Design (`docs/04-dataset-mockapi-security-devops-mvpcut-team.md`):** Synthetic 4+1 bidder dataset story, mock registry interface, security hardening, MVP cut-line, 3-track development breakdown (6-member SIH team).
 7. **Execution Timeline & Checklists (`docs/05-dependencies-timeline-checklists-skills-git.md`):** Hour-by-hour 36h sprint schedule, individual person checklists, skill-gap mitigation, Git workflow.
 8. **Demo Script & Winning Strategy (`docs/06-demo-judges-claims-stack-spec-strategy.md`):** 6.5-minute timed demo script, S6 Bidder Cockpit layout, 32 judge defense questions, claim defense card.
 9. **Interactive Documentation Web Viewer (`index.html`, `css/style.css`, `js/main.js`):** Responsive client-side markdown viewer rendering all blueprint documents.

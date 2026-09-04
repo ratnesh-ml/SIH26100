@@ -105,17 +105,20 @@ Live GSTN/PAN/Udyam/MCA/DigiLocker integrations · LayoutLMv3/Donut/VLM · GNN o
 
 ---
 
-## 20 — 3-Person Team Architecture
+## 20 — Development Track Architecture (3-Track Work Breakdown)
 
-### Person 1 — CORE PLATFORM ENGINEER ("Backbone")
+> [!NOTE]
+> **Official SIH 2026 Team Notice:** The official Smart India Hackathon 2026 team for SIH26100 comprises **6 members** (Ratnesh Pratap Singh, Uday Nankani, Viyom Tiwari, Ayan Shaikh, Soumya Pandey, Shreya Patkar). This section documents the 3-track technical work breakdown (Core Platform, AI/Document Intelligence, and Product/Frontend) utilized during software implementation sprints.
+
+### Track 1 — CORE PLATFORM ENGINEER ("Backbone")
 Owns: Postgres schema + Alembic, FastAPI app, auth/RBAC, tenders/bidders/documents/jobs routers, upload safety, storage, job runner + worker loop, audit chain, report PDF (WeasyPrint), Docker compose, seed loader, CI, deployment laptop+VPS, integration testing, `/health`.
 Secondary: risk engine wiring, registry provider interface, page-PNG rendering endpoint.
 
-### Person 2 — AI / DOCUMENT INTELLIGENCE ENGINEER ("Brain")
+### Track 2 — AI / DOCUMENT INTELLIGENCE ("Brain")
 Owns: synthetic document generator + ground truth, classifier, textify/OCR, all extractors, normaliser, entity resolution, validators/checksums, mock registry fixtures + debarment loader, rule engine + YAML rules, anomaly module, risk weights, explanation templates + KB + copilot retrieval, eval script, LLM optional adapter + injection guard.
 Secondary: report content (what goes in the dossier), API schema for findings/evidence (co-designed with P1 at H0–2).
 
-### Person 3 — PRODUCT / FRONTEND / DEMO ENGINEER ("Face")
+### Track 3 — PRODUCT / FRONTEND / DEMO ("Face")
 Owns: React app (8 screens), design system, evidence viewer overlay, matrix, cockpit, decision panel, status poller, graph screen, audit screen, masking rules, empty/error states, mock API server (MSW) for parallel work, demo script, pitch deck, screen recordings as backup, judge Q&A cards, README/DEMO.md.
 Secondary: report HTML template styling (Jinja) with P1, copilot drawer UX with P2, accessibility.
 
