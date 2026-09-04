@@ -67,6 +67,8 @@ The complete value of VigilBid is demonstrated through **ONE concrete synthetic 
   - Class-I Local Supplier status $\ge$ 50.0% local content under DPIIT PPP-MII Order 2017
   - Mandatory identity containment under GFR 2017 Rule 144 and CGST Act 2017 Section 22.
 
+![Tender Portfolio & Criteria Setup](screenshots/02-tender.png)
+
 ### Step 2: Select Bidder
 - **Screen / Route:** `/bidders` $\rightarrow$ Select **Bharat Hydrotech Corp** (Bidder C)
 - **What Happens:** Officer selects Bidder C from the 5 participating vendors.
@@ -82,6 +84,8 @@ The complete value of VigilBid is demonstrated through **ONE concrete synthetic 
   5. `local_content.pdf` (Make in India Self-Declaration)
 - **Underlying Logic:** Content-Addressable Storage (CAS) computes SHA-256 digests and enforces a 100:1 maximum decompression guard to prevent ZIP bomb vulnerabilities.
 
+![Secure Ingestion Portal](screenshots/03-upload.png)
+
 ### Step 4: Show Automatic Extraction
 - **Screen / Route:** Bidder Cockpit $\rightarrow$ Extracted Entities Tab
 - **What Happens:** Deterministic extraction displays structured key-value tokens parsed in &lt;108ms:
@@ -90,6 +94,8 @@ The complete value of VigilBid is demonstrated through **ONE concrete synthetic 
   - **3-Year Average Turnover:** `₹6.10 Crores` (UDIN: `24045123AAAAA9999`)
   - **Declared Local Content:** `45.0%` (Confidence: 0.97)
 - **Underlying Logic:** PyMuPDF extracts native digital text tokens and character coordinates without probabilistic hallucinations.
+
+![Real-Time Forensic Pipeline Stepper](screenshots/04-processing.png)
 
 ### Step 5: Show PAN-GSTIN Mismatch
 - **Screen / Route:** Bidder Cockpit $\rightarrow$ Identity & Cross-Check Matrix
@@ -103,12 +109,16 @@ The complete value of VigilBid is demonstrated through **ONE concrete synthetic 
 - **What Happens:** Evaluator clicks finding **"PAN-GSTIN Identity Inconsistency"**.
 - **Underlying Logic:** Rule `CPCL-GOODS-002` triggers with severity `FAIL`, citing GFR 2017 Rule 144 and Section 22 of the CGST Act 2017.
 
+![Primary Bidder Cockpit](screenshots/06-bidder-cockpit.png)
+
 ### Step 7: Open Evidence on Exact Pages
 - **Screen / Route:** Bidder Cockpit $\rightarrow$ Split-Screen Evidence Inspector
 - **What Happens:** The dual-pane viewer opens and highlights the exact PDF locations:
   - **Left / Top Pane:** `gst_reg06.pdf`, Page 1, Bounding Box `[120, 85, 340, 110]` highlighting `GSTIN: 33AAACB9999F1Z5`.
   - **Right / Bottom Pane:** `pan_card.pdf`, Page 1, Bounding Box `[140, 160, 310, 185]` highlighting `PAN: AAACB1234F`.
 - **Underlying Logic:** Coordinate mapper translates PDF character bounding boxes into responsive visual highlight overlays.
+
+![Split-Screen Evidence Inspector](screenshots/07-evidence.png)
 
 ### Step 8: Show Local-Content Discrepancy
 - **Screen / Route:** Bidder Cockpit $\rightarrow$ Finding `CPCL-GOODS-003`
@@ -121,6 +131,8 @@ The complete value of VigilBid is demonstrated through **ONE concrete synthetic 
 - **Screen / Route:** Compliance Matrix (`/matrix`)
 - **What Happens:** Overall Bidder Compliance Status is marked: **`FAIL`**.
 - **Underlying Logic:** Deterministic precedence hierarchy: `FAIL > REVIEW > WARN > PASS`. Hard identity failure triggers statutory disqualification.
+
+![Multi-Bidder Compliance Matrix](screenshots/05-compliance-matrix.png)
 
 ### Step 10: Show 65/100 HIGH Risk Score
 - **Screen / Route:** Bidder Cockpit $\rightarrow$ Risk Gauge Widget
@@ -135,6 +147,8 @@ The complete value of VigilBid is demonstrated through **ONE concrete synthetic 
   - **Financial Factor Baseline:** `+5.0 pts` (Routine turnover check)
   - **Total Score:** `35.0 + 25.0 + 5.0 = 65.0 pts`
 - **Underlying Logic:** Zero black-box AI reasoning; 100% transparent, explainable arithmetic.
+
+![Explainable Risk View](screenshots/08-risk.png)
 
 ### Step 12: Show AI/System Recommendation
 - **Screen / Route:** Bidder Cockpit $\rightarrow$ System Advisory Panel
@@ -161,6 +175,8 @@ The complete value of VigilBid is demonstrated through **ONE concrete synthetic 
   - **Previous Hash:** `8f9a2b71c402...e491`
   - **Current Block Hash:** `3c7e1d54b899...912f`
 - **Underlying Logic:** Clicking **"Verify Ledger Integrity"** recalculates forward hashes across all blocks in milliseconds, confirming unbroken cryptographic continuity. One-click export to CVC Compliance Dossier PDF.
+
+![Tamper-Evident Audit Ledger](screenshots/10-audit.png)
 
 ---
 

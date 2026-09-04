@@ -13,15 +13,15 @@ This document reserves the evaluator-facing locations for final visual and video
 
 ## Screenshot slots
 
-| Order | Filename | Required content | Caption to use |
-|---:|---|---|---|
-| 1 | `01-dashboard.png` | Executive dashboard with bidder/risk overview | `VigilBid executive scrutiny dashboard showing the tender risk posture.` |
-| 2 | `02-bidder-cockpit.png` | Bharat Hydrotech bidder cockpit | `Bidder cockpit showing extracted documents, findings, and current risk status.` |
-| 3 | `03-evidence-inspector.png` | PAN/GSTIN evidence highlighted side by side | `Evidence inspector linking the compliance finding to exact source PDF regions.` |
-| 4 | `04-risk-explanation.png` | Risk score and factor decomposition | `Explainable risk view showing how each factor contributes to the composite score.` |
-| 5 | `05-audit-ledger.png` | Human decision and audit-chain verification | `Governed officer decision recorded in the tamper-evident audit ledger.` |
+| Order | Filename | Required content | Caption to use | Status |
+|---:|---|---|---|---|
+| 1 | [`01-dashboard.png`](screenshots/01-dashboard.png) | Executive dashboard with bidder/risk overview | `VigilBid executive scrutiny dashboard showing the tender risk posture.` | **Captured & Attached** |
+| 2 | [`02-bidder-cockpit.png`](screenshots/02-bidder-cockpit.png) | Bharat Hydrotech bidder cockpit | `Bidder cockpit showing extracted documents, findings, and current risk status.` | **Captured & Attached** |
+| 3 | [`03-evidence-inspector.png`](screenshots/03-evidence-inspector.png) | PAN/GSTIN evidence highlighted side by side | `Evidence inspector linking the compliance finding to exact source PDF regions.` | **Captured & Attached** |
+| 4 | [`04-risk-explanation.png`](screenshots/04-risk-explanation.png) | Risk score and factor decomposition | `Explainable risk view showing how each factor contributes to the composite score.` | **Captured & Attached** |
+| 5 | [`05-audit-ledger.png`](screenshots/05-audit-ledger.png) | Human decision and audit-chain verification | `Governed officer decision recorded in the tamper-evident audit ledger.` | **Captured & Attached** |
 
-Store the final files under `docs/demo/screenshots/`. Keep the filenames stable so README links do not need to change later.
+All screenshot assets are captured from the Stitch UI specifications and stored under [`docs/demo/screenshots/`](screenshots/). Supplementary forensic views (`05-compliance-matrix.png`, `09-graph.png`, `04-processing.png`, `03-upload.png`) are also available.
 
 ## Video structure
 

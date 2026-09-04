@@ -17,20 +17,20 @@
 
 > **Start here:** [Evaluator Quickstart](docs/EVALUATOR-QUICKSTART.md) — a concise path from the problem statement to the runnable demo, evidence inspection, explainable risk, human decision, audit trail, and final dossier.
 
-### Submission assets to be added before the final submission
+### Submission assets status
 
 | Asset | Current status |
 |---|---|
 | Live demo URL | [https://vigilbid-frontend.onrender.com](https://vigilbid-frontend.onrender.com) |
 | Backend API & Docs | [https://vigilbid-backend.onrender.com/api/v1/docs](https://vigilbid-backend.onrender.com/api/v1/docs) |
 | YouTube walkthrough | `[ADD YOUTUBE VIDEO URL]` |
-| Dashboard screenshot | `docs/demo/screenshots/01-dashboard.png` — to be added |
-| Bidder cockpit screenshot | `docs/demo/screenshots/02-bidder-cockpit.png` — to be added |
-| Evidence inspector screenshot | `docs/demo/screenshots/03-evidence-inspector.png` — to be added |
-| Explainable risk screenshot | `docs/demo/screenshots/04-risk-explanation.png` — to be added |
-| Audit ledger screenshot | `docs/demo/screenshots/05-audit-ledger.png` — to be added |
+| Dashboard screenshot | [`docs/demo/screenshots/01-dashboard.png`](docs/demo/screenshots/01-dashboard.png) (Captured & Attached) |
+| Bidder cockpit screenshot | [`docs/demo/screenshots/02-bidder-cockpit.png`](docs/demo/screenshots/02-bidder-cockpit.png) (Captured & Attached) |
+| Evidence inspector screenshot | [`docs/demo/screenshots/03-evidence-inspector.png`](docs/demo/screenshots/03-evidence-inspector.png) (Captured & Attached) |
+| Explainable risk screenshot | [`docs/demo/screenshots/04-risk-explanation.png`](docs/demo/screenshots/04-risk-explanation.png) (Captured & Attached) |
+| Audit ledger screenshot | [`docs/demo/screenshots/05-audit-ledger.png`](docs/demo/screenshots/05-audit-ledger.png) (Captured & Attached) |
 
-The placeholders above are intentional. The repository structure is ready for the final URLs and images to be inserted without reorganizing the documentation again.
+All 5 core UI screenshot assets and supplementary forensic views are captured and available in [`docs/demo/screenshots/`](docs/demo/screenshots/).
 
 Additional evaluator-facing planning documents are available for the future Judge Mode, demonstration benchmark, and final screenshot/video package:
 
@@ -94,37 +94,61 @@ Public procurement scrutiny takes **8 to 10 hours per bidder**, leaving evaluati
 
 ---
 
-## 📸 Visual Screenshots
+## 📸 Visual Screenshots & Interface Walkthrough
 
-The final high-resolution UI captures will be added according to [docs/demo/SCREENSHOTS.md](docs/demo/SCREENSHOTS.md) and stored under [`docs/demo/screenshots/`](docs/demo/screenshots/). Until then, the planned screenshot slots are documented below so the evaluator-facing structure is already complete:
+High-resolution UI captures generated from the official Stitch UI specifications and stored in [`docs/demo/screenshots/`](docs/demo/screenshots/):
 
-```
-┌────────────────────────────────────────────────────────────────────────────────────────┐
-│ 1. Executive Scrutiny Dashboard (/dashboard)                                           │
-│ Target Asset: docs/demo/screenshots/01-dashboard.png                                   │
-│ Function: Portfolio-level procurement overview and active risk posture telemetry       │
-├────────────────────────────────────────────────────────────────────────────────────────┤
-│ 2. Bidder Scrutiny Cockpit (/bidders/:id)                                              │
-│ Target Asset: docs/demo/screenshots/06-bidder-cockpit.png                              │
-│ Function: Cross-document identity verification and extracted tax credentials           │
-├────────────────────────────────────────────────────────────────────────────────────────┤
-│ 3. Split-Screen Evidence Inspector (/bidders/:id/evidence)                             │
-│ Target Asset: docs/demo/screenshots/07-evidence.png                                    │
-│ Function: Evidence-linked compliance finding with coordinate bounding box highlight   │
-├────────────────────────────────────────────────────────────────────────────────────────┤
-│ 4. Explainable Risk View (/bidders/:id/risk)                                           │
-│ Target Asset: docs/demo/screenshots/08-risk.png                                        │
-│ Function: 0–100 composite risk score dial with decomposed factor contributions         │
-├────────────────────────────────────────────────────────────────────────────────────────┤
-│ 5. Multi-Bidder Compliance Matrix (/compliance-matrix)                                 │
-│ Target Asset: docs/demo/screenshots/05-compliance-matrix.png                           │
-│ Function: High-density multi-bidder criteria matrix with traffic-light status chips    │
-├────────────────────────────────────────────────────────────────────────────────────────┤
-│ 6. Cryptographic Audit Ledger (/audit)                                                 │
-│ Target Asset: docs/demo/screenshots/10-audit.png                                       │
-│ Function: Tamper-evident SHA-256 event chain with live ledger verification             │
-└────────────────────────────────────────────────────────────────────────────────────────┘
-```
+### 1. Executive Scrutiny Dashboard (`/dashboard`)
+*Portfolio-level procurement scrutiny overview, active CPCL tender telemetry, bidder evaluation progress, and real-time risk posture distribution.*
+![Executive Scrutiny Dashboard](docs/demo/screenshots/01-dashboard.png)
+
+---
+
+### 2. Primary Bidder Scrutiny Cockpit (`/bidders/:id`)
+*Central officer scrutiny interface displaying verified identity tokens, extracted financial metrics, and statutory GFR 2017 finding cards.*
+![Primary Bidder Cockpit](docs/demo/screenshots/06-bidder-cockpit.png)
+
+---
+
+### 3. Split-Screen Evidence Inspector (`/bidders/:id/evidence`)
+*Zero-hallucination verification linking statutory findings directly to source PDF pages with visual coordinate bounding box overlays.*
+![Split-Screen Evidence Inspector](docs/demo/screenshots/07-evidence.png)
+
+---
+
+### 4. Explainable Risk Posture & Factor Breakdown (`/bidders/:id/risk`)
+*Transparent 0–100 composite risk engine with decomposed point contributions across identity inconsistencies, compliance gaps, and document anomalies.*
+![Explainable Risk Posture](docs/demo/screenshots/08-risk.png)
+
+---
+
+### 5. Multi-Bidder Compliance Matrix Heatmap (`/compliance-matrix`)
+*High-density matrix comparing 5 participating bidders across 34 CPCL Goods criteria with traffic-light status chips (PASS, WARN, REVIEW, FAIL).*
+![Compliance Matrix](docs/demo/screenshots/05-compliance-matrix.png)
+
+---
+
+### 6. Cross-Bidder Entity Link Graph (`/graph`)
+*Entity resolution and cartelization detection connecting vendors via shared PANs, bank accounts, common signatories, or identical document hashes.*
+![Cross-Bidder Entity Link Graph](docs/demo/screenshots/09-graph.png)
+
+---
+
+### 7. Tamper-Evident Cryptographic SHA-256 Audit Ledger (`/audit`)
+*Cryptographically sealed decision ledger with forward SHA-256 hash chains, CVC-mandated officer minutes, and live integrity verification.*
+![Cryptographic Audit Ledger](docs/demo/screenshots/10-audit.png)
+
+---
+
+### 8. Real-Time Forensic Pipeline Stepper (`/pipeline`)
+*Asynchronous 11-stage scrutiny progression from raw ZIP ingestion and CAS indexing through OCR, entity resolution, rule checks, and risk scoring.*
+![Forensic Pipeline Stepper](docs/demo/screenshots/04-processing.png)
+
+---
+
+### 9. Secure Multi-Document Ingestion Portal (`/upload`)
+*Safe bidder package ingestion supporting multi-file drag-and-drop, magic byte verification, zip bomb ratio guards, and malware quarantine.*
+![Secure Ingestion Portal](docs/demo/screenshots/03-upload.png)
 
 ---
 
