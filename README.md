@@ -13,6 +13,24 @@
 
 ---
 
+## 🧭 Evaluator-First Entry Point
+
+> **Start here:** [Evaluator Quickstart](docs/EVALUATOR-QUICKSTART.md) — a concise path from the problem statement to the runnable demo, evidence inspection, explainable risk, human decision, audit trail, and final dossier.
+
+### Submission assets to be added before the final submission
+
+| Asset | Current status |
+|---|---|
+| Live demo URL | `[ADD LIVE DEMO URL]` |
+| YouTube walkthrough | `[ADD YOUTUBE VIDEO URL]` |
+| Dashboard screenshot | `docs/demo/screenshots/01-dashboard.png` — to be added |
+| Bidder cockpit screenshot | `docs/demo/screenshots/02-bidder-cockpit.png` — to be added |
+| Evidence inspector screenshot | `docs/demo/screenshots/03-evidence-inspector.png` — to be added |
+| Explainable risk screenshot | `docs/demo/screenshots/04-risk-explanation.png` — to be added |
+| Audit ledger screenshot | `docs/demo/screenshots/05-audit-ledger.png` — to be added |
+
+The placeholders above are intentional. The repository structure is ready for the final URLs and images to be inserted without reorganizing the documentation again.
+
 ## 🏛️ SIH 2026 Project Identity
 
 | Attribute | Official Specification |
@@ -60,8 +78,8 @@ Public procurement scrutiny takes **8 to 10 hours per bidder**, leaving evaluati
 
 | Demonstration Channel | Access Status | Verification Notes |
 |---|---|---|
-| **Live Demo** | To be added | Public demonstration instance |
-| **Demo Video** | To be added | Comprehensive video walkthrough of end-to-end verification lifecycle |
+| **Live Demo** | `[ADD LIVE DEMO URL]` | Public demonstration instance; link to be added before final submission |
+| **Demo Video** | `[ADD YOUTUBE VIDEO URL]` | Comprehensive video walkthrough; link to be added before final submission |
 | **Interactive Tour** | **Available in Local Build (`/#/demo`)** | Self-contained, zero-setup 15-step interactive scrutiny tour |
 | **Evaluator Walkthrough Guide** | **[docs/demo/DEMO-GUIDE.md](docs/demo/DEMO-GUIDE.md)** | Step-by-step evaluator manual with exact coordinates, telemetry, and citations |
 | **60-Second Summary** | **[docs/ONE-MINUTE-TOUR.md](docs/ONE-MINUTE-TOUR.md)** | Executive brief for competition jury and technical reviewers |
@@ -70,7 +88,7 @@ Public procurement scrutiny takes **8 to 10 hours per bidder**, leaving evaluati
 
 ## 📸 Visual Screenshots
 
-High-resolution UI captures are prepared according to [docs/demo/SCREENSHOTS.md](docs/demo/SCREENSHOTS.md) and archived under [`docs/demo/screenshots/`](docs/demo/screenshots/):
+The final high-resolution UI captures will be added according to [docs/demo/SCREENSHOTS.md](docs/demo/SCREENSHOTS.md) and stored under [`docs/demo/screenshots/`](docs/demo/screenshots/). Until then, the planned screenshot slots are documented below so the evaluator-facing structure is already complete:
 
 ```
 ┌────────────────────────────────────────────────────────────────────────────────────────┐
