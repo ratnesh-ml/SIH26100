@@ -88,6 +88,19 @@ class ReleaseAuditRunner:
             sqlite_url = f"sqlite+aiosqlite:///{sqlite_path}"
             reconfigure_engine(sqlite_url)
 
+        # Ensure frontend distribution is compiled before FastAPI app initialization
+        dist_index = ROOT_DIR / "frontend" / "dist" / "index.html"
+        if not dist_index.exists() and (ROOT_DIR / "frontend" / "package.json").exists():
+            import subprocess
+            import shutil
+            if shutil.which("npm"):
+                try:
+                    if not (ROOT_DIR / "frontend" / "node_modules").exists():
+                        subprocess.run(["npm", "ci"], cwd=str(ROOT_DIR / "frontend"), capture_output=True, timeout=120)
+                    subprocess.run(["npm", "run", "build"], cwd=str(ROOT_DIR / "frontend"), capture_output=True, timeout=60)
+                except Exception:
+                    pass
+
         from backend.main import app
 
         transport = httpx.ASGITransport(app=app)
@@ -561,4 +574,4 @@ class ReleaseAuditRunner:
 if __name__ == "__main__":
     runner = ReleaseAuditRunner()
     success = asyncio.run(runner.run_audit())
-    sys.exit(0 if success else 1)
+    os._exit(0 if success else 1)
