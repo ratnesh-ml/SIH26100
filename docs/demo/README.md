@@ -16,12 +16,12 @@ VigilBid includes an interactive, high-fidelity demonstration page integrated di
 - **Unauthenticated Access:** Evaluators and judges can explore the complete system without logging in.
 - **Problem vs Solution Presentation:** Visual comparison between manual procurement bottlenecks (CAG audit statistics) and automated vigilance.
 - **Interactive 10-Stage Pipeline Visualizer:** Clickable step-by-step walkthrough showing how documents transform from raw ZIPs into audit-backed compliance findings.
-- **Real-World Vendor Scenario Switcher:** Interactive tabbed cards showcasing:
-  1. *Meridian Flow Systems:* Clean Tier-1 vendor (`PASS`, Risk: 0/100).
-  2. *Sri Kaveri Engineering:* Minor MSE abbreviation variance (`WARN`, Jaro-Winkler score: 0.82).
-  3. *Bharat Hydrotech Corp:* Hard PAN-GSTIN structural mismatch (`FAIL`, Risk: 65/100).
-  4. *Nova Pumps & Systems:* PDF metadata editing anomaly & indirect prompt injection (`HIGH`, Risk: 76.5/100).
-  5. *Zenith Infra Tech:* CVC-debarred entity detected against registry sanctions (`FAIL`, Risk: 95/100).
+- **Real-World Vendor Scenario Switcher:** Interactive tabbed cards showcasing the 5-scenario test matrix:
+  1. *Scenario 1 (Clean Bidder) — Meridian Flow Systems:* Clean Tier-1 vendor (`PASS`, Risk: 0/100).
+  2. *Scenario 2 (Minor Inconsistency) — Sri Kaveri Engineering:* Minor MSE abbreviation variance (`REVIEW`, Risk: 22/100).
+  3. *Scenario 3 (Identity Mismatch) — Bharat Hydrotech Corp:* Hard PAN-GSTIN structural mismatch (`FAIL`, Risk: 65/100).
+  4. *Scenario 4 (Document Anomaly) — Nova Pumps & Systems:* PDF metadata editing anomaly & prompt injection (`WARN`, Risk: 72/100).
+  5. *Scenario 5 (Statutory Issue) — Zenith Infra Tech:* Debarred entity detected against CPPP sanctions (`FAIL`, Risk: 95/100).
 - **Embedded Video Section:** Dedicated responsive video player with fallback instructions.
 
 ---

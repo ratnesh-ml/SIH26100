@@ -1,0 +1,264 @@
+{
+  "metadata": {
+    "project_name": "VigilBid",
+    "problem_statement": "SIH26100",
+    "title": "AI-Powered Integrated Bid Compliance Verification Platform for GeM Procurement",
+    "last_verified": "4 September 2026",
+    "verification_timestamp_utc": "2026-09-04T17:25:19.406083+00:00",
+    "target_psu": "Chennai Petroleum Corporation Limited (CPCL)",
+    "generator_script": "scripts/generate_project_metrics.py"
+  },
+  "repository_counts": {
+    "database_tables": {
+      "count": 18,
+      "tables": [
+        "anomaly_signals",
+        "audit_log",
+        "bidder_links",
+        "bidders",
+        "bids",
+        "criteria",
+        "decisions",
+        "document_pages",
+        "documents",
+        "extracted_fields",
+        "findings",
+        "jobs",
+        "kb_chunks",
+        "reports",
+        "risk_drivers",
+        "tenders",
+        "users",
+        "verification_events"
+      ],
+      "evidence": "backend/core/database.py and backend/models/entities.py"
+    },
+    "api_endpoints": {
+      "total_routes_registered": 64,
+      "operational_endpoints": 63,
+      "infrastructure_endpoints": 1,
+      "categories": {
+        "openapi.json": 1,
+        "docs": 1,
+        "redoc": 1,
+        "": 1,
+        "dashboard": 1,
+        "auth": 3,
+        "tenders": 11,
+        "bidders": 17,
+        "bids": 7,
+        "documents": 4,
+        "jobs": 3,
+        "findings": 2,
+        "copilot": 2,
+        "audit": 3,
+        "registry": 3,
+        "demo": 2,
+        "risk": 1
+      },
+      "evidence": "backend/main.py and backend/api/router.py"
+    },
+    "compliance_rules": {
+      "declarative_yaml_rules": 18,
+      "total_cpcl_goods_rules_and_checks": 34,
+      "risk_weight_categories": 7,
+      "evidence": "rules/cpcl_goods_v1.yaml and pipeline/compliance/engine.py"
+    },
+    "document_classes": {
+      "count": 13,
+      "classes": [
+        "FORM_GST_REG_06",
+        "PAN_CARD",
+        "UDYAM_REGISTRATION",
+        "CA_TURNOVER_CERTIFICATE",
+        "BALANCE_SHEET",
+        "OEM_AUTHORIZATION",
+        "MAKE_IN_INDIA_DECLARATION",
+        "LAND_BORDER_DECLARATION",
+        "INTEGRITY_PACT",
+        "ITR_ACKNOWLEDGEMENT",
+        "EMD_BANK_GUARANTEE",
+        "FORM_16_TDS",
+        "STARTUP_INDIA_CERTIFICATE"
+      ],
+      "evidence": "pipeline/document_processing/classifier.py"
+    },
+    "pipeline_stages": {
+      "count": 11,
+      "steps": [
+        {
+          "step": "01",
+          "name": "Ingestion & Safety",
+          "engine": "DocumentIngester",
+          "desc": "Zip bomb ratio defense (100:1), magic byte check, CAS indexing"
+        },
+        {
+          "step": "02",
+          "name": "Classification",
+          "engine": "DocumentClassifier",
+          "desc": "TF-IDF + Ridge across 13 statutory document categories"
+        },
+        {
+          "step": "03",
+          "name": "Text & Layout OCR",
+          "engine": "HybridOCREngine",
+          "desc": "PyMuPDF native text extraction with Tesseract 5.0 fallback"
+        },
+        {
+          "step": "04",
+          "name": "Structured Extraction",
+          "engine": "ExtractionRegistry",
+          "desc": "Regex + coordinate extraction of GSTIN, PAN, Udyam, Turnover, UDIN"
+        },
+        {
+          "step": "05",
+          "name": "Normalization",
+          "engine": "EntityNormalizer",
+          "desc": "Date parsing, currency standardization, uppercase casing, whitespace strip"
+        },
+        {
+          "step": "06",
+          "name": "Entity Resolution",
+          "engine": "EntityMatcher",
+          "desc": "Jaro-Winkler string similarity, PAN-in-GSTIN substring containment"
+        },
+        {
+          "step": "07",
+          "name": "Registry Adapters",
+          "engine": "MockRegistryAdapter",
+          "desc": "Controlled verification schemas for GSTN, Income Tax, Udyam, Debarment"
+        },
+        {
+          "step": "08",
+          "name": "Rules Engine",
+          "engine": "ComplianceEngine",
+          "desc": "34 CPCL Goods rules evaluated under GFR 2017 legal precedence"
+        },
+        {
+          "step": "09",
+          "name": "Anomaly Engine",
+          "engine": "ForensicAnomalyEngine",
+          "desc": "PDF metadata heuristics, timestamp inversion, prompt injection patterns"
+        },
+        {
+          "step": "10",
+          "name": "Composite Risk Scorer",
+          "engine": "RiskScorer",
+          "desc": "0-100 score decomposed into Identity, Compliance, Financial, and Anomaly"
+        },
+        {
+          "step": "11",
+          "name": "Dossier Generator",
+          "engine": "DossierGenerator",
+          "desc": "Official CVC compliance dossier PDF with evidence bounding boxes"
+        }
+      ],
+      "evidence": "pipeline/runner.py"
+    },
+    "dataset_distinction": {
+      "problem_scale_scenario": "~900 documents across a 30-bidder tender (estimated full-scale PSU procurement)",
+      "reproducible_demo_dataset": "5 synthetic bidders, 26 PDF files (plus 5 pre-generated CVC dossiers)",
+      "vendor_packages_count": 5,
+      "vendor_submission_pdfs": 26,
+      "cvc_dossier_pdfs": 5,
+      "total_demo_package_pdfs": 31,
+      "evidence": "seed/demo_packages/"
+    },
+    "demonstration_test_matrix": {
+      "bidder_a_meridian": {
+        "name": "Meridian Flow Systems Pvt Ltd",
+        "scenario": "Scenario 1 \u2014 Clean Bidder",
+        "status": "PASS",
+        "risk_score": 0.0,
+        "risk_band": "LOW",
+        "what_it_tests": "Clean baseline. 100% data parity across GST, PAN, Udyam, CA Turnover (\u20b914.20 Cr), and Class-I MII (62%).",
+        "files": [
+          "01_gst_cert.pdf",
+          "02_pan_card.pdf",
+          "03_udyam_cert.pdf",
+          "04_ca_turnover_cert.pdf",
+          "05_oem_auth.pdf",
+          "06_mii_declaration.pdf",
+          "07_integrity_pact.pdf",
+          "08_land_border_decl.pdf"
+        ]
+      },
+      "bidder_b_kaveri": {
+        "name": "Sri Kaveri Engineering Works",
+        "scenario": "Scenario 2 \u2014 Minor Inconsistency",
+        "status": "REVIEW",
+        "risk_score": 22.0,
+        "risk_band": "LOW",
+        "what_it_tests": "Trade name abbreviation & MSE legal suffix variance (Jaro-Winkler: 0.82) with GFR 153 turnover exemption.",
+        "files": [
+          "01_gst_cert.pdf",
+          "02_pan_card.pdf",
+          "03_udyam_cert.pdf",
+          "04_ca_turnover_cert.pdf",
+          "05_oem_auth.pdf",
+          "06_mii_declaration.pdf"
+        ]
+      },
+      "bidder_c_bharat": {
+        "name": "Bharat Hydrotech Corp",
+        "scenario": "Scenario 3 \u2014 Identity Mismatch",
+        "status": "FAIL",
+        "risk_score": 65.0,
+        "risk_band": "HIGH",
+        "what_it_tests": "Hard PAN-in-GSTIN structural contradiction (AAACB1234F vs 33AAACB9999F1Z5) and local content deficit (45% vs 50%).",
+        "files": [
+          "01_gst_cert.pdf",
+          "02_pan_card.pdf",
+          "03_udyam_cert.pdf",
+          "04_ca_turnover_cert.pdf",
+          "05_mii_declaration.pdf"
+        ]
+      },
+      "bidder_d_nova": {
+        "name": "Nova Pumps & Systems Ltd",
+        "scenario": "Scenario 4 \u2014 Document Anomaly",
+        "status": "WARN",
+        "risk_score": 72.0,
+        "risk_band": "HIGH",
+        "what_it_tests": "PDF metadata modification traces (GIMP 2.10 software delta) and indirect prompt injection attempts in text layers.",
+        "files": [
+          "01_gst_cert.pdf",
+          "02_pan_card.pdf",
+          "03_ca_turnover_cert.pdf",
+          "04_mii_declaration.pdf"
+        ]
+      },
+      "bidder_e_debarred": {
+        "name": "Zenith Infra Tech Pvt Ltd",
+        "scenario": "Scenario 5 \u2014 Serious Statutory Issue",
+        "status": "FAIL",
+        "risk_score": 95.0,
+        "risk_band": "HIGH",
+        "what_it_tests": "Suo-moto cancelled GSTIN registration status and active national CPPP debarment order under GFR Rule 151.",
+        "files": [
+          "01_gst_cert.pdf",
+          "02_pan_card.pdf",
+          "03_ca_turnover_cert.pdf"
+        ]
+      }
+    },
+    "automated_testing": {
+      "backend_tests_collected": 381,
+      "backend_tests_passed": 381,
+      "backend_test_suites": 20,
+      "frontend_tests_collected": 70,
+      "frontend_tests_passed": 70,
+      "frontend_test_suites": 12,
+      "release_audit_subsystems": 20,
+      "release_audit_status": "ALL 20 RELEASE REQUIREMENTS SATISFIED",
+      "measured_execution_times": {
+        "backend_test_suite": "4.02 s",
+        "frontend_vitest_and_components": "6.65 s",
+        "automated_release_audit": "8.66 s",
+        "rule_evaluation_per_bidder": "4.2 ms",
+        "risk_calculation": "1.8 ms",
+        "audit_ledger_verification": "8.4 ms"
+      }
+    }
+  }
+}
