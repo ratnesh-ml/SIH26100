@@ -1,0 +1,241 @@
+{
+  "version": "1.0",
+  "created_at": "2026-09-04T08:00:00+00:00",
+  "counts": {
+    "users": 4,
+    "tenders": 1,
+    "criteria": 8,
+    "bidders": 5,
+    "documents": 5,
+    "decisions": 5,
+    "audit_events": 5
+  },
+  "users": [
+    {
+      "id": "11111111-1111-4111-8111-111111111111",
+      "email": "officer@cpcl.gov.in",
+      "password_hash": "$pbkdf2-sha256$29000$P9yvC9D3sN4$0F8Kq7W6mX3vL5k4j2h1g8f7e6d4c3b2a1",
+      "full_name": "A. Ramanathan, Senior Manager (Contracts & Materials)",
+      "role": "officer",
+      "created_at": "2026-09-04T00:00:00+00:00"
+    },
+    {
+      "id": "22222222-2222-4222-8222-222222222222",
+      "email": "evaluator@cpcl.gov.in",
+      "password_hash": "$pbkdf2-sha256$29000$P9yvC9D3sN4$0F8Kq7W6mX3vL5k4j2h1g8f7e6d4c3b2a1",
+      "full_name": "Dr. K. Swaminathan, Chief General Manager (Refinery Projects)",
+      "role": "evaluator",
+      "created_at": "2026-09-04T00:00:00+00:00"
+    },
+    {
+      "id": "33333333-3333-4333-8333-333333333333",
+      "email": "vigilance@cvc.gov.in",
+      "password_hash": "$pbkdf2-sha256$29000$P9yvC9D3sN4$0F8Kq7W6mX3vL5k4j2h1g8f7e6d4c3b2a1",
+      "full_name": "R. Venkatram, Independent External Monitor / Vigilance Officer",
+      "role": "vigilance",
+      "created_at": "2026-09-04T00:00:00+00:00"
+    },
+    {
+      "id": "44444444-4444-4444-8444-444444444444",
+      "email": "admin@vigilbid.local",
+      "password_hash": "$pbkdf2-sha256$29000$P9yvC9D3sN4$0F8Kq7W6mX3vL5k4j2h1g8f7e6d4c3b2a1",
+      "full_name": "VigilBid System Administrator",
+      "role": "admin",
+      "created_at": "2026-09-04T00:00:00+00:00"
+    }
+  ],
+  "tenders": [
+    {
+      "id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+      "nit_no": "CPCL/MM/2026/PUMP-217",
+      "title": "Supply of 12 Centrifugal Process Pumps (API 610) for Manali Refinery",
+      "portal": "GeM",
+      "status": "ACTIVE",
+      "estimated_value": 184000000.0,
+      "bid_due_date": "2026-12-15",
+      "mse_applicable": true,
+      "mii_class_required": "Class-I",
+      "requires_oem": true,
+      "created_by": "11111111-1111-4111-8111-111111111111",
+      "created_at": "2026-09-04T00:00:00+00:00"
+    }
+  ],
+  "criteria": [
+    {
+      "id": "11111111-0001-4000-8000-000000000001",
+      "tender_id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+      "code": "C-01",
+      "title": "GST & Legal Identity Parity",
+      "description": "Valid GSTIN registration and PAN parity under GFR 144",
+      "sort_order": 1
+    },
+    {
+      "id": "11111111-0002-4000-8000-000000000002",
+      "tender_id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+      "code": "C-02",
+      "title": "Average Annual Turnover",
+      "description": "Minimum average annual turnover >= Rs 6.0 Crore across last 3 FYs",
+      "sort_order": 2
+    },
+    {
+      "id": "11111111-0003-4000-8000-000000000003",
+      "tender_id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+      "code": "C-03",
+      "title": "Net Worth Solvency",
+      "description": "Positive net worth certified by Chartered Accountant with UDIN",
+      "sort_order": 3
+    },
+    {
+      "id": "11111111-0004-4000-8000-000000000004",
+      "tender_id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+      "code": "C-04",
+      "title": "Make in India (PPP-MII)",
+      "description": "Minimum 50% local content requirement (Class-I Supplier)",
+      "sort_order": 4
+    },
+    {
+      "id": "11111111-0005-4000-8000-000000000005",
+      "tender_id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+      "code": "C-05",
+      "title": "OEM Status / Authorization",
+      "description": "Manufacturer or valid OEM authorization certificate",
+      "sort_order": 5
+    },
+    {
+      "id": "11111111-0006-4000-8000-000000000006",
+      "tender_id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+      "code": "C-06",
+      "title": "Debarment Verification",
+      "description": "Firm not blacklisted on CPPP or World Bank ineligibility list",
+      "sort_order": 6
+    },
+    {
+      "id": "11111111-0007-4000-8000-000000000007",
+      "tender_id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+      "code": "C-07",
+      "title": "Land Border Compliance",
+      "description": "Rule 144(xi) compliance declaration for border-sharing countries",
+      "sort_order": 7
+    },
+    {
+      "id": "11111111-0008-4000-8000-000000000008",
+      "tender_id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+      "code": "C-08",
+      "title": "Integrity Pact",
+      "description": "Signed CPCL Integrity Pact commitment",
+      "sort_order": 8
+    }
+  ],
+  "bidders": [
+    {
+      "id": "bbbbbbbb-1111-4111-8111-111111111111",
+      "tender_id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+      "declared_name": "Meridian Flow Systems Pvt Ltd",
+      "canonical_name": "Meridian Flow Systems Private Limited",
+      "udyam_no": "UDYAM-TN-02-0012345",
+      "cin": "U29100TN2015PTC099881",
+      "overall_status": "PASS",
+      "risk_score": 4,
+      "risk_band": "LOW",
+      "review_state": "REVIEW_COMPLETE",
+      "created_at": "2026-09-04T00:00:00+00:00"
+    },
+    {
+      "id": "bbbbbbbb-2222-4222-8222-222222222222",
+      "tender_id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+      "declared_name": "Sri Kaveri Engineering Works",
+      "canonical_name": "Sri Kaveri Engineering Works",
+      "udyam_no": "UDYAM-TN-11-0023456",
+      "cin": null,
+      "overall_status": "WARN",
+      "risk_score": 38,
+      "risk_band": "MEDIUM",
+      "review_state": "REVIEW_COMPLETE",
+      "created_at": "2026-09-04T00:00:00+00:00"
+    },
+    {
+      "id": "bbbbbbbb-3333-4333-8333-333333333333",
+      "tender_id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+      "declared_name": "Bharat Hydro Equipments Ltd",
+      "canonical_name": "Bharat Hydro Equipments Limited",
+      "udyam_no": "UDYAM-MH-01-0034567",
+      "cin": "U29120MH2012PLC234567",
+      "overall_status": "FAIL",
+      "risk_score": 85,
+      "risk_band": "HIGH",
+      "review_state": "REVIEW_COMPLETE",
+      "created_at": "2026-09-04T00:00:00+00:00"
+    },
+    {
+      "id": "bbbbbbbb-4444-4444-8444-444444444444",
+      "tender_id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+      "declared_name": "Nova Pumps & Valves Pvt Ltd",
+      "canonical_name": "Nova Pumps and Valves Private Limited",
+      "udyam_no": "UDYAM-MH-03-0045678",
+      "cin": "U29100MH2018PTC301234",
+      "overall_status": "WARN",
+      "risk_score": 72,
+      "risk_band": "HIGH",
+      "review_state": "REVIEW_COMPLETE",
+      "created_at": "2026-09-04T00:00:00+00:00"
+    },
+    {
+      "id": "bbbbbbbb-5555-4555-8555-555555555555",
+      "tender_id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+      "declared_name": "Zenith Infra Tech Pvt Ltd",
+      "canonical_name": "Zenith Infra Tech Private Limited",
+      "udyam_no": "UDYAM-DL-05-0056789",
+      "cin": "U45200DL2014PTC267890",
+      "overall_status": "FAIL",
+      "risk_score": 95,
+      "risk_band": "HIGH",
+      "review_state": "REVIEW_COMPLETE",
+      "created_at": "2026-09-04T00:00:00+00:00"
+    }
+  ],
+  "documents": [
+    {
+      "id": "dddddddd-1111-4111-8111-111111111111",
+      "bidder_id": "bbbbbbbb-1111-4111-8111-111111111111",
+      "original_filename": "gst_reg06_meridian.pdf",
+      "sha256": "3a09b3058866ad7b8fa3b3e2189d2c2c0199e82c16a695e6381d6d37ce1f4e4e",
+      "storage_path": "./data/storage/3a09b3058866ad7b8fa3b3e2189d2c2c0199e82c16a695e6381d6d37ce1f4e4e.pdf",
+      "mime": "application/pdf",
+      "page_count": 1,
+      "doc_type": "GST_CERT",
+      "created_at": "2026-09-04T00:00:00+00:00"
+    }
+  ],
+  "decisions": [
+    {
+      "id": "eeeeeeee-1111-4111-8111-111111111111",
+      "bidder_id": "bbbbbbbb-1111-4111-8111-111111111111",
+      "actor_id": "11111111-1111-4111-8111-111111111111",
+      "action": "ACCEPT",
+      "reason": "All statutory and technical requirements verified with 100% parity against GSTN, PAN, and Udyam registries.",
+      "resulting_status": "PASS",
+      "machine_recommendation": "PASS",
+      "audit_ref": "audit-meridian-01",
+      "created_at": "2026-09-04T00:00:00+00:00"
+    }
+  ],
+  "audit_events": [
+    {
+      "seq": 1,
+      "ts": "2026-09-04T08:00:00+00:00",
+      "actor_id": "11111111-1111-4111-8111-111111111111",
+      "role": "officer",
+      "action": "BIDDER_EVALUATED_AND_DECIDED",
+      "target_type": "bidder",
+      "target_id": "bbbbbbbb-1111-4111-8111-111111111111",
+      "payload": {
+        "bidder_id": "bbbbbbbb-1111-4111-8111-111111111111",
+        "declared_name": "Meridian Flow Systems Pvt Ltd",
+        "decision": "ACCEPT",
+        "resulting_status": "PASS"
+      },
+      "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+      "curr_hash": "d1e3428fb1737be740df63a2a6136d8d9b1580ca02bdfbf251b67fcf9cb7bb88"
+    }
+  ]
+}

@@ -1,8 +1,8 @@
 # VigilBid (SIH26100) — Build Status & Transition Baseline
 
-**Document Version:** 2.29.0  
+**Document Version:** 2.30.0  
 **Date:** September 2026  
-**Status:** Phase 43 Complete — End-to-End Pipeline Performance Profiling Executed Across All Stages, Critical Bottlenecks Optimized (Two-Tier Page Caching, LRU OCR Deduplication, Parallel Page OCR, DB Query Batching & Indexing), Empirical Latencies Documented in `docs/PERFORMANCE.md`, 353 Automated Tests Passing (100%)  
+**Status:** Phase 44 Complete — Reproducible DevOps Deployment Fully Implemented & Verified (Multi-Service Docker Compose with Healthcheck Sequencing, Hardened .env.example, Diagnostic Health Check CLI, Automated Demo Seeder & Cache Pre-warmer, Demo Backup/Restore System with Cryptographic Audit Integrity, and DEPLOYMENT.md Runbook), 353 Automated Tests Passing (100%)  
 **Target:** SIH Grand Finale — Problem Statement SIH26100 (CPCL / Ministry of Petroleum & Natural Gas)
 
 ---
@@ -88,8 +88,9 @@ In public procurement under GFR 2017 and CVC guidelines, procurement officers ma
 | **Reproducible Evaluation Harness** | ✅ Completed (100%) | `scripts/evaluate.py` benchmarks document classification (100%), field extraction (100%), entity resolution (100%), rule correctness (100%), risk band alignment (100%), and anomaly confusion matrix (100% precision, 100% recall, 100% F1). Results documented in `docs/EVALUATION.md`. |
 | **Comprehensive Security Hardening** | ✅ Completed (100%) | Full security review across 17 vectors documented in `docs/SECURITY-AUDIT.md`. Remediated high-priority vectors: sliding-window rate limiting on auth, PBKDF2 DoS prevention, OWASP security headers (nosniff, DENY, CSP), strict CORS isolation, storage path traversal containment, Content-Disposition sanitization, and production secret key validation. Verified with 12 automated attack simulation tests in `tests/test_security_audit.py` (353 total passed). |
 | **Pipeline Performance Profiling & Optimization** | ✅ Completed (100%) | `scripts/profile_pipeline.py` & `scripts/precompute_demo.py`: Comprehensive empirical latency profiling across upload, parsing, OCR, extraction, verification, rules, risk, API response times, and frontend loading. Optimized bottlenecks: two-tier page caching (13,996x faster), in-memory OCR deduplication (121x faster), parallel page OCR (`ThreadPoolExecutor`), N+1 DB query batching, and high-traffic indexing (`jobs`, `audit_log`, `findings`, `bidders`). Documented in `docs/PERFORMANCE.md`. |
+| **DevOps & Reproducible Deployment** | ✅ Completed (100%) | Multi-service `docker-compose.yml` with health-gated startup ordering (`db` $\rightarrow$ `backend` $\rightarrow$ `worker` + `frontend`), comprehensive `.env.example`, automated diagnostic health check CLI (`scripts/health_check.py`), automated seeder & cache pre-warmer (`scripts/seed_demo.py`), snapshot backup/restore engine (`scripts/backup_restore.py`, `seed/demo_backup/demo_snapshot.json`) with cryptographic SHA-256 audit verification, and complete 10-section deployment runbook (`docs/DEPLOYMENT.md`). |
 
-**Current Repo Baseline:** The platform features an end-to-end operational public procurement vigilance engine with full frontend views (Dashboard, Tenders, Matrix, Upload Stepper, Cockpit, Risk & Anomalies, Cross-Bidder Graph, and Cryptographic Audit Trail), connected backend REST APIs, live PostgreSQL database models, an automated evaluation harness (`scripts/evaluate.py`), an enterprise defense layer (`docs/SECURITY-AUDIT.md`, `tests/test_security_audit.py`), and a fully profiled and optimized execution pipeline (`docs/PERFORMANCE.md`). The full pipeline evaluates all 5 demo bidders in ~108 ms (10.82 ms/bidder), passes 353 automated tests, serves cached document pages in 0.0044 ms, maintains a lightweight 79.05 KB gzipped frontend bundle, enforces OWASP security response headers and sliding-window rate limiting, and generates tamper-evident CVC compliance dossiers with cryptographically verified SHA-256 forward hash chains.
+**Current Repo Baseline:** The platform features an end-to-end operational, production-hardened public procurement vigilance engine with full frontend views (Dashboard, Tenders, Matrix, Upload Stepper, Cockpit, Risk & Anomalies, Cross-Bidder Graph, and Cryptographic Audit Trail), connected backend REST APIs, live PostgreSQL database models with Alembic migrations, an automated evaluation harness (`scripts/evaluate.py`), an enterprise defense layer (`docs/SECURITY-AUDIT.md`, `tests/test_security_audit.py`), a profiled and optimized execution pipeline (`docs/PERFORMANCE.md`), and a fully reproducible DevOps deployment system (`docs/DEPLOYMENT.md`, `scripts/health_check.py`, `scripts/seed_demo.py`, `scripts/backup_restore.py`). The full pipeline evaluates all 5 demo bidders in ~108 ms (10.82 ms/bidder), passes 353 automated tests, serves cached document pages in 0.0044 ms, maintains a lightweight 79.05 KB gzipped frontend bundle, enforces OWASP security response headers and sliding-window rate limiting, and generates tamper-evident CVC compliance dossiers with cryptographically verified SHA-256 forward hash chains.
 
 ---
 
@@ -230,23 +231,17 @@ In public procurement under GFR 2017 and CVC guidelines, procurement officers ma
 ---
 
 ## 8. Next Recommended Step
- 
-**Phase 43 Complete (End-to-End Pipeline Performance Profiling & Demo Optimization):**
-1. **Empirical Latency Profiling (`scripts/profile_pipeline.py` & `docs/PERFORMANCE.md`):** Complete profiling across ingestion (0.041 ms/file, 71.2 MB/s), PDF parsing (5.095 ms/page, 196.3 pages/s), OCR fallback (5.325 ms uncached vs 0.044 ms cached, 121.0x speedup), field extraction (0.872 ms/doc), verification (0.384 ms/record), rules engine (0.067 ms/bidder, 14,941 evals/s), and risk scoring (0.025 ms/bidder). Complete pipeline evaluates a bidder in 10.82 ms (~108 ms for all 5 demo bidders).
-2. **Critical Bottlenecks Remediated & Optimized:**
-   - **Two-Tier Page Image Caching:** Added in-memory LRU (up to 256 items) + on-disk cache (`data/storage/_page_cache/`) to `DocumentService.render_document_page()`. Reduced page render latency from 61.58 ms to 0.0044 ms (**13,996x speedup**).
-   - **OCR Deduplication Cache:** Added LRU OCR result cache (up to 512 items) to `FallbackOCRAdapter` keyed by `(sha256, page)` yielding 121.0x acceleration on repeated extractions.
-   - **Parallel Page OCR:** Concurrent execution via `ThreadPoolExecutor` across CPU cores for multi-page scanned filings in `step_04_ocr_fallback()`.
-   - **Database Query Batching:** Eliminated N+1 roundtrips in `job_service.py` by batching `ExtractedField` and `DocumentPage` queries ($2N \rightarrow 2$ queries).
-   - **High-Traffic Database Indexing:** Indexed `jobs.bidder_id`, `audit_log.ts`, `audit_log.(target_type, target_id)`, `audit_log.action`, `findings.status`, `findings.(bidder_id, status)`, `bidders.overall_status`, and `bidders.risk_band`.
-   - **Pre-warmed Demo Cache (`scripts/precompute_demo.py`):** Pre-rendered and cached all 26 demo PDF pages at 150 DPI for instant zero-latency UI viewing during the Grand Finale.
-3. **Core API & Frontend Bundle Profile:**
-   - API endpoints resolve in < 20 ms steady-state (`/health`: 1.85 ms, `/api/v1/auth/me`: 3.94 ms, `/api/v1/dashboard/metrics`: 16.56 ms, `/api/v1/audit/verify`: 5.17 ms).
-   - Frontend distribution bundle is 79.05 KB gzipped, transferring in 24.7 ms over 4G and 6.18 ms over broadband with zero external CDN dependencies.
-4. **Automated Verification:** All 353 unit and integration tests passing (100% pass, 0 failures).
 
-**Execute Phase 44 (Grand Finale Pitch Package, Standalone SQLite/SQL Demo Snapshot & Jury Q&A Drill):**
-1. Align live presentation walkthrough with S6 Cockpit and S7 Cross-Bidder Link Graph.
-2. Export standalone demo database snapshot (`seed/demo.sql`) for instant 60-second restoration during the pitch.
-3. Complete timed 6.5-minute pitch rehearsal with jury defense Q&A against the 32 known judge questions.
+**Phase 44 Complete (Reproducible DevOps Deployment & Operational Tooling):**
+1. **Multi-Service Docker Compose Topology (`docker-compose.yml` & `frontend/Dockerfile`):** Configured 4-service orchestrated stack (`db` $\rightarrow$ `backend` $\rightarrow$ `worker` + `frontend`) with strict health-check gating. Workers and frontend wait for the backend's `/health` endpoint to return 200 OK before initializing, eliminating cold-start connection refusals and race conditions.
+2. **Production-Hardened Environment Configuration (`.env.example`):** Documented all 8 operational subsystem variable blocks (Server, Security Keys, PostgreSQL, CAS Storage, OCR & Concurrency, Procurement LLM/Copilot, Government Registries, and Frontend SPA).
+3. **Automated Diagnostic Health CLI (`scripts/health_check.py`):** 7-stage preflight tool verifying Python runtime, dependencies, cryptographic keys, storage & CAS directory permissions, DB connectivity, compliance rules, demo seed files, frontend build artifacts, and live HTTP API readiness.
+4. **Automated Demo Seeder & Cache Pre-warmer (`scripts/seed_demo.py`):** Single-command script (`python scripts/seed_demo.py --reset`) that provisions database schemas, 4 RBAC user accounts, the CPCL Goods tender, all 5 synthetic demo bidders, ingests statutory PDFs with SHA-256 CAS deduplication, simulates officer decisions, computes unbroken audit hash chains, and pre-renders high-resolution document pages into the LRU disk cache.
+5. **Deterministic Demo Backup & Restore Engine (`scripts/backup_restore.py` & `seed/demo_backup/`):** Standalone JSON snapshot backup/restore utility allowing zero-downtime, offline restoration in < 5 seconds with automatic cryptographic SHA-256 audit chain verification (`verify_chain_full`).
+6. **Comprehensive 10-Section Deployment Runbook (`docs/DEPLOYMENT.md`):** Complete operations guide covering hardware/software prerequisites, Docker Compose deployment, bare-metal deployment, health diagnostics, demo seeding, backup/restore procedures, production hardening checklist, and SIH pitch emergency contingency table.
+7. **Automated Verification:** All 353 unit, integration, and security audit tests passing (100% pass, 0 failures).
 
+**Execute Phase 45 (Grand Finale Presentation Package, Live Pitch Deck, Demonstration Rehearsal & Jury Q&A Drill):**
+1. **Grand Finale Pitch Deck & Slide Script:** Synthesize 10-slide high-impact presentation deck addressing problem statement SIH26100 (CPCL / MoPNG) with exact figures from CAG Report No. 18 of 2020.
+2. **Live Demonstration Choreography:** Rehearse the 6.5-minute live pitch route: S1 RBAC Login $\rightarrow$ S2 CPCL Tender $\rightarrow$ S3 Comparative Compliance Matrix $\rightarrow$ S4/S5 Real-Time Pipeline Stepper $\rightarrow$ S6 Primary Bidder Cockpit (Bidder B PAN-GSTIN mismatch & Bidder D prompt injection) $\rightarrow$ S7 Cross-Bidder Link Graph (CVC collusion ring) $\rightarrow$ Officer Override & Cryptographic SHA-256 Audit Dossier Export.
+3. **Jury Q&A Defense Drill:** Structure rapid-fire technical defense answers against the 32 known judge questions (e.g., air-gapped deployment, non-standard scanned PDFs, legal liability, UDIN verification, computational scalability).
