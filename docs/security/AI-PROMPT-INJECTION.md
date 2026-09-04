@@ -43,7 +43,9 @@ The `PromptInjectionGuard` scans all user queries and retrieved document text bl
 
 **Action on Detection:**
 - In User Query: Immediate security refusal response (`category="INJECTION_BLOCKED"`).
-- In Document Text: The adversarial text is neutralized via `[REDACTED ADVERSARIAL INJECTION - NEUTRALIZED]` and flagged as a forensic tamper anomaly (`A-INJ-01`), contributing +20 points to the bidder's risk score.
+- In Document Text: The adversarial text is masked via `[REDACTED ADVERSARIAL INJECTION - NEUTRALIZED]` and flagged as an adversarial injection anomaly signal (`A-INJ-01`), contributing +20 points to the bidder's risk score.
+
+*Note on Classification: These controls provide heuristic pattern detection and passive context quarantine. They are designed to mitigate known adversarial patterns rather than guarantee prevention of all arbitrary prompt injections.*
 
 ---
 

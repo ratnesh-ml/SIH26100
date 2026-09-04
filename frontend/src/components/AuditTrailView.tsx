@@ -151,8 +151,8 @@ export const AuditTrailView: React.FC<AuditTrailViewProps> = ({
             </div>
             <p className="text-xs text-slate-400 mt-0.5">
               {tenderId
-                ? `Tender-specific immutable SHA-256 hash-chain timeline`
-                : `Global system-wide immutable SHA-256 hash-chain log`}
+                ? `Tender-specific tamper-evident SHA-256 hash-chain timeline`
+                : `Global system-wide tamper-evident SHA-256 hash-chain log`}
             </p>
           </div>
         </div>
@@ -307,7 +307,7 @@ export const AuditTrailView: React.FC<AuditTrailViewProps> = ({
 
       {loading && (
         <LoadingState
-          message="Loading immutable audit events and verifying cryptographic chain..."
+          message="Loading audit trail events and verifying cryptographic chain..."
           size="lg"
           className="rounded-xl bg-slate-900/40 border border-slate-800"
         />
@@ -500,7 +500,7 @@ export const AuditTrailView: React.FC<AuditTrailViewProps> = ({
               <EmptyState
                 icon={<ShieldCheck className="w-6 h-6 text-slate-500" />}
                 title="No Audit Events Matched"
-                description="No immutable audit events matched your search and filter criteria."
+                description="No audit trail events matched your search and filter criteria."
               />
             )}
           </div>

@@ -24,10 +24,7 @@
    uvicorn backend.main:app --port 8000
    cd frontend && npm run dev
    ```
-2. Open your browser directly to:
-   ```
-   http://localhost:5173/#/demo
-   ```
+2. Start the frontend with the command above and open the local address printed by Vite (navigate to route `/#/demo`).
    *No login required. The guided tour renders the complete 15-step interactive scrutiny journey with real-time UI telemetry and visual evidence cards.*
 
 ### Option B: Full Live Procurement Officer Session
@@ -35,7 +32,7 @@
    ```bash
    python scripts/demo_setup.py
    ```
-2. Log in at `http://localhost:5173` with evaluation credentials:
+2. Log in at the application root with evaluation credentials:
    - **Procurement Officer:** `officer@cpcl.gov.in` / `Officer@123`
    - **Vigilance Officer (CVO):** `vigilance@cpcl.gov.in` / `Vigilance@123`
    - **System Administrator:** `admin@cpcl.gov.in` / `Admin@123`
@@ -154,12 +151,12 @@ The complete value of VigilBid is demonstrated through **ONE concrete synthetic 
 
 ### Step 15: Show Audit Ledger Entry
 - **Screen / Route:** `/audit` $\rightarrow$ Audit Trail Explorer
-- **What Happens:** The officer's action is committed to the immutable SHA-256 forward ledger:
+- **What Happens:** The officer's action is committed to the tamper-evident SHA-256 forward ledger:
   - **Event:** `OFFICER_DECISION_RECORDED` (Sequence Block #142)
   - **Officer:** `officer@cpcl.gov.in`
   - **Previous Hash:** `8f9a2b71c402...e491`
   - **Current Block Hash:** `3c7e1d54b899...912f`
-- **Underlying Logic:** Clicking **"Verify Ledger Integrity"** recalculates hashes across all blocks in milliseconds, confirming zero tampering. One-click export to CVC Compliance Dossier PDF.
+- **Underlying Logic:** Clicking **"Verify Ledger Integrity"** recalculates forward hashes across all blocks in milliseconds, confirming unbroken cryptographic continuity. One-click export to CVC Compliance Dossier PDF.
 
 ---
 
@@ -195,15 +192,15 @@ The complete value of VigilBid is demonstrated through **ONE concrete synthetic 
 | **1. Meridian Flow Systems Pvt Ltd** | `PASS` | `0.0 (LOW)` | Clean baseline. 100% data parity across GST, PAN, Udyam, CA Turnover (₹14.20 Cr), and Class-I MII (62%). |
 | **2. Sri Kaveri Engineering Works** | `REVIEW` | `22.0 (LOW)` | MSE trade name abbreviation handled via 0.82 entity resolution parity. Routed to REVIEW; officer accepts. |
 | **3. Bharat Hydrotech Corp** | `FAIL` | `65.0 (HIGH)` | **Primary evaluation scenario**. Hard PAN-GSTIN mismatch and 45% local content deficit. Officer rejects. |
-| **4. Nova Pumps & Systems Ltd** | `WARN` | `72.0 (HIGH)` | Format-compliant bid caught for PDF metadata tampering (GIMP 2.10) and hidden white-on-white prompt injection. |
+| **4. Nova Pumps & Systems Ltd** | `WARN` | `72.0 (HIGH)` | Format-compliant bid flagged for suspicious PDF metadata inconsistencies (GIMP 2.10 editing tool delta) and hidden white-on-white prompt injection pattern. |
 | **5. Zenith Infra Tech Pvt Ltd** | `FAIL` | `95.0 (HIGH)` | Suo-moto cancelled GSTIN and active CPPP national debarment order under GFR Rule 151. |
 
 ---
 
 ## 6. Demonstration Resources
 
-- **Demo Video:** Demo Video: To be added
-- **Live Demo:** Live Demo: To be added
-- **REST API Documentation:** Interactive Swagger UI at `http://localhost:8000/docs`
+- **Demo Video:** To be added
+- **Live Demo:** To be added
+- **REST API Documentation:** Interactive Swagger UI available under `/docs` on the active backend port
 - **Full Architecture Specification:** [docs/architecture/REPOSITORY-MAP.md](../architecture/REPOSITORY-MAP.md)
 - **SIH 24-Requirement Traceability:** [docs/architecture/SIH26100-REQUIREMENT-MATRIX.md](../architecture/SIH26100-REQUIREMENT-MATRIX.md)

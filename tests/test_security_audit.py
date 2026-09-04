@@ -305,6 +305,23 @@ def test_ingester_rejects_zip_traversal():
     assert len(res.accepted) == 0
 
 
+def test_zip_bomb_ratio_defense():
+    """Verify that DocumentIngester detects and rejects archives with compression ratio > 100:1."""
+    import zipfile
+    buf = io.BytesIO()
+    # 200 KB of repetitive bytes compresses down to ~200 bytes (ratio > 500:1 > 100:1 threshold)
+    large_payload = b"%PDF-1.4\n" + b"0" * (200 * 1024)
+    with zipfile.ZipFile(buf, "w", compression=zipfile.ZIP_DEFLATED) as zf:
+        zf.writestr("bomb.pdf", large_payload)
+
+    ingester = DocumentIngester()
+    res = ingester.ingest_bytes("bomb_archive.zip", buf.getvalue())
+    assert len(res.rejected) > 0
+    assert any("Zip bomb detected" in r.reason or "ratio" in r.reason for r in res.rejected)
+    assert len(res.accepted) == 0
+
+
+
 # =============================================================================
 # 8. Prompt Injection Defense
 # =============================================================================

@@ -2,8 +2,8 @@
 
 This directory contains resources, guides, scripts, and media guidelines for demonstrating the VigilBid platform during presentations, evaluations, and video walkthroughs.
 
-- **Demo Walkthrough:** Demo Walkthrough: To be added
-- **Video Walkthrough:** Video Walkthrough: To be added
+- **Live Demo:** To be added
+- **Demo Video:** To be added
 - **Demonstration Guide:** See [docs/demo/DEMO-GUIDE.md](DEMO-GUIDE.md) for the complete scenario walkthrough.
 
 ---
@@ -37,11 +37,8 @@ VigilBid includes an interactive, high-fidelity demonstration page integrated di
    # Terminal 2: Frontend Client
    cd frontend && npm run dev
    ```
-2. Open your browser to:
-   ```
-   http://localhost:5173/#/demo
-   ```
-3. Alternatively, if opening the main application (`http://localhost:5173`), click the **"Guided Demo"** button with the pulsating blue badge in the top navigation bar, or click **"Explore Interactive Guided Demo Tour"** on the login screen.
+2. Start the frontend with the command above and open the local address printed by Vite (navigate to route `/#/demo` for the zero-auth tour).
+3. Alternatively, when opening the main application, click the **"Guided Demo"** button with the pulsating blue badge in the top navigation bar, or click **"Explore Interactive Guided Demo Tour"** on the login screen.
 
 ---
 

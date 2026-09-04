@@ -111,7 +111,7 @@ SIH26100/
   * `ComplianceMatrixView.tsx` (Screen S3): 5 × 8 comparative evaluation matrix with sticky legal identity column and status chips.
   * `BidderDetailView.tsx` (Screen S6): The "One Screen That Wins" — three-column cockpit (Criteria Rail, 150 DPI Document Canvas with SVG bounding boxes, and Adjudication Panel with CVC justification validation).
   * `CrossBidderGraphView.tsx` (Screen S7): Interactive NetworkX-rendered collusion graph linking shared attributes.
-  * `AuditTrailView.tsx` (Screen S8): Immutable SHA-256 ledger with live "Verify Chain" forward re-hash button.
+  * `AuditTrailView.tsx` (Screen S8): Tamper-evident SHA-256 ledger with live "Verify Chain" forward re-hash button.
   * `DemoView.tsx` (`/demo`): Standalone interactive guided tour for judges and contributors.
   * `components/ui/`: 9 modular primitives guaranteeing UI re-skinning without business logic disruption.
 
@@ -133,7 +133,7 @@ SIH26100/
   * `pipeline/entity_resolution/`: Token Set Ratio, Jaro-Winkler, legal suffix cleaning, and embedded PAN primacy.
   * `pipeline/registry_adapters/`: `RegistryProvider` abstraction with `MockRegistryProvider` simulation.
   * `pipeline/compliance/`: Declarative YAML rule evaluation with legal precedence (`FAIL > REVIEW > WARN > PASS`).
-  * `pipeline/risk/`: PDF metadata tampering checks (GIMP), prompt injection detection, and NetworkX collusion graph.
+  * `pipeline/risk/`: PDF metadata anomaly checks (GIMP), prompt injection detection, and NetworkX collusion graph.
   * `pipeline/audit/`: Forward SHA-256 hash chaining service with zero blockchain dependencies.
   * `pipeline/reports/`: On-demand CVC Technical Evaluation Dossier PDF compilation.
 
@@ -144,7 +144,7 @@ SIH26100/
 ### 2.5 `seed/` (Demonstration Dataset)
 * **What it is:** Complete synthetic demonstration data allowing 100% reproducible presentations.
 * **Contents:**
-  * `seed/demo_packages/`: 5 realistic bidder folders (26 statutory PDFs) representing clean large enterprise, MSE with abbreviation, hard PAN-GSTIN mismatch, adversarial PDF tampering with prompt injection, and debarred vendor control.
+  * `seed/demo_packages/`: 5 realistic bidder folders (26 statutory PDFs) representing clean large enterprise, MSE with abbreviation, hard PAN-GSTIN mismatch, adversarial PDF metadata anomalies with prompt injection, and debarred vendor control.
   * `seed/mock_fixtures/`: Curated JSON records for simulated government registries.
   * `seed/ground_truth.json`: Published ground truth benchmark for classification, extraction, and rule outcomes.
 

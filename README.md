@@ -41,7 +41,7 @@ Public procurement scrutiny takes **8 to 10 hours per bidder**, leaving evaluati
 - 🔍 **Split-Screen Evidence:** Connects every finding directly to exact source PDF pages and coordinate bounding box highlights.
 - ⚖️ **Zero AI Hallucinations:** Legal compliance is executed by **100% deterministic Python rules citing GFR 2017 clauses**—probabilistic LLMs are never legal judges.
 - 👤 **Preserved Human Authority:** Procurement officers retain complete discretion to accept, reject, or override findings with mandatory written minutes.
-- 🔐 **Cryptographic Auditability:** Every decision is permanently committed to an immutable SHA-256 forward hash chain for CAG and CVC audit oversight.
+- 🔐 **Cryptographic Auditability:** Every decision is committed to a tamper-evident SHA-256 forward hash chain for CAG and CVC audit oversight.
 
 ```
 ┌────────────────────────────────────────────────────────────────────────────────────────┐
@@ -60,9 +60,9 @@ Public procurement scrutiny takes **8 to 10 hours per bidder**, leaving evaluati
 
 | Demonstration Channel | Access Status | Verification Notes |
 |---|---|---|
-| **Demo Video** | Demo Video: To be added | Comprehensive video walkthrough of end-to-end verification lifecycle |
-| **Live Demo** | Live Demo: To be added | Public demonstration instance |
-| **Interactive Tour** | **Available in App (`/#/demo`)** | Self-contained, zero-setup 15-step interactive scrutiny tour in local build |
+| **Live Demo** | To be added | Public demonstration instance |
+| **Demo Video** | To be added | Comprehensive video walkthrough of end-to-end verification lifecycle |
+| **Interactive Tour** | **Available in Local Build (`/#/demo`)** | Self-contained, zero-setup 15-step interactive scrutiny tour |
 | **Evaluator Walkthrough Guide** | **[docs/demo/DEMO-GUIDE.md](docs/demo/DEMO-GUIDE.md)** | Step-by-step evaluator manual with exact coordinates, telemetry, and citations |
 | **60-Second Summary** | **[docs/ONE-MINUTE-TOUR.md](docs/ONE-MINUTE-TOUR.md)** | Executive brief for competition jury and technical reviewers |
 
@@ -178,7 +178,7 @@ VigilBid brings document ingestion, structured extraction, cross-document entity
 1. **AI Assists:** Ingests untrusted bidder ZIP archives, detects document types, and extracts structured text layers and word coordinates using hybrid layout analysis and local OCR.
 2. **Rules Verify:** Evaluates 34 CPCL Goods criteria under GFR 2017 using deterministic, auditable Python rules—not probabilistic LLMs.
 3. **Evidence Explains:** Connects every finding to an exact document, page number, bounding box coordinate, and verbatim text citation in a split-screen viewer.
-4. **Officer Decides:** Preserves human statutory authority. Officers review recommendations, accept findings, or record mandatory written justifications for overrides, with every action committed to an immutable SHA-256 hash-chained audit ledger.
+4. **Officer Decides:** Preserves human statutory authority. Officers review recommendations, accept findings, or record mandatory written justifications for overrides, with every action committed to a tamper-evident SHA-256 hash-chained audit ledger.
 
 ---
 
@@ -316,16 +316,16 @@ graph TB
 
 | # | Capability | Technical Implementation | Operational Procurement Value |
 |---|---|---|---|
-| **1** | **Safe Document Ingestion** | Decompression bomb protection (100:1 ratio guard), magic byte validation (`%PDF-`), and Content-Addressable Storage (CAS) via SHA-256 digests. | Isolates untrusted vendor archives before downstream processing. |
+| **1** | **Safe Document Ingestion** | Decompression ratio guard (tested against 100:1 archive expansion), magic byte validation (`%PDF-`), and Content-Addressable Storage (CAS) via SHA-256 digests. | Isolates untrusted vendor archives before downstream processing. |
 | **2** | **Document Intelligence** | TF-IDF classification across 13 statutory document types with sub-second PyMuPDF text layer and Tesseract 5.0 OCR fallback. | Eliminates manual document sorting and extracts word coordinates. |
-| **3** | **Entity Resolution** | Deterministic PAN-in-GSTIN containment checking (chars 3–12) and Jaro-Winkler legal name similarity ($\ge 0.85$). | Prevents identity mismatches while protecting MSEs from wrongful disqualification due to minor abbreviations. |
+| **3** | **Entity Resolution** | Deterministic PAN-in-GSTIN containment checking (chars 3–12) and Jaro-Winkler legal name similarity ($\ge 0.85$). | Mitigates identity mismatches while protecting MSEs from wrongful disqualification due to minor abbreviations. |
 | **4** | **Registry Adapters** | Controlled mock adapters that follow the expected verification interface conforming to GSTN, PAN, MCA-21, Udyam, and CPPP schemas. | Validates credentials without requiring officers to log into 5 external portals. |
 | **5** | **Deterministic Rules Engine** | 34 CPCL Goods criteria under GFR 2017 evaluated in Python with strict legal precedence (`FAIL > REVIEW > WARN > PASS`). | Guarantees 100% reproducible compliance rulings with zero generative hallucinations. |
-| **6** | **PDF Metadata & Anomaly Detection** | Scans PDF metadata for editing tool traces and detects indirect instruction text in bid document layers. | Flags unexpected editing tool signatures and prompt manipulation attempts. |
+| **6** | **PDF Metadata & Anomaly Detection** | Flags suspicious PDF metadata inconsistencies (editing tool traces, modification timestamps) and detects instruction patterns in bid document layers. | Flags unexpected editing tool signatures and prompt manipulation attempts. |
 | **7** | **Explainable Risk Scoring** | Transparent 0–100 composite risk score decomposed into Identity (+35), Compliance (+25), Financial (+5), and Anomaly factors. | Eliminates black-box scoring; every single risk point is attributed to a verifiable root cause. |
 | **8** | **Split-Screen Evidence Inspector** | Dual-pane viewer rendering high-resolution PDF pages with exact coordinate bounding box highlight overlays. | Enables officers to verify evidence visually in seconds without opening external PDF viewers. |
 | **9** | **Officer Review Cockpit** | Dedicated interface allowing officers to accept findings, issue clarifications, or record mandatory written justifications for overrides. | Preserves human authority; procurement officers retain sole legal discretion. |
-| **10** | **Cryptographic Audit & Dossier** | Forward SHA-256 hash-chained immutable ledger verified at runtime, with one-click export to official CVC Compliance Dossier PDFs. | Generates standardized CVC-formatted compliance dossiers for evaluation committee and CAG review. |
+| **10** | **Cryptographic Audit & Dossier** | Forward SHA-256 tamper-evident hash chain verified at runtime, with one-click export to official CVC Compliance Dossier PDFs. | Generates standardized CVC-formatted compliance dossiers for evaluation committee and CAG review. |
 
 ---
 
@@ -333,9 +333,9 @@ graph TB
 
 VigilBid applies defense-in-depth across the ingestion and evaluation pipeline:
 
-- **Ingestion Defenses:** Validates file magic bytes (`%PDF-`), enforces a maximum 100:1 archive decompression ratio, and checks filenames against path traversal attacks (`../`).
-- **Content-Addressable Storage (CAS):** Files are stored by their SHA-256 digest (`data/storage/{bidder_id}/{sha256}.pdf`), ensuring immutability and preventing file overwrites.
-- **Prompt Injection Protection:** Scans submitted bid text layers for prompt injection patterns attempting to manipulate downstream LLM copilot contexts.
+- **Ingestion Defenses:** Validates file magic bytes (`%PDF-`), enforces decompression ratio guards (tested against 100:1 ratio limit), and prevents path traversal attacks (`../`).
+- **Content-Addressable Storage (CAS):** Files are stored by their SHA-256 digest (`data/storage/{bidder_id}/{sha256}.pdf`), establishing write-once storage and preventing accidental file overwrites.
+- **Prompt Injection Detection & Isolation:** Scans submitted bid text layers for prompt injection patterns and quarantines untrusted document text within passive data tags.
 - **Stateless RBAC:** Uses signed HMAC-SHA256 JWTs with role-based access control (`Officer`, `Approver`, `Auditor`, `Admin`).
 - **Environment Isolation:** Sensitive credentials and secrets are managed via `.env` files and excluded from version control.
 
@@ -348,7 +348,7 @@ VigilBid applies defense-in-depth across the ingestion and evaluation pipeline:
 The project includes unit, integration, and release certification test suites:
 
 ```bash
-# 1. Run all backend automated tests (380 tests)
+# 1. Run all backend automated tests (381 tests)
 pytest tests/ -v
 
 # 2. Run frontend component & UI architecture checks (70 tests)
@@ -494,10 +494,10 @@ cp .env.example .env
 docker compose up --build
 ```
 
-Access the application via your local browser:
-- **Interactive Guided Tour (Zero Auth):** `/demo`
+Open the local address printed in your terminal:
+- **Interactive Guided Tour (Zero Auth):** Navigate to `/#/demo`
 - **Procurement Officer Cockpit:** Application root
-- **Interactive OpenAPI Documentation:** `/api/v1/docs`
+- **Interactive OpenAPI Documentation:** Available under `/api/v1/docs` on the API port
 
 ---
 
@@ -520,6 +520,8 @@ uvicorn backend.main:app --reload --port 8000
 python worker.py
 cd frontend && npm run dev
 ```
+
+Start the frontend with the command above and open the local address printed by Vite. Complete developer port configurations are documented in [docs/development/DEVELOPER-GUIDE.md](docs/development/DEVELOPER-GUIDE.md).
 
 ### Default Evaluation Credentials
 

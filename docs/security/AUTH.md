@@ -151,7 +151,7 @@ Authorization: Bearer <access_token>
 | `/bidders/{id}/complete-review` | `POST` | `officer` | Finalize evaluation once all findings decided. |
 | `/findings/{id}/decision` | `POST` | `officer`, `evaluator` | Record Accept/Override/Clarify/Concur. |
 | `/audit/verify` | `GET` | `vigilance`, `officer`, `admin` | Cryptographic SHA-256 hash-chain verification. |
-| `/tenders/{id}/audit` | `GET` | `vigilance`, `officer`, `evaluator`, `admin` | View immutable audit events. |
+| `/tenders/{id}/audit` | `GET` | `vigilance`, `officer`, `evaluator`, `admin` | View tamper-evident audit events. |
 | `/bidders/{id}/report.pdf` | `GET` | All authenticated | Export RTI/CVC compliance dossier. |
 
 ---

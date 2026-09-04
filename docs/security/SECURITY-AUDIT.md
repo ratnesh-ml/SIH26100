@@ -2,7 +2,7 @@
 
 **Date:** September 2026  
 **Audit Scope:** Full Application Stack (FastAPI Backend, PostgreSQL Engine, PDF Pipeline, Copilot RAG, Client REST APIs)  
-**Security Posture Baseline:** Hardened & Tested (353 automated tests passing, 0 security failures)  
+**Security Posture Baseline:** Hardened & Tested (381 automated tests passing, 0 security failures)  
 **Auditor / Engineering Role:** VigilBid Security & Defensive Architecture Team  
 
 ---
@@ -36,7 +36,7 @@ The primary threat actors and attack surfaces considered in this security audit:
 | **12** | **Logging & Privacy** | Centralized Python logging avoiding plain passwords, unhashed tokens, or sensitive payloads. | MEDIUM | ✅ SECURE | Verified that passwords, JWT tokens, and decrypted keys are never written to logger statements or console output. |
 | **13** | **Sensitive Data Exposure** | Fernet symmetric cipher encrypting sensitive tax identifiers (`encrypted_pan`, `encrypted_gstin`) at rest in PostgreSQL. | HIGH | ✅ SECURE | Identifiers masked in public schemas (`mask_pan`, `mask_gstin`); `UserOut` strictly excludes `password_hash`. |
 | **14** | **Document Access Control** | Authentication (`get_current_user`) and RBAC checks required on document download, raw file streaming, and page PNG renders. | HIGH | ✅ SECURE | All document routes require verified Bearer JWT tokens. Unauthorized and unauthenticated requests rejected with HTTP 401/403. |
-| **15** | **Prompt Injection Defense** | Dual-layer heuristic scanner: `PromptInjectionGuard` for Copilot RAG queries and `AnomalyDetector` (`A-INJ-01`) for ingested documents. | HIGH | ✅ SECURE | Scans and sanitizes adversarial commands ("ignore previous instructions", "override all rules", "DAN mode"). |
+| **15** | **Prompt Injection Detection & Isolation** | Dual-layer heuristic scanner: `PromptInjectionGuard` for Copilot RAG queries and `AnomalyDetector` (`A-INJ-01`) for ingested documents. Untrusted text isolated in `<DOCUMENT_DATA>`. | HIGH | ✅ SECURE | Scans heuristic adversarial patterns ("ignore previous instructions", "override all rules", "DAN mode") and quarantines unverified text. |
 | **16** | **CORS Configuration** | Restricted CORS middleware specifying trusted frontend origins and credential isolation. | HIGH | ✅ SECURE | Replaced wildcard `allow_origins=["*"]` + `allow_credentials=True` with explicit origins whitelist (`localhost:5173`, `3000`, etc.) and regex. |
 | **17** | **Rate Limiting** | In-memory thread-safe sliding-window rate limiter protecting sensitive API routes. | HIGH | ✅ SECURE | Enforces 10 requests/minute on `/api/v1/auth/login` to prevent credential stuffing and brute-force attacks. Returns HTTP 429 with `Retry-After`. |
 
@@ -85,24 +85,25 @@ A dedicated attack simulation test suite was created in [`tests/test_security_au
 
 ### Test Suite Execution Output
 ```
-tests/test_security_audit.py::test_login_rate_limiting_blocks_after_threshold PASSED [  8%]
-tests/test_security_audit.py::test_oversized_password_rejected_with_422 PASSED [ 16%]
-tests/test_security_audit.py::test_invalid_email_format_or_empty PASSED  [ 25%]
-tests/test_security_audit.py::test_security_response_headers_present PASSED [ 33%]
-tests/test_security_audit.py::test_cors_allowed_origin_handling PASSED   [ 41%]
-tests/test_security_audit.py::test_document_download_blocks_path_traversal_escape PASSED [ 50%]
-tests/test_security_audit.py::test_content_disposition_sanitizes_crlf_and_quotes PASSED [ 58%]
-tests/test_security_audit.py::test_zip_path_traversal_detection PASSED   [ 66%]
-tests/test_security_audit.py::test_ingester_rejects_zip_traversal PASSED [ 75%]
-tests/test_security_audit.py::test_prompt_injection_guard_detects_and_sanitizes PASSED [ 83%]
-tests/test_security_audit.py::test_fernet_encryption_and_decryption PASSED [ 91%]
+tests/test_security_audit.py::test_login_rate_limiting_blocks_after_threshold PASSED [  7%]
+tests/test_security_audit.py::test_oversized_password_rejected_with_422 PASSED [ 15%]
+tests/test_security_audit.py::test_invalid_email_format_or_empty PASSED  [ 23%]
+tests/test_security_audit.py::test_security_response_headers_present PASSED [ 30%]
+tests/test_security_audit.py::test_cors_allowed_origin_handling PASSED   [ 38%]
+tests/test_security_audit.py::test_document_download_blocks_path_traversal_escape PASSED [ 46%]
+tests/test_security_audit.py::test_content_disposition_sanitizes_crlf_and_quotes PASSED [ 53%]
+tests/test_security_audit.py::test_zip_path_traversal_detection PASSED   [ 61%]
+tests/test_security_audit.py::test_ingester_rejects_zip_traversal PASSED [ 69%]
+tests/test_security_audit.py::test_zip_bomb_ratio_defense PASSED         [ 76%]
+tests/test_security_audit.py::test_prompt_injection_guard_detects_and_sanitizes PASSED [ 84%]
+tests/test_security_audit.py::test_fernet_encryption_and_decryption PASSED [ 92%]
 tests/test_security_audit.py::test_user_out_schema_does_not_expose_password_hash PASSED [100%]
 
-============================= 12 passed in 8.88s ==============================
-============================ 353 passed in 32.82s =============================
+============================= 13 passed in 5.27s ==============================
+============================ 381 passed in 30.50s =============================
 ```
 
-All 12 security test cases passed cleanly with zero regressions across the entire 353-test platform suite.
+All 13 security test cases passed cleanly with zero regressions across the entire 381-test platform suite.
 
 ---
 

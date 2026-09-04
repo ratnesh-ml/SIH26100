@@ -805,7 +805,7 @@ async def get_audit_trail(
     current_user: Annotated[User, Depends(get_current_user)] = None,
     session: Annotated[AsyncSession, Depends(get_db_session)] = None,
 ):
-    """Retrieve immutable audit trail events for a specific tender."""
+    """Retrieve tamper-evident audit trail events for a specific tender."""
     events = await AuditService.get_audit_trail(session, tender_id=tender_id, page=page, limit=limit)
     return [AuditEventOut.model_validate(e) for e in events]
 
@@ -820,7 +820,7 @@ async def get_global_audit_trail(
     current_user: Annotated[User, Depends(get_current_user)] = None,
     session: Annotated[AsyncSession, Depends(get_db_session)] = None,
 ):
-    """Retrieve immutable global audit trail events with optional filtering."""
+    """Retrieve tamper-evident global audit trail events with optional filtering."""
     events = await AuditService.get_audit_trail(
         session, target_type=target_type, target_id=target_id, action=action, page=page, limit=limit
     )

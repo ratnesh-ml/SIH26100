@@ -50,8 +50,8 @@ Bidder ZIP Upload
 1. **Evidence-First Verification:** Every finding (`PASS`, `WARN`, `REVIEW`, `FAIL`) is tied to an exact document name, page number, bounding box coordinates, and verbatim text citation.
 2. **Deterministic Rules Over Black-Box LLMs:** AI is used strictly for noisy perception (OCR, layout parsing); all legal decisions and compliance calculations use deterministic Python logic.
 3. **Cross-Document Entity Resolution:** Catches hidden discrepancies across documents (e.g., PAN within GSTIN mismatch, differing entity names across Udyam vs PAN).
-4. **Forensic Anomaly Triggers:** Flags PDF metadata tampering (e.g., GIMP modified date preceding creation date) and indirect adversarial prompt injections.
-5. **Cryptographic Integrity:** Every action is chained into an immutable SHA-256 ledger modeled on git commit trees.
+4. **Forensic Anomaly Triggers:** Flags suspicious PDF metadata inconsistencies (e.g., GIMP modified date preceding creation date) and indirect adversarial prompt injection patterns.
+5. **Cryptographic Integrity:** Every action is chained into a tamper-evident SHA-256 ledger modeled on git commit trees.
 
 ---
 
@@ -60,7 +60,7 @@ The included demonstration environment loads a synthetic CPCL Centrifugal Pump t
 - **Meridian Pumps Pvt Ltd:** Clean, fully compliant Tier-1 vendor.
 - **Kaveri Flow Systems LLP:** Minor MSE abbreviation variance (`LLP` vs `Limited Liability Partnership`), flagged as `WARN` for human review.
 - **Bharat Hydrotech Corp:** Hard PAN-GSTIN mismatch (`AAACB1234F` vs `AAACB9999F`), correctly flagged as `FAIL`.
-- **Nova Impellers Ltd:** Forensic anomaly (GIMP metadata alteration) & indirect prompt injection attempt, flagged with elevated risk (76.5/100).
+- **Nova Impellers Ltd:** Suspicious PDF metadata anomaly (GIMP editing tool delta) & indirect prompt injection pattern, flagged with elevated risk (72.0/100).
 - **Zenith Valves & Controls:** CVC-debarred entity detected against simulated registry sanctions.
 
 ---

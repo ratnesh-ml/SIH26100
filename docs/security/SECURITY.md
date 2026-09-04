@@ -56,11 +56,12 @@ All document uploads undergo multi-tiered validation before being accepted or pe
 
 ## 3. Defense Mechanisms & Thresholds
 
-### 3.1 Zip Safety & Decompression Bomb Protection
+### 3.1 Archive Decompression Ratio Guards (Tested at 100:1 Limit)
 1. **Max Archive Size:** 100 MB compressed (`MAX_ZIP_SIZE`).
 2. **Max Uncompressed Size:** 150 MB total uncompressed (`MAX_UNCOMPRESSED_TOTAL`).
 3. **Max Compression Ratio:** 100:1 ratio limit per individual entry (`MAX_COMPRESSION_RATIO`). Any entry exceeding this ratio aborts the entire archive extraction.
 4. **Max Entry Count:** 200 files per archive (`MAX_ZIP_ENTRIES`).
+*Note: These controls provide defense-in-depth against tested archive expansion patterns rather than a universal guarantee against all archive variations.*
 
 ### 3.2 Directory & Path Traversal Prevention
 1. **Entry Path Inspection:** Every entry in a ZIP is sanitized using `os.path.basename`.
@@ -78,7 +79,7 @@ All document uploads undergo multi-tiered validation before being accepted or pe
 - **Safe Attachment Delivery:** Documents downloaded from `/api/v1/documents/{id}/download` are served with:
   `Content-Disposition: attachment; filename="{original_filename}"`
   Browsers are instructed to download rather than render raw PDF active content inline.
-- **Isolated Image Rendering:** For the UI, the backend renders PDF pages to PNG raster images (`/documents/{id}/pages/{n}.png`), completely neutralizing client-side PDF viewer exploits.
+- **Isolated Image Rendering:** For the UI, the backend renders PDF pages to PNG raster images (`/documents/{id}/pages/{n}.png`), mitigating client-side PDF viewer exploits by presenting passive pixel renderings.
 
 ---
 

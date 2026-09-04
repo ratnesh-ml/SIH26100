@@ -39,7 +39,9 @@ class AuditService:
         payload: Optional[dict[str, Any]] = None,
         commit: bool = True,
     ) -> AuditLog:
-        """Record an immutable, hash-chained audit event for an important action.
+        """Record a tamper-evident, hash-chained audit event for an important action.
+
+        Computes forward hash linking to current chain head.
 
         Records:
             - actor (actor_id and role)
@@ -162,7 +164,7 @@ class AuditService:
         page: int = 1,
         limit: int = 50,
     ) -> list[AuditLog]:
-        """Query immutable audit events with pagination and filters."""
+        """Query tamper-evident audit events with pagination and filters."""
         stmt = select(AuditLog).order_by(AuditLog.seq.asc())
         if target_type:
             stmt = stmt.where(AuditLog.target_type == target_type)

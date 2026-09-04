@@ -2,7 +2,7 @@
 
 ## 1. Executive Summary
 
-The **VigilBid Anomaly Detection Subsystem** (`pipeline/risk/anomaly.py`) provides realistic, explainable forensic inspection of bidder submission documents. It identifies structural inconsistencies, metadata tampering indicators, unexpected timestamps, hidden/microscopic text overlays, adversarial prompt injections, and cross-document collusion similarities.
+The **VigilBid Anomaly Detection Subsystem** (`pipeline/risk/anomaly.py`) provides realistic, explainable forensic inspection of bidder submission documents. It identifies structural inconsistencies, suspicious PDF metadata inconsistencies, unexpected timestamps, hidden/microscopic text overlays, adversarial prompt injection patterns, and cross-document collusion similarities.
 
 ```
 ┌────────────────────────────────────────────────────────┐
@@ -31,7 +31,8 @@ The **VigilBid Anomaly Detection Subsystem** (`pipeline/risk/anomaly.py`) provid
 ## 2. Legal Policy & Vocabulary Guardrails
 
 In strict adherence to Section 10.1 of `docs/02`:
-- The system **never** claims legal fraud, forgery, or criminal tampering.
+- The system **never** claims legal fraud, forgery, or proof of tampering.
+- Metadata anomaly detection is an indicator of potential inconsistency, not conclusive proof of tampering.
 - Phrases like `"fraud"`, `"fraudulent"`, `"fake"`, or `"forged"` are programmatically forbidden.
 - Findings are documented exclusively as **risk anomaly signals**:
   - *"Risk signal: Potential anomaly detected — human verification required."*

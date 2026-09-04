@@ -96,7 +96,7 @@ docs/
 │
 ├── risk/                              # Risk Scoring & Forensic Vigilance
 │   ├── RISK-ENGINE.md                 # 4-factor composite risk scoring arithmetic
-│   ├── ANOMALIES.md                   # PDF metadata tampering forensics (GIMP)
+│   ├── ANOMALIES.md                   # PDF metadata anomaly checks (GIMP)
 │   └── GRAPH.md                       # Cross-bidder collusion network graph
 │
 ├── evidence/                          # Traceability & Official Reporting

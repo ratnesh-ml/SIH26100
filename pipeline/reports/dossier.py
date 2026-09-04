@@ -188,7 +188,7 @@ class DossierGenerator:
 
         # Footer on all pages
         for p in doc:
-            p.insert_text((left, 815), f"VigilBid SIH26100 — Certified Immutable Technical Evaluation Record | Generated: {gen_time}", fontsize=7.5, color=(0.5, 0.5, 0.5))
+            p.insert_text((left, 815), f"VigilBid SIH26100 — Certified Tamper-Evident Technical Evaluation Record | Generated: {gen_time}", fontsize=7.5, color=(0.5, 0.5, 0.5))
 
         pdf_bytes = doc.tobytes()
         doc.close()
@@ -277,13 +277,13 @@ class DossierGenerator:
         c_head = chain_head or "GENESIS_ROOT_CHAIN_HEAD_0000000000000000000000000000000000000000"
         audit_text = (
             f"Forward SHA-256 Audit Chain Head: {c_head[:32]}...\n"
-            f"Integrity Status: VERIFIED IMMUTABLE | Total Recorded Audit Events: {len(audit_events or [])}\n"
+            f"Integrity Status: VERIFIED TAMPER-EVIDENT | Total Recorded Audit Events: {len(audit_events or [])}\n"
             f"Adjudicated in accordance with GFR 2017 Rule 161 (Two-Bid System)."
         )
         page.insert_textbox(fitz.Rect(left, y, 555, y + 36), audit_text, fontsize=8, fontname="helv")
 
         # Footer
-        page.insert_text((left, 815), f"VigilBid SIH26100 — Certified Immutable Technical Evaluation Record | Generated: {gen_time}", fontsize=7.5, color=(0.5, 0.5, 0.5))
+        page.insert_text((left, 815), f"VigilBid SIH26100 — Certified Tamper-Evident Technical Evaluation Record | Generated: {gen_time}", fontsize=7.5, color=(0.5, 0.5, 0.5))
 
         pdf_bytes = doc.tobytes()
         doc.close()
