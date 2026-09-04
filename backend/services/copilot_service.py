@@ -209,12 +209,14 @@ class CopilotService:
             domains_searched=resp.domains_searched,
             used_llm=resp.used_llm,
             confidence=resp.confidence,
+            grounding_status=resp.grounding_status.value if hasattr(resp.grounding_status, "value") else str(resp.grounding_status),
             facts=resp.facts,
             explanations=resp.explanations,
             injection_detected=resp.injection_detected,
             is_conclusive=resp.is_conclusive,
             category=resp.category,
         )
+
 
     @classmethod
     def get_knowledge_base_status(cls) -> RAGKnowledgeBaseStatus:

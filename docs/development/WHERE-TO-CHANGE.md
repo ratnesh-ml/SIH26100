@@ -15,7 +15,7 @@ This document is a rapid-lookup directory for software engineers, evaluators, an
 | **Field Extraction Regular Expressions** | `pipeline/extraction/gst.py`<br>`pipeline/extraction/pan.py`<br>`pipeline/extraction/financial.py` | `GSTIN_REGEX`, `PAN_REGEX`, `extract_turnover_table()`, `UDIN_REGEX` |
 | **Entity Matching & Name Normalization** | `pipeline/entity_resolution/matcher.py`<br>`pipeline/entity_resolution/normalizer.py` | `calculate_name_similarity()`, `COMPANY_SUFFIX_MAP`, Jaro-Winkler threshold (0.85) |
 | **Simulated Government Registry Responses** | `pipeline/registry_adapters/mock_adapter.py`<br>`seed/mock_fixtures/` | `MockRegistryAdapter.verify_gstin()`, JSON fixtures in `seed/mock_fixtures/` |
-| **Tender Compliance Rules (GFR/CPCL)** | `rules/cpcl_goods_rules.yaml`<br>`pipeline/compliance/engine.py` | Declarative YAML rule definitions, `evaluate_rule()`, threshold operators |
+| **Tender Compliance Rules (GFR/CPCL)** | `rules/cpcl_goods_v1.yaml`<br>`pipeline/compliance/engine.py` | Declarative YAML rule definitions, `evaluate_rule()`, threshold operators |
 | **Risk Scoring Weights & Drivers** | `pipeline/risk/scorer.py` | `RISK_WEIGHTS` (Identity: 30%, Financial: 25%, Compliance: 25%, Anomaly: 20%) |
 | **Forensic Anomaly Detection Checks** | `pipeline/risk/anomaly.py` | `detect_metadata_anomalies()`, `detect_prompt_injection()`, timestamp delta checks |
 | **Cryptographic Audit Ledger Logic** | `backend/services/audit_service.py`<br>`pipeline/audit/hasher.py` | `compute_forward_hash()`, `verify_chain_integrity()`, `GENESIS_HASH` |
@@ -31,7 +31,7 @@ This document is a rapid-lookup directory for software engineers, evaluators, an
 ## Detailed Modification Scenarios
 
 ### 1. How to Add a New Compliance Rule
-1. Open [`rules/cpcl_goods_rules.yaml`](file:///rules/cpcl_goods_rules.yaml).
+1. Open [`rules/cpcl_goods_v1.yaml`](../../rules/cpcl_goods_v1.yaml).
 2. Add a new YAML rule entry under the appropriate section:
    ```yaml
    - id: CPCL-DOC-015
@@ -49,7 +49,7 @@ This document is a rapid-lookup directory for software engineers, evaluators, an
 4. Run tests: `pytest tests/unit/test_rule_engine.py`.
 
 ### 2. How to Add a New Registry Mock Fixture
-1. Open [`seed/mock_fixtures/`](file:///seed/mock_fixtures/) and locate the target registry (e.g. `gst_fixtures.json`).
+1. Open [`seed/mock_fixtures/`](../../seed/mock_fixtures/) and locate the target registry (e.g. `gst_fixtures.json`).
 2. Add an entry matching the simulated entity's identifier:
    ```json
    {
@@ -64,7 +64,7 @@ This document is a rapid-lookup directory for software engineers, evaluators, an
 3. Restart or reseed: `python scripts/demo_setup.py`.
 
 ### 3. How to Adjust Risk Weightings
-1. Open [`pipeline/risk/scorer.py`](file:///pipeline/risk/scorer.py).
+1. Open [`pipeline/risk/scorer.py`](../../pipeline/risk/scorer.py).
 2. Modify the weight dictionary:
    ```python
    DIMENSION_WEIGHTS = {
@@ -77,7 +77,7 @@ This document is a rapid-lookup directory for software engineers, evaluators, an
 3. Run test verification: `pytest tests/unit/test_risk_engine.py`.
 
 ### 4. How to Update the YouTube Demo URL
-1. Open [`frontend/src/components/DemoView.tsx`](file:///frontend/src/components/DemoView.tsx).
+1. Open [`frontend/src/components/DemoView.tsx`](../../frontend/src/components/DemoView.tsx).
 2. Set the `YOUTUBE_DEMO_URL` string on line 14:
    ```typescript
    const YOUTUBE_DEMO_URL = "https://www.youtube.com/embed/YOUR_VIDEO_ID";

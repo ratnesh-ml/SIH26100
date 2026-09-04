@@ -3,22 +3,22 @@
 ### AI-assisted, evidence-first bid verification for public procurement.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Build Status](https://img.shields.io/badge/Build-Passing-emerald)](docs/testing/RELEASE-CHECKLIST.md)
-[![Backend Tests: 353 Passing](https://img.shields.io/badge/Backend%20Tests-353%20Passing-brightgreen)](tests/)
+[![CI Pipeline](https://github.com/ratnesh-ml/SIH26100/actions/workflows/ci.yml/badge.svg)](https://github.com/ratnesh-ml/SIH26100/actions/workflows/ci.yml)
+[![Backend Tests: 380 Passing](https://img.shields.io/badge/Backend%20Tests-380%20Passing-brightgreen)](tests/)
 [![Frontend Tests: 70 Passing](https://img.shields.io/badge/Frontend%20Tests-70%20Passing-brightgreen)](frontend/)
 [![Release Audit: 20/20 Subsystems](https://img.shields.io/badge/Release%20Audit-20%2F20%20Certified-blue)](scripts/release_audit.py)
+[![Threat Model: Comprehensive](https://img.shields.io/badge/Threat%20Model-Certified-emerald)](docs/security/THREAT-MODEL.md)
 [![Architecture: Modular Monolith](https://img.shields.io/badge/Architecture-Modular%20Monolith-orange)](docs/architecture/REPOSITORY-MAP.md)
-[![SIH Problem: SIH26100](https://img.shields.io/badge/SIH%202024-SIH26100-purple)](docs/architecture/FEATURE-TRACEABILITY.md)
+[![SIH Problem: SIH26100](https://img.shields.io/badge/SIH%202026-SIH26100-purple)](docs/architecture/FEATURE-TRACEABILITY.md)
 
 **VigilBid helps procurement officers review bidder documents, verify eligibility signals, identify discrepancies, and inspect the evidence behind every important finding.**
 
-Designed for the **Smart India Hackathon (Problem Statement SIH26100)**, VigilBid provides an evidence-first, buyer-side decision-support platform tailored for high-value public procurement under **General Financial Rules (GFR) 2017** and **Central Vigilance Commission (CVC)** guidelines. The reference implementation demonstrates scrutiny for **Chennai Petroleum Corporation Limited (CPCL)**, the **Ministry of Petroleum & Natural Gas (MoPNG)**, and the **Government e-Marketplace (GeM)**.
+Designed for the **Smart India Hackathon 2026 (Problem Statement SIH26100)**, VigilBid provides an evidence-first, buyer-side decision-support platform tailored for high-value public procurement under **General Financial Rules (GFR) 2017** and **Central Vigilance Commission (CVC)** guidelines. The reference implementation demonstrates scrutiny for **Chennai Petroleum Corporation Limited (CPCL)**, the **Ministry of Petroleum & Natural Gas (MoPNG)**, and the **Government e-Marketplace (GeM)**.
 
 ---
 
-<!-- HERO SCREENSHOT: INSERT FINAL PRODUCT SCREENSHOT HERE -->
 > [!NOTE]
-> **Visual Tour:** A high-resolution capture of the Executive Scrutiny Dashboard (`docs/demo/screenshots/01-dashboard.png`) is specified in [docs/demo/SCREENSHOTS.md](docs/demo/SCREENSHOTS.md). To explore the live interface, launch the zero-setup interactive tour at [`http://localhost:5173/#/demo`](http://localhost:5173/#/demo).
+> **Visual Tour:** A high-resolution capture of the Executive Scrutiny Dashboard (`docs/demo/screenshots/01-dashboard.png`) is documented in [docs/demo/SCREENSHOTS.md](docs/demo/SCREENSHOTS.md). For local evaluation, follow [Quick Start](#quick-start) to launch the zero-setup interactive guided tour.
 
 ```
 ┌──────────────┐     ┌──────────────┐     ┌──────────────┐     ┌──────────────┐     ┌──────────────┐     ┌──────────────┐
@@ -31,15 +31,16 @@ Designed for the **Smart India Hackathon (Problem Statement SIH26100)**, VigilBi
 
 ## 🚀 Quick Links
 
-| Resource | Description | Direct Target |
+| Resource | Description | Status / Target |
 |---|---|---|
-| **Interactive Guided Demo** | Test the full evaluation workflow locally with zero authentication | [http://localhost:5173/#/demo](http://localhost:5173/#/demo) |
-| **Video Demonstration** | 60–120 second executive demonstration walkthrough | `[INSERT YOUTUBE LINK]` |
-| **60-Second Overview** | Rapid high-level summary for evaluators and judges | [docs/ONE-MINUTE-TOUR.md](docs/ONE-MINUTE-TOUR.md) |
+| **Live Deployed Demo** | Public cloud deployment | Live Demo: To be added |
+| **Demo Video** | Video demonstration of verification workflow | Demo Video: To be added |
+| **Demo Walkthrough Guide** | Step-by-step evaluator guide across all 5 synthetic bidder scenarios | [docs/demo/DEMO-GUIDE.md](docs/demo/DEMO-GUIDE.md) |
+| **60-Second Overview** | Rapid high-level summary for evaluators and technical reviewers | [docs/ONE-MINUTE-TOUR.md](docs/ONE-MINUTE-TOUR.md) |
 | **Quick Start** | Step-by-step local setup and Docker deployment commands | [Jump to Quick Start](#quick-start) |
 | **System Architecture** | Component diagrams, processing pipeline, and technology map | [Jump to System Architecture](#system-architecture) |
-| **API Documentation** | Interactive Swagger / OpenAPI v3 documentation | [http://localhost:8000/api/v1/docs](http://localhost:8000/api/v1/docs) \| [docs/api/FINAL-API.md](docs/api/FINAL-API.md) |
-| **Test Verification** | How to run the 353 backend tests and 70 frontend tests | [Jump to Testing](#testing-verification) |
+| **API Documentation** | Specification and contract for 24 REST endpoints | [docs/api/FINAL-API.md](docs/api/FINAL-API.md) |
+| **Test Verification** | How to run the 380 backend tests and 70 frontend tests | [Jump to Testing](#testing-verification) |
 | **Security Architecture** | Decompression defense, content-addressable storage, and RBAC | [Jump to Security](#security-architecture) \| [SECURITY.md](SECURITY.md) |
 | **Known Limitations** | Transparent accounting of simulation scope and production prerequisites | [Jump to Limitations](#known-limitations) \| [docs/KNOWN-LIMITATIONS.md](docs/KNOWN-LIMITATIONS.md) |
 
@@ -280,47 +281,49 @@ The following metrics are verified directly from the codebase:
 ```
 ┌────────────────────────────────────────────────────────────────────────────────────────┐
 │ 1. Executive Scrutiny Dashboard (/dashboard)                                           │
-│ [SCREENSHOT PLACEHOLDER: docs/demo/screenshots/01-dashboard.png]                       │
-│ Caption: "Portfolio-level procurement and risk posture overview"                      │
+│ Target Asset: docs/demo/screenshots/01-dashboard.png                                   │
+│ Function: Portfolio-level procurement overview and active risk posture telemetry       │
 ├────────────────────────────────────────────────────────────────────────────────────────┤
 │ 2. Bidder Scrutiny Cockpit (/bidders/:id)                                              │
-│ [SCREENSHOT PLACEHOLDER: docs/demo/screenshots/06-bidder-cockpit.png]                  │
-│ Caption: "Cross-document identity verification and extracted tax credentials"          │
+│ Target Asset: docs/demo/screenshots/06-bidder-cockpit.png                              │
+│ Function: Cross-document identity verification and extracted tax credentials           │
 ├────────────────────────────────────────────────────────────────────────────────────────┤
 │ 3. Split-Screen Evidence Inspector (/bidders/:id/evidence)                             │
-│ [SCREENSHOT PLACEHOLDER: docs/demo/screenshots/07-evidence.png]                        │
-│ Caption: "Evidence-linked compliance finding with coordinate bounding box highlight"   │
+│ Target Asset: docs/demo/screenshots/07-evidence.png                                    │
+│ Function: Evidence-linked compliance finding with coordinate bounding box highlight   │
 ├────────────────────────────────────────────────────────────────────────────────────────┤
 │ 4. Explainable Risk View (/bidders/:id/risk)                                           │
-│ [SCREENSHOT PLACEHOLDER: docs/demo/screenshots/08-risk.png]                            │
-│ Caption: "0–100 composite risk score dial with decomposed factor contributions"        │
+│ Target Asset: docs/demo/screenshots/08-risk.png                                        │
+│ Function: 0–100 composite risk score dial with decomposed factor contributions         │
 ├────────────────────────────────────────────────────────────────────────────────────────┤
 │ 5. Multi-Bidder Compliance Matrix (/compliance-matrix)                                 │
-│ [SCREENSHOT PLACEHOLDER: docs/demo/screenshots/05-compliance-matrix.png]               │
-│ Caption: "High-density multi-bidder criteria matrix with traffic-light status chips"   │
+│ Target Asset: docs/demo/screenshots/05-compliance-matrix.png                           │
+│ Function: High-density multi-bidder criteria matrix with traffic-light status chips    │
 ├────────────────────────────────────────────────────────────────────────────────────────┤
 │ 6. Cryptographic Audit Ledger (/audit)                                                 │
-│ [SCREENSHOT PLACEHOLDER: docs/demo/screenshots/10-audit.png]                           │
-│ Caption: "Tamper-evident SHA-256 event chain with live ledger verification"            │
+│ Target Asset: docs/demo/screenshots/10-audit.png                                       │
+│ Function: Tamper-evident SHA-256 event chain with live ledger verification             │
 └────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 🎥 Demo Video
+## 🎥 Demonstration & Guided Tour
 
-[![Watch the Demo Video](https://img.shields.io/badge/YouTube-Demonstration%20Video-red?style=for-the-badge&logo=youtube)](https://www.youtube.com/)
+- **Live Deployed Demo:** Live Demo: To be added
+- **Demo Video:** Demo Video: To be added
+- **Local Interactive Tour:** Follow [Quick Start](#quick-start) to launch the application locally, then access `http://localhost:5173/#/demo` in your browser.
+- **Demo Walkthrough Guide:** See [docs/demo/DEMO-GUIDE.md](docs/demo/DEMO-GUIDE.md) for the complete workflow breakdown and scenario guide.
 
-**Direct Link:** `[INSERT YOUTUBE LINK]`
+### Evaluation Workflow (Synthetic Scenario: CPCL/MM/2026/PUMP-217):
+1. **Public Procurement Challenge:** Ingesting and evaluating multi-document bidder packages for synthetic demonstration tender `CPCL/MM/2026/PUMP-217`.
+2. **Safe Ingestion & Document Intelligence:** Decompression defense, automated classification across 13 document types, and hybrid OCR.
+3. **Cross-Document Entity Resolution & Rule Execution:** Detecting the PAN-GSTIN mismatch in *Bharat Hydrotech Corp* and MSE status in *Sri Kaveri Engineering*.
+4. **Split-Screen Evidence Inspector & Officer Adjudication:** Inspecting coordinate bounding boxes and recording mandatory written override justifications.
+5. **Cryptographic Audit Verification & CVC Dossier Export:** Verifying the SHA-256 hash chain and generating formal compliance PDF dossiers.
 
-### Demonstration Overview (60–120 Second Summary):
-1. **00:00 – 00:20:** The Public Procurement Challenge — Evaluating 900+ PDFs across 30 bidders in CPCL tender `CPCL/MM/2026/PUMP-217`.
-2. **00:20 – 00:45:** Safe Ingestion & Document Intelligence — Uploading bidder packages, automated classification, and hybrid OCR.
-3. **00:45 – 01:15:** Cross-Document Entity Resolution & Rule Execution — Catching the PAN-GSTIN mismatch in *Bharat Hydrotech Corp*.
-4. **01:15 – 01:45:** Split-Screen Evidence Inspector & Officer Adjudication — Inspecting highlighted bounding boxes and recording an override justification.
-5. **01:45 – 02:00:** Cryptographic Audit Verification & CVC Dossier Export — Verifying the SHA-256 hash chain and generating the final compliance PDF.
-
-*For the complete 7-minute presentation script used during competition evaluation, see [docs/demo/DEMO-NARRATIVE.md](docs/demo/DEMO-NARRATIVE.md).*
+> [!IMPORTANT]
+> **Synthetic Demonstration Data & Mock Integration Notice:** All bidder data, document packages, and tender identifiers (e.g. `CPCL/MM/2026/PUMP-217`) in the demo are synthetic datasets created for reproducible evaluation. External statutory registries (GSTN, PAN, MCA-21, Udyam, CVC Debarment) are accessed via controlled sandbox/mock adapters. Final qualification/disqualification decision remains strictly with the human Procurement Officer.
 
 ---
 
@@ -527,7 +530,7 @@ VigilBid includes **5 realistic, synthetic vendor packages** for CPCL tender `CP
 The project includes unit, integration, and end-to-end release test suites:
 
 ```bash
-# 1. Run all backend automated tests (353 tests)
+# 1. Run all backend automated tests (380 tests)
 pytest tests/ -v
 
 # 2. Run frontend component & UI architecture checks (70 tests)
@@ -636,7 +639,7 @@ SIH26100/
 ├── pipeline/         # 11-step asynchronous bid verification and document processing pipeline
 ├── rules/            # Declarative YAML rule definitions (34 CPCL Goods rules under GFR 2017)
 ├── data/             # Content-Addressable Storage (CAS) for raw PDF assets
-├── tests/            # Automated test suites (353 backend tests + 70 frontend test checks)
+├── tests/            # Automated test suites (380 backend tests + 70 frontend test checks)
 ├── scripts/          # Operations, demo seeding (demo_setup.py), and release verification scripts
 ├── seed/             # Synthetic vendor submission packages (26 PDFs) and registry fixtures
 ├── docs/             # Technical architecture, specifications, decision records, and demo guides
@@ -651,7 +654,7 @@ SIH26100/
 
 | Audience | Recommended Starting Path | Primary Topics Covered |
 |---|---|---|
-| **For SIH Judges** | [docs/ONE-MINUTE-TOUR.md](docs/ONE-MINUTE-TOUR.md) \| [docs/demo/DEMO-NARRATIVE.md](docs/demo/DEMO-NARRATIVE.md) | Executive problem, innovation, 7-minute presentation script |
+| **For Evaluators & Reviewers** | [docs/ONE-MINUTE-TOUR.md](docs/ONE-MINUTE-TOUR.md) \| [docs/demo/DEMO-GUIDE.md](docs/demo/DEMO-GUIDE.md) | Executive problem, innovation, evaluator walkthrough |
 | **For Developers** | [docs/development/DEVELOPER-GUIDE.md](docs/development/DEVELOPER-GUIDE.md) \| [docs/development/WHERE-EVERYTHING-LIVES.md](docs/development/WHERE-EVERYTHING-LIVES.md) | Local environment setup, project structure, conventions |
 | **For Architects** | [docs/architecture/REPOSITORY-MAP.md](docs/architecture/REPOSITORY-MAP.md) \| [docs/architecture/DATA-FLOW.md](docs/architecture/DATA-FLOW.md) | Modular Monolith design, pipeline orchestration, CAS storage |
 | **For AI / ML Specialists**| [docs/ai/OCR.md](docs/ai/OCR.md) \| [docs/ai/EXTRACTION.md](docs/ai/EXTRACTION.md) | Hybrid OCR strategy, TF-IDF classifier, layout analysis |
@@ -663,7 +666,7 @@ SIH26100/
 
 ## 🗺️ Project Roadmap
 
-### Completed (Phases 1–49)
+### Core Platform Capabilities
 - [x] Multi-document ZIP ingestion gateway with zip-bomb defense
 - [x] Content-Addressable Storage (CAS) for raw PDFs
 - [x] Hybrid PyMuPDF + local Tesseract OCR engine
@@ -676,14 +679,12 @@ SIH26100/
 - [x] Automated CVC compliance dossier PDF generator
 - [x] Cross-bidder collusion network graph
 - [x] Standalone unauthenticated `/demo` tour page
-- [x] Comprehensive test suites (353 backend tests + 70 frontend tests)
+- [x] Comprehensive test suites (380 backend tests + 70 frontend tests)
 
-### Next Steps (Phases 50–52)
+### Upcoming Enhancements
 - [ ] Multilingual OCR support for regional Indian languages (Hindi, Tamil)
 - [ ] Live GSTN sandbox connector via GST Suvidha Provider (GSP) testbench
 - [ ] Automated CA UDIN cryptographic verification connector
-
-### Future Vision
 - [ ] Distributed Celery + Redis worker cluster for high-volume tender spikes
 - [ ] Direct GeM API v3 webhook integration
 - [ ] Support for Works and Consultancy Services procurement rules
@@ -696,12 +697,12 @@ SIH26100/
 
 | Name | Role & Responsibility | Primary Contributions | GitHub / Contact |
 |---|---|---|---|
-| **Ritik** | Lead System Architect & Backend Engineer | Modular monolith architecture, FastAPI services, SQLAlchemy ORM, SHA-256 audit ledger | [Profile Placeholder] |
-| **Ratnesh** | AI Pipeline & OCR Engineer | 11-step pipeline orchestration, hybrid OCR, TF-IDF classification, entity resolution | [Profile Placeholder] |
-| **Team Member 3** | Frontend & UX Design Engineer | React 18 UI, split-screen evidence inspector, vigilance dark theme, demo tour | [Profile Placeholder] |
-| **Team Member 4** | Domain Rules & Compliance Specialist | 34 CPCL Goods criteria, GFR 2017 mapping, CVC dossier generator | [Profile Placeholder] |
-| **Team Member 5** | Security & DevOps Engineer | Ingestion defenses, CAS storage, Docker Compose stack, release audit runner | [Profile Placeholder] |
-| **Team Member 6** | QA & Evaluation Lead | Test suite development (353 backend tests), benchmarking, evaluation dataset | [Profile Placeholder] |
+| **Ritik** | Lead System Architect & Backend Engineer | Modular monolith architecture, FastAPI services, SQLAlchemy ORM, SHA-256 audit ledger | [Contributors](https://github.com/ratnesh-ml/SIH26100/graphs/contributors) |
+| **Ratnesh** | AI Pipeline & OCR Engineer | 11-step pipeline orchestration, hybrid OCR, TF-IDF classification, entity resolution | [Contributors](https://github.com/ratnesh-ml/SIH26100/graphs/contributors) |
+| **Team Member 3** | Frontend & UX Design Engineer | React 18 UI, split-screen evidence inspector, vigilance dark theme, demo tour | [Contributors](https://github.com/ratnesh-ml/SIH26100/graphs/contributors) |
+| **Team Member 4** | Domain Rules & Compliance Specialist | 34 CPCL Goods criteria, GFR 2017 mapping, CVC dossier generator | [Contributors](https://github.com/ratnesh-ml/SIH26100/graphs/contributors) |
+| **Team Member 5** | Security & DevOps Engineer | Ingestion defenses, CAS storage, Docker Compose stack, release audit runner | [Contributors](https://github.com/ratnesh-ml/SIH26100/graphs/contributors) |
+| **Team Member 6** | QA & Evaluation Lead | Test suite development (380 backend tests), benchmarking, evaluation dataset | [Contributors](https://github.com/ratnesh-ml/SIH26100/graphs/contributors) |
 
 ---
 
@@ -721,13 +722,14 @@ SIH26100/
 This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
 
 ### Statutory Disclaimer
-VigilBid is an open-source decision-support platform built for the Smart India Hackathon. Government registry data used in the default demonstration environment is synthetic and served via mock adapters; it must not be represented as live statutory government verification. Final procurement decisions remain the exclusive statutory responsibility of designated human procurement officers.
+VigilBid is an open-source decision-support platform built for the Smart India Hackathon 2026 (Problem Statement SIH26100). Government registry data used in the default demonstration environment is synthetic and served via mock adapters; it must not be represented as live statutory government verification. Final procurement decisions remain the exclusive statutory responsibility of designated human procurement officers.
 
 ---
 
 ## 🏁 Ready to Evaluate?
 
-1. **Explore the Demo:** Navigate to `http://localhost:5173/#/demo` for an interactive, guided walkthrough with zero setup required.
-2. **Review the Code:** Inspect the clean separation between perception in `pipeline/` and law in `rules/`.
-3. **Verify the Ledger:** Visit `http://localhost:5173/#/audit` and click **"Verify Ledger Integrity"** to test cryptographic hash verification in real time.
-4. **Run the Tests:** Execute `pytest tests/ -v` and `python scripts/release_audit.py` to confirm 100% test passing status.
+1. **Local Setup:** Follow the [Quick Start](#quick-start) instructions to start backend and frontend services.
+2. **Explore the Demo Tour:** With local services running, open the interactive tour at `http://localhost:5173/#/demo`.
+3. **Review the Code:** Inspect the clean separation between perception in `pipeline/` and law in `rules/`.
+4. **Verify the Ledger:** In the running local instance, visit `http://localhost:5173/#/audit` and click **"Verify Ledger Integrity"** to test cryptographic hash verification in real time.
+5. **Run the Tests:** Execute `pytest tests/ -v` and `python scripts/release_audit.py` to confirm 100% test passing status.

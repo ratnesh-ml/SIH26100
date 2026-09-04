@@ -39,7 +39,7 @@ All contributors are expected to uphold a professional, respectful, and legally 
    npm run dev
    ```
 
-For detailed architectural and debugging guides, refer to [docs/DEVELOPER-GUIDE.md](docs/DEVELOPER-GUIDE.md).
+For detailed architectural and debugging guides, refer to [docs/development/DEVELOPER-GUIDE.md](docs/development/DEVELOPER-GUIDE.md).
 
 ---
 

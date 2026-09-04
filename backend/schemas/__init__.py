@@ -39,6 +39,11 @@ from backend.schemas.finding import (
     BidDecisionCreate,
     DecisionOut,
     CompleteReviewResponse,
+    RequirementEvidenceRow,
+    RequirementTraceabilityMatrix,
+    RiskExplanationFactor,
+    RiskExplanationOut,
+    HistoricalVerificationRecord,
 )
 from backend.schemas.document import DocumentSummary, RejectedFileOut, IngestionResponse
 from backend.schemas.job import JobState, StepStatus, JobStatus

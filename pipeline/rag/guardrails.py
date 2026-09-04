@@ -13,22 +13,29 @@ from typing import Optional
 
 
 class PromptInjectionGuard:
-    """Detects and neutralizes adversarial prompt injection attempts."""
+    """Detects and neutralizes adversarial prompt injection attempts.
+    
+    Treats all incoming document texts and external inputs strictly as inert DATA,
+    preventing prompt injection attacks from manipulating evaluation conclusions.
+    """
 
     INJECTION_PATTERNS = [
         r"ignore\s+(all\s+)?(previous|earlier)\s+instructions",
         r"disregard\s+(all\s+)?(previous|earlier)\s+instructions",
         r"system\s*prompt\s*:",
-        r"you\s+are\s+now\s+(an?\s+)?(unrestricted|in\s+dan\s+mode|jailbroken|freed)",
+        r"you\s+are\s+now\s+(an?\s+)?(unrestricted|in\s+dan\s+mode|jailbroken|freed|developer\s+mode)",
         r"override\s+(all\s+)?(rules|scores|evaluations|findings)",
         r"always\s+(return|answer|say)\s+(pass|compliant|approved)",
-        r"mark\s+(this\s+)?bidder\s+(as\s+)?compliant",
+        r"mark\s+(this\s+)?bidder\s+(as\s+)?(compliant|pass|approved)",
         r"this\s+bidder\s+is\s+pre-?approved",
         r"bypass\s+(all\s+)?compliance(\s+checks?)?",
         r"forget\s+(your\s+)?(rules|instructions|constraints)",
         r"act\s+as\s+a\s+helpful\s+assistant\s+and\s+approve",
         r"you\s+must\s+certify\s+this\s+bid",
         r"do\s+not\s+follow\s+safety\s+guidelines",
+        r"set\s+risk\s+score\s+to\s+0",
+        r"grant\s+(full\s+)?compliance",
+        r"output\s+pass\s+unconditionally",
     ]
 
     @classmethod
@@ -56,6 +63,13 @@ class PromptInjectionGuard:
         for pattern in cls.INJECTION_PATTERNS:
             sanitized = re.sub(pattern, "[REDACTED ADVERSARIAL INJECTION - NEUTRALIZED]", sanitized, flags=re.IGNORECASE)
         return sanitized
+
+    @classmethod
+    def wrap_data_context(cls, text: str, source_doc: str = "Uploaded Document") -> str:
+        """Enforce DATA-NOT-INSTRUCTIONS isolation boundary around document extracts."""
+        sanitized = cls.sanitize_text(text)
+        return f"<DOCUMENT_DATA source=\"{source_doc}\" type=\"inert_data\">\n{sanitized}\n</DOCUMENT_DATA>"
+
 
 
 class QueryIntentClassifier:

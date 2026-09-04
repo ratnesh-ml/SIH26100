@@ -1,9 +1,9 @@
 # VigilBid in 60 Seconds: Executive One-Minute Tour
 
 **Project Name:** VigilBid (SIH26100)  
-**Track:** Smart India Hackathon 2024 Grand Finale  
+**Track:** Smart India Hackathon 2026 Grand Finale  
 **Domain:** Public Procurement & Vigilance · GeM & CPCL (Ministry of Petroleum & Natural Gas)  
-**Status:** Certified Release Candidate · 100% Tests Passing (353 Backend, 70 Frontend, 20/20 Release Audit)
+**Status:** Certified Release Candidate · 100% Tests Passing (380 Backend, 70 Frontend, 20/20 Release Audit)
 
 ---
 
@@ -56,7 +56,7 @@ Bidder ZIP Upload
 ---
 
 ## 5. What the Demo Shows
-The included demonstration environment loads a live CPCL Centrifugal Pump tender (`CPCL/PROC/2026/PUMP-042`) with 5 realistic bidders:
+The included demonstration environment loads a synthetic CPCL Centrifugal Pump tender scenario (`CPCL/PROC/2026/PUMP-042`) with 5 realistic bidders:
 - **Meridian Pumps Pvt Ltd:** Clean, fully compliant Tier-1 vendor.
 - **Kaveri Flow Systems LLP:** Minor MSE abbreviation variance (`LLP` vs `Limited Liability Partnership`), flagged as `WARN` for human review.
 - **Bharat Hydrotech Corp:** Hard PAN-GSTIN mismatch (`AAACB1234F` vs `AAACB9999F`), correctly flagged as `FAIL`.
@@ -77,10 +77,10 @@ The included demonstration environment loads a live CPCL Centrifugal Pump tender
 ---
 
 ## 7. Where to Inspect the Code
-- **Rules Engine:** [`pipeline/rules/rule_engine.py`](file:///pipeline/rules/rule_engine.py) & [`rules/cpcl_goods_rules.yaml`](file:///rules/cpcl_goods_rules.yaml)
-- **Entity Resolution:** [`pipeline/steps/step06_entity_resolution.py`](file:///pipeline/steps/step06_entity_resolution.py)
-- **Risk Scoring:** [`pipeline/risk/risk_engine.py`](file:///pipeline/risk/risk_engine.py)
-- **Forensic Anomalies:** [`pipeline/anomalies/anomaly_engine.py`](file:///pipeline/anomalies/anomaly_engine.py)
-- **Cryptographic Audit:** [`backend/services/audit_service.py`](file:///backend/services/audit_service.py)
-- **Interactive UI Cockpit:** [`frontend/src/components/BidderCockpit.tsx`](file:///frontend/src/components/BidderCockpit.tsx)
-- **Interactive Guided Demo Page:** [`frontend/src/components/DemoView.tsx`](file:///frontend/src/components/DemoView.tsx)
+- **Rules Engine:** [`pipeline/compliance/engine.py`](../pipeline/compliance/engine.py) & [`rules/cpcl_goods_v1.yaml`](../rules/cpcl_goods_v1.yaml)
+- **Entity Resolution:** [`pipeline/entity_resolution/matcher.py`](../pipeline/entity_resolution/matcher.py)
+- **Risk Scoring:** [`pipeline/risk/scorer.py`](../pipeline/risk/scorer.py)
+- **Forensic Anomalies:** [`pipeline/risk/anomaly.py`](../pipeline/risk/anomaly.py)
+- **Cryptographic Audit:** [`backend/services/audit_service.py`](../backend/services/audit_service.py)
+- **Interactive UI Cockpit:** [`frontend/src/components/BidderDetailView.tsx`](../frontend/src/components/BidderDetailView.tsx)
+- **Interactive Guided Demo Page:** [`frontend/src/components/DemoView.tsx`](../frontend/src/components/DemoView.tsx)

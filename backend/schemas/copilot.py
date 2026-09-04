@@ -34,11 +34,13 @@ class CopilotQueryResponse(BaseModel):
     domains_searched: list[str]
     used_llm: bool = False
     confidence: float = 1.0
+    grounding_status: str = "GROUNDED"
     facts: list[str] = Field(default_factory=list)
     explanations: list[str] = Field(default_factory=list)
     injection_detected: bool = False
     is_conclusive: bool = True
     category: str = "GENERAL"
+
 
 
 class RAGDomainInfo(BaseModel):

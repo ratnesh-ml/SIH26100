@@ -52,7 +52,7 @@ async def test_mock_registry_gstin_active():
 
     assert res.found is True
     assert res.status == "ACTIVE"
-    assert res.source == "Simulated registry (demo)"
+    assert "DEMO" in res.source and "Simulated" in res.source
     assert res.data["legal_name"] == "APEX INDUSTRIAL SOLUTIONS PRIVATE LIMITED"
     assert res.data["state"] == "Tamil Nadu"
 
@@ -228,7 +228,7 @@ async def test_api_registry_verification_routes(officer_auth_headers):
         assert r_gst.status_code == 200
         data_gst = r_gst.json()
         assert data_gst["found"] is True
-        assert data_gst["source"] == "Simulated registry (demo)"
+        assert "DEMO" in data_gst["source"] and "Simulated" in data_gst["source"]
 
         # 2. PAN route
         r_pan = await ac.get("/api/v1/registry/pan/AABCC1234F", headers=officer_auth_headers)

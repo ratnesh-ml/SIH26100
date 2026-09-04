@@ -3,7 +3,18 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
+from enum import Enum
 from typing import Any, Optional
+
+
+class RegistryScenario(str, Enum):
+    """Deterministic simulation scenarios for synthetic registry evaluation."""
+    NORMAL = "NORMAL"
+    MISMATCH = "MISMATCH"
+    EXPIRED = "EXPIRED"
+    NOT_FOUND = "NOT_FOUND"
+    API_UNAVAILABLE = "API_UNAVAILABLE"
+    DEBARRED = "DEBARRED"
 
 
 @dataclass
@@ -38,22 +49,30 @@ class RegistryProvider(ABC):
     """
 
     @abstractmethod
-    async def verify_gstin(self, gstin: str) -> RegistryResult:
+    async def verify_gstin(
+        self, gstin: str, scenario: Optional[RegistryScenario | str] = None
+    ) -> RegistryResult:
         """Verify GSTIN structure, active/cancelled status, and taxpayer details."""
         pass
 
     @abstractmethod
-    async def verify_pan(self, pan: str) -> RegistryResult:
+    async def verify_pan(
+        self, pan: str, scenario: Optional[RegistryScenario | str] = None
+    ) -> RegistryResult:
         """Verify PAN format, validity, taxpayer entity, and registered name."""
         pass
 
     @abstractmethod
-    async def verify_udyam(self, udyam_no: str) -> RegistryResult:
+    async def verify_udyam(
+        self, udyam_no: str, scenario: Optional[RegistryScenario | str] = None
+    ) -> RegistryResult:
         """Verify Udyam MSME registration status and enterprise category."""
         pass
 
     @abstractmethod
-    async def verify_cin(self, cin: str) -> RegistryResult:
+    async def verify_cin(
+        self, cin: str, scenario: Optional[RegistryScenario | str] = None
+    ) -> RegistryResult:
         """Verify MCA21 Corporate Identification Number and filing status."""
         pass
 
@@ -64,22 +83,23 @@ class RegistryProvider(ABC):
         pan: Optional[str] = None,
         gstin: Optional[str] = None,
         cin: Optional[str] = None,
+        scenario: Optional[RegistryScenario | str] = None,
     ) -> RegistryResult:
         """Check national debarment and blacklist registries (CPPP / GeM)."""
         pass
 
     # Aliases per architectural contract in docs/04
-    async def gstin(self, gstin_no: str) -> RegistryResult:
-        return await self.verify_gstin(gstin_no)
+    async def gstin(self, gstin_no: str, scenario: Optional[RegistryScenario | str] = None) -> RegistryResult:
+        return await self.verify_gstin(gstin_no, scenario=scenario)
 
-    async def pan(self, pan_no: str) -> RegistryResult:
-        return await self.verify_pan(pan_no)
+    async def pan(self, pan_no: str, scenario: Optional[RegistryScenario | str] = None) -> RegistryResult:
+        return await self.verify_pan(pan_no, scenario=scenario)
 
-    async def udyam(self, udyam_no: str) -> RegistryResult:
-        return await self.verify_udyam(udyam_no)
+    async def udyam(self, udyam_no: str, scenario: Optional[RegistryScenario | str] = None) -> RegistryResult:
+        return await self.verify_udyam(udyam_no, scenario=scenario)
 
-    async def cin(self, cin_no: str) -> RegistryResult:
-        return await self.verify_cin(cin_no)
+    async def cin(self, cin_no: str, scenario: Optional[RegistryScenario | str] = None) -> RegistryResult:
+        return await self.verify_cin(cin_no, scenario=scenario)
 
     async def debarment(
         self,
@@ -88,9 +108,11 @@ class RegistryProvider(ABC):
         pan: Optional[str] = None,
         gstin: Optional[str] = None,
         cin: Optional[str] = None,
+        scenario: Optional[RegistryScenario | str] = None,
     ) -> RegistryResult:
-        return await self.check_debarment(name=name, pan=pan, gstin=gstin, cin=cin)
+        return await self.check_debarment(name=name, pan=pan, gstin=gstin, cin=cin, scenario=scenario)
 
 
 # Backward-compatible alias
 BaseRegistryProvider = RegistryProvider
+

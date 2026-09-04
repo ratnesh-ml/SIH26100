@@ -290,7 +290,19 @@ class CrossDocumentVerifier:
         if gstin:
             clean_gst = gstin.strip().upper()
             gst_res = await registry_provider.verify_gstin(clean_gst)
-            if not gst_res.found:
+            if gst_res.status == "API_UNAVAILABLE":
+                findings.append(VerificationFinding(
+                    check_id="XDOC-REG-GST-01",
+                    input_fields={"gstin": clean_gst},
+                    expected_relationship="GSTIN must be found and ACTIVE in simulated GSTN registry",
+                    actual_values={"found": False, "status": "API_UNAVAILABLE", "error": gst_res.data.get("error")},
+                    status="REVIEW",
+                    confidence=0.50,
+                    explanation=f"Simulated statutory registry portal ({gst_res.source}) is currently unavailable (503 Gateway Timeout). Status set to REVIEW / PENDING_VERIFICATION. Compliance cannot be automatically granted.",
+                    citation="GST Act 2017 Sec 22 / GFR 173(v)",
+                    potential_anomaly_detected=False,
+                ))
+            elif not gst_res.found:
                 findings.append(VerificationFinding(
                     check_id="XDOC-REG-GST-01",
                     input_fields={"gstin": clean_gst},
@@ -330,7 +342,19 @@ class CrossDocumentVerifier:
         if pan:
             clean_p = pan.strip().upper()
             pan_res = await registry_provider.verify_pan(clean_p)
-            if not pan_res.found:
+            if pan_res.status == "API_UNAVAILABLE":
+                findings.append(VerificationFinding(
+                    check_id="XDOC-REG-PAN-01",
+                    input_fields={"pan": clean_p},
+                    expected_relationship="PAN must be valid and active in simulated NSDL / Income Tax registry",
+                    actual_values={"found": False, "status": "API_UNAVAILABLE", "error": pan_res.data.get("error")},
+                    status="REVIEW",
+                    confidence=0.50,
+                    explanation=f"Simulated statutory registry portal ({pan_res.source}) is currently unavailable (503 Gateway Timeout). Status set to REVIEW / PENDING_VERIFICATION. Compliance cannot be automatically granted.",
+                    citation="Income Tax Act 1961 Sec 139A / GFR 173(v)",
+                    potential_anomaly_detected=False,
+                ))
+            elif not pan_res.found:
                 findings.append(VerificationFinding(
                     check_id="XDOC-REG-PAN-01",
                     input_fields={"pan": clean_p},
@@ -357,7 +381,19 @@ class CrossDocumentVerifier:
         if udyam_no:
             clean_u = udyam_no.strip().upper()
             udy_res = await registry_provider.verify_udyam(clean_u)
-            if not udy_res.found:
+            if udy_res.status == "API_UNAVAILABLE":
+                findings.append(VerificationFinding(
+                    check_id="XDOC-REG-UDY-01",
+                    input_fields={"udyam_no": clean_u},
+                    expected_relationship="Udyam registration must be active in simulated Ministry of MSME registry",
+                    actual_values={"found": False, "status": "API_UNAVAILABLE", "error": udy_res.data.get("error")},
+                    status="REVIEW",
+                    confidence=0.50,
+                    explanation=f"Simulated statutory registry portal ({udy_res.source}) is currently unavailable (503 Gateway Timeout). Status set to REVIEW / PENDING_VERIFICATION. Compliance cannot be automatically granted.",
+                    citation="MSMED Act 2006 Sec 7 / GFR 173(v)",
+                    potential_anomaly_detected=False,
+                ))
+            elif not udy_res.found:
                 findings.append(VerificationFinding(
                     check_id="XDOC-REG-UDY-01",
                     input_fields={"udyam_no": clean_u},
@@ -401,7 +437,19 @@ class CrossDocumentVerifier:
             gstin=gstin,
             cin=cin,
         )
-        if deb_res.status == "DEBARRED":
+        if deb_res.status == "API_UNAVAILABLE":
+            findings.append(VerificationFinding(
+                check_id="XDOC-REG-DEB-01",
+                input_fields={"pan": pan, "name": company_name, "gstin": gstin},
+                expected_relationship="Bidder entity and identifiers must NOT appear on national debarment/blacklist registry",
+                actual_values={"debarred": False, "status": "API_UNAVAILABLE"},
+                status="REVIEW",
+                confidence=0.50,
+                explanation=f"Simulated debarment registry ({deb_res.source}) is currently unavailable (503 Gateway Timeout). Status set to REVIEW / PENDING_VERIFICATION. Compliance cannot be automatically granted.",
+                citation="GFR 2017 Rule 151 / GFR 173(v)",
+                potential_anomaly_detected=False,
+            ))
+        elif deb_res.status == "DEBARRED":
             hits = deb_res.data.get("hits", [{}])
             order_info = hits[0].get("order_number", "Unspecified")
             authority = hits[0].get("authority", "CPPP / GeM")

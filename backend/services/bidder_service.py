@@ -10,7 +10,19 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from backend.core.security import encrypt_identifier, decrypt_identifier
-from backend.models.entities import Bidder, Bid, Tender, RiskDriver, AnomalySignal
+from backend.models.entities import (
+    Bidder,
+    Bid,
+    Tender,
+    Criterion,
+    Finding,
+    Document,
+    VerificationEvent,
+    Decision,
+    AuditLog,
+    RiskDriver,
+    AnomalySignal,
+)
 from backend.schemas.bidder import BidderCreate, BidderUpdate, BidderProfile
 from backend.schemas.bid import BidCreate, AttachBidderRequest, BidStatusUpdate, BidOut
 from backend.services.audit_service import AuditService
@@ -601,4 +613,312 @@ class BidderService:
             "entity_confidence": float(bidder.entity_confidence) if bidder.entity_confidence is not None else None,
             "drivers": drivers,
             "anomalies": anomalies,
+        }
+
+    @staticmethod
+    async def get_requirement_matrix(session: AsyncSession, bidder_id: uuid.UUID) -> dict[str, Any]:
+        """Fetch requirement-to-evidence matrix mapping tender criteria to findings and bounding boxes."""
+        bidder_stmt = (
+            select(Bidder)
+            .options(
+                selectinload(Bidder.tender).selectinload(Tender.criteria),
+                selectinload(Bidder.findings),
+            )
+            .where(Bidder.id == bidder_id)
+        )
+        bidder_res = await session.execute(bidder_stmt)
+        bidder = bidder_res.scalar_one_or_none()
+        if not bidder:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Bidder with ID '{bidder_id}' not found.",
+            )
+
+        tender = bidder.tender
+        criteria = sorted(getattr(tender, "criteria", []) or [], key=lambda c: getattr(c, "sort_order", 0) or 0)
+        findings = getattr(bidder, "findings", []) or []
+
+        findings_by_crit: dict[str, Any] = {}
+        for f in findings:
+            if f.criterion_id:
+                findings_by_crit[str(f.criterion_id)] = f
+            if f.rule_id:
+                findings_by_crit[f.rule_id] = f
+
+        rows = []
+        satisfied_count = 0
+        unsatisfied_count = 0
+
+        for crit in criteria:
+            finding = findings_by_crit.get(str(crit.id)) or findings_by_crit.get(crit.code)
+            if not finding and crit.rule_ids:
+                for r_id in crit.rule_ids:
+                    if r_id in findings_by_crit:
+                        finding = findings_by_crit[r_id]
+                        break
+
+            if finding:
+                status_val = finding.status
+                is_sat = (status_val == "PASS")
+                if is_sat:
+                    satisfied_count += 1
+                else:
+                    unsatisfied_count += 1
+
+                extracted_str = None
+                if finding.extracted:
+                    extracted_str = ", ".join(f"{k}: {v}" for k, v in finding.extracted.items() if v is not None)
+                elif finding.explanation:
+                    extracted_str = finding.explanation
+
+                req_str = None
+                if finding.expected:
+                    req_str = ", ".join(f"{k}: {v}" for k, v in finding.expected.items() if v is not None)
+                elif crit.threshold:
+                    req_str = ", ".join(f"{k}: {v}" for k, v in crit.threshold.items() if v is not None)
+                else:
+                    req_str = crit.description
+
+                rule_clause = None
+                if finding.citation and isinstance(finding.citation, dict):
+                    rule_clause = finding.citation.get("clause") or finding.citation.get("rule")
+
+                evidence_items = finding.evidence or []
+                ver_source = "Document Text & Bounding Box"
+                if evidence_items and isinstance(evidence_items, list) and len(evidence_items) > 0:
+                    first_ev = evidence_items[0]
+                    if isinstance(first_ev, dict):
+                        ver_source = first_ev.get("source") or "PyMuPDF Text Layer"
+
+                rows.append({
+                    "requirement_code": crit.code,
+                    "requirement_title": crit.title,
+                    "requirement_description": crit.description,
+                    "status": status_val,
+                    "is_satisfied": is_sat,
+                    "observed_value": extracted_str or "Observed via statutory filing",
+                    "required_value": req_str or "Compliant declaration required",
+                    "rule_id": finding.rule_id,
+                    "rule_clause": rule_clause,
+                    "verification_source": ver_source,
+                    "reason": finding.explanation,
+                    "finding_id": finding.id,
+                    "evidence": evidence_items,
+                })
+            else:
+                unsatisfied_count += 1
+                rows.append({
+                    "requirement_code": crit.code,
+                    "requirement_title": crit.title,
+                    "requirement_description": crit.description,
+                    "status": "PENDING",
+                    "is_satisfied": False,
+                    "observed_value": "Pending evaluation",
+                    "required_value": str(crit.threshold) if crit.threshold else "Compliant filing required",
+                    "rule_id": crit.code,
+                    "rule_clause": None,
+                    "verification_source": "Pending pipeline execution",
+                    "reason": "Evaluation pending document processing",
+                    "finding_id": None,
+                    "evidence": [],
+                })
+
+        return {
+            "bidder_id": bidder.id,
+            "bidder_name": bidder.declared_name or bidder.canonical_name or "Unknown Vendor",
+            "tender_id": tender.id if tender else uuid.UUID(int=0),
+            "tender_nit": tender.nit_no if tender else "N/A",
+            "overall_status": bidder.overall_status,
+            "requirements": rows,
+            "total_requirements": len(rows),
+            "satisfied_count": satisfied_count,
+            "unsatisfied_count": unsatisfied_count,
+        }
+
+    @staticmethod
+    async def explain_risk(session: AsyncSession, bidder_id: uuid.UUID) -> dict[str, Any]:
+        """Generate human-readable, explainable risk breakdown answering WHY for every contributor."""
+        bidder_stmt = (
+            select(Bidder)
+            .options(
+                selectinload(Bidder.findings),
+                selectinload(Bidder.risk_drivers),
+                selectinload(Bidder.anomaly_signals),
+            )
+            .where(Bidder.id == bidder_id)
+        )
+        res = await session.execute(bidder_stmt)
+        bidder = res.scalar_one_or_none()
+        if not bidder:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Bidder with ID '{bidder_id}' not found.",
+            )
+
+        factors = []
+        total_pts = 0
+
+        # 1. Findings-based risk factors (FAIL, WARN, REVIEW)
+        for f in (bidder.findings or []):
+            if f.status in ("FAIL", "WARN", "REVIEW"):
+                pts = 35 if f.status == "FAIL" else (15 if f.status == "WARN" else 10)
+                if "002" in f.rule_id:
+                    pts = 35
+                    cat = "Identity"
+                elif "001" in f.rule_id:
+                    pts = 30
+                    cat = "Financial"
+                elif "003" in f.rule_id:
+                    pts = 25
+                    cat = "Compliance"
+                else:
+                    cat = "Compliance"
+
+                has_ev = bool(f.evidence and len(f.evidence) > 0)
+                reason_text = f.explanation
+                if not has_ev:
+                    explanation_st = "INSUFFICIENT_EVIDENCE"
+                    reason_text += " (Insufficient visual evidence to fully corroborate this finding)"
+                else:
+                    explanation_st = "EXPLAINED"
+
+                rule_clause = None
+                if f.citation and isinstance(f.citation, dict):
+                    rule_clause = f.citation.get("clause")
+
+                factors.append({
+                    "factor_name": f.title,
+                    "category": cat,
+                    "severity": "HIGH" if f.status == "FAIL" else "MEDIUM",
+                    "contribution": pts,
+                    "reason": reason_text,
+                    "rule_id": f.rule_id,
+                    "rule_clause": rule_clause,
+                    "source": "Deterministic Rule Engine",
+                    "has_evidence": has_ev,
+                    "evidence": f.evidence if has_ev else [],
+                    "explanation_status": explanation_st,
+                })
+                total_pts += pts
+
+        # 2. Forensic anomaly factors
+        for a in (bidder.anomaly_signals or []):
+            pts = a.points or 20
+            has_ev = bool(a.evidence)
+            ev_list = [a.evidence] if has_ev and isinstance(a.evidence, dict) else (a.evidence or [])
+            factors.append({
+                "factor_name": a.description or f"Forensic Signal {a.code}",
+                "category": "Anomaly",
+                "severity": a.severity or "HIGH",
+                "contribution": pts,
+                "reason": a.description or "PDF metadata or content integrity anomaly detected",
+                "rule_id": a.code,
+                "rule_clause": "Vigilance Forensic Standard",
+                "source": "PDF Forensic Engine",
+                "has_evidence": has_ev,
+                "evidence": ev_list,
+                "explanation_status": "EXPLAINED" if has_ev else "INSUFFICIENT_EVIDENCE",
+            })
+            total_pts += pts
+
+        if not factors and bidder.risk_score == 0:
+            summary = "Low Risk (0/100): All statutory eligibility criteria, identity checks, and documents verified without discrepancies."
+        elif bidder.risk_band == "HIGH":
+            summary = f"High Risk ({bidder.risk_score}/100): Critical non-compliances and identity discrepancies require statutory officer review."
+        elif bidder.risk_band == "MEDIUM":
+            summary = f"Medium Risk ({bidder.risk_score}/100): Documentation warnings require officer scrutiny and possible clarification."
+        else:
+            summary = f"Low Risk ({bidder.risk_score}/100): Routine submission with minimal or exempted compliance variances."
+
+        return {
+            "bidder_id": bidder.id,
+            "bidder_name": bidder.declared_name or bidder.canonical_name or "Unknown Vendor",
+            "score": bidder.risk_score,
+            "band": bidder.risk_band,
+            "summary": summary,
+            "factors": factors,
+            "total_contribution": total_pts,
+        }
+
+    @staticmethod
+    async def get_verification_history(session: AsyncSession, bidder_id: uuid.UUID) -> dict[str, Any]:
+        """Retrieve historical verification record containing snapshot of documents, rules, findings, and decisions."""
+        bidder_stmt = (
+            select(Bidder)
+            .options(
+                selectinload(Bidder.tender),
+                selectinload(Bidder.documents),
+                selectinload(Bidder.findings),
+                selectinload(Bidder.verification_events),
+                selectinload(Bidder.decisions).selectinload(Decision.actor),
+            )
+            .where(Bidder.id == bidder_id)
+        )
+        res = await session.execute(bidder_stmt)
+        bidder = res.scalar_one_or_none()
+        if not bidder:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Bidder with ID '{bidder_id}' not found.",
+            )
+
+        tender = bidder.tender
+        docs = [
+            {
+                "id": str(d.id),
+                "filename": d.original_filename,
+                "sha256": d.sha256,
+                "doc_type": d.doc_type,
+                "uploaded_at": d.created_at.isoformat() if d.created_at else None,
+            }
+            for d in (bidder.documents or [])
+        ]
+
+        registry_ev = [
+            {
+                "verifier": v.verifier,
+                "provider": v.provider,
+                "status": v.status,
+                "checked_at": v.checked_at.isoformat() if v.checked_at else None,
+            }
+            for v in (bidder.verification_events or [])
+        ]
+
+        decs = []
+        for dec in (bidder.decisions or []):
+            decs.append({
+                "id": dec.id,
+                "finding_id": dec.finding_id,
+                "bidder_id": dec.bidder_id,
+                "bid_id": dec.bid_id,
+                "actor_id": dec.actor_id,
+                "actor_name": dec.actor.full_name if getattr(dec, "actor", None) else "Officer",
+                "actor_role": dec.actor.role if getattr(dec, "actor", None) else "officer",
+                "action": dec.action,
+                "reason": dec.reason,
+                "resulting_status": dec.resulting_status,
+                "machine_recommendation": dec.machine_recommendation,
+                "audit_ref": dec.audit_ref,
+                "created_at": dec.created_at or datetime.now(timezone.utc),
+            })
+
+        audit_stmt = select(AuditLog).order_by(AuditLog.seq.desc()).limit(1)
+        audit_res = await session.execute(audit_stmt)
+        latest_audit = audit_res.scalar_one_or_none()
+        chain_head = latest_audit.curr_hash if latest_audit else None
+
+        return {
+            "bidder_id": bidder.id,
+            "bidder_name": bidder.declared_name or bidder.canonical_name or "Unknown Vendor",
+            "tender_id": tender.id if tender else uuid.UUID(int=0),
+            "tender_nit": tender.nit_no if tender else "N/A",
+            "verified_at": getattr(bidder, "updated_at", None) or bidder.created_at or datetime.now(timezone.utc),
+            "ruleset_version": "1.0",
+            "documents_evaluated": docs,
+            "registry_responses": registry_ev,
+            "findings_count": len(bidder.findings or []),
+            "risk_score": bidder.risk_score,
+            "risk_band": bidder.risk_band,
+            "officer_decisions": decs,
+            "audit_chain_head": chain_head,
         }

@@ -61,16 +61,16 @@ This script:
 
 ## 4. How to Configure the YouTube Video URL
 
-The demo page includes a placeholder for a recorded YouTube walkthrough video.
+The demo page includes an optional slot for an embedded YouTube walkthrough video.
 
 To insert a real YouTube URL:
-1. Open [`frontend/src/components/DemoView.tsx`](file:///frontend/src/components/DemoView.tsx).
+1. Open [`frontend/src/components/DemoView.tsx`](../../frontend/src/components/DemoView.tsx).
 2. Locate the constant at line 14:
    ```typescript
    const YOUTUBE_DEMO_URL = ""; // e.g. "https://www.youtube.com/embed/YOUR_VIDEO_ID"
    ```
-3. Replace the empty string with your YouTube embed URL (e.g., `"https://www.youtube.com/embed/dQw4w9WgXcQ"`).
-4. Save the file. Vite hot-reloads automatically. The demo page will seamlessly transition from the placeholder banner to an interactive embedded player.
+3. Replace the empty string with your YouTube embed URL (e.g., `"https://www.youtube.com/embed/YOUR_VIDEO_ID"`).
+4. Save the file. Vite hot-reloads automatically. The demo page will transition from the fallback banner to an embedded player.
 
 ---
 
@@ -96,7 +96,7 @@ To add visual screenshots to the documentation:
 
 ## 6. Demonstration Documents & References
 
-- [docs/demo/DEMO-NARRATIVE.md](DEMO-NARRATIVE.md): Chronological 7-minute presentation script.
-- [docs/DEMO-SCRIPT.md](../DEMO-SCRIPT.md): Complete 12-beat presentation runbook with contingency plans.
-- [docs/FINAL-DEMO.md](../FINAL-DEMO.md): Evaluation summary, claims verification, and judge Q&A guide.
+- [docs/demo/DEMO-GUIDE.md](DEMO-GUIDE.md): Authoritative step-by-step evaluator walkthrough and scenario guide.
+- [docs/demo/REGISTRY-SIMULATOR.md](REGISTRY-SIMULATOR.md): Statutory registry simulator and chaos failure engine.
 - [docs/demo/SCREENSHOTS.md](SCREENSHOTS.md): Screenshot capture and composition specification.
+- [docs/ONE-MINUTE-TOUR.md](../ONE-MINUTE-TOUR.md): 60-second executive summary for reviewers.

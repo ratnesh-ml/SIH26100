@@ -128,16 +128,18 @@ def verify():
     doc_errors = []
     docs = [
         "docs/BUILD-STATUS.md",
-        "docs/ARCHITECTURE-LOCK.md",
-        "docs/INTERFACE-CONTRACTS.md",
-        "docs/REPOSITORY-STRUCTURE.md",
+        "docs/ONE-MINUTE-TOUR.md",
+        "docs/KNOWN-LIMITATIONS.md",
+        "docs/architecture/FINAL-ARCHITECTURE.md",
+        "docs/development/DEVELOPER-GUIDE.md",
+        "docs/demo/DEMO-GUIDE.md",
     ]
     for doc in docs:
         if (ROOT / doc).exists():
             print(f"  [OK] Document present: {doc}")
         else:
             doc_errors.append(doc)
-            print(f"  [PENDING] Document pending: {doc}")
+            print(f"  [MISSING] Document missing: {doc}")
 
     print("\n" + "=" * 60)
     if missing_dirs or import_errors or yaml_errors:

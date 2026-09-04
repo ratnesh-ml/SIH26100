@@ -518,13 +518,13 @@ export const DemoView: React.FC<DemoViewProps> = ({ onEnterApp, onOpenAudit }) =
           ) : (
             <div className="p-8 max-w-xl mx-auto rounded-2xl border border-dashed border-slate-700 bg-slate-950 flex flex-col items-center justify-center gap-3">
               <span className="text-xs font-mono text-slate-400 uppercase tracking-wider">
-                Video Placeholder
+                Video Walkthrough
               </span>
-              <p className="text-xs text-slate-500">
-                [YouTube demo link placeholder — configure YOUTUBE_DEMO_URL in DemoView.tsx]
+              <p className="text-sm font-semibold text-slate-200">
+                Demo Video: To be added
               </p>
               <span className="text-[11px] text-sky-400 font-mono">
-                docs/DEMO-SCRIPT.md provides the complete verbatim presentation narration
+                Refer to docs/demo/DEMO-GUIDE.md for the step-by-step evaluation walkthrough
               </span>
             </div>
           )}
@@ -551,7 +551,7 @@ export const DemoView: React.FC<DemoViewProps> = ({ onEnterApp, onOpenAudit }) =
               GitHub Repository
             </h3>
             <p className="text-xs text-slate-400 mt-1">
-              Source code, automated test suites (353 unit + 70 UI), Docker Compose configurations, and CI pipelines.
+              Source code, automated test suites (380 unit + 70 UI), Docker Compose configurations, and CI pipelines.
             </p>
           </a>
 

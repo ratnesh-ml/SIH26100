@@ -5,6 +5,13 @@ from enum import Enum
 from typing import Any, Optional
 
 
+class GroundingStatus(str, Enum):
+    """Grounding status indicating corroboration level of evidence."""
+    GROUNDED = "GROUNDED"
+    PARTIALLY_GROUNDED = "PARTIALLY_GROUNDED"
+    INSUFFICIENT_EVIDENCE = "INSUFFICIENT_EVIDENCE"
+
+
 class KnowledgeDomain(str, Enum):
     """The four distinct procurement knowledge domains."""
     TENDER = "tender"                    # Clauses, NIT specifications, turnover/experience criteria, EMD terms
@@ -79,6 +86,7 @@ class CopilotResponse:
     domains_searched: list[str]
     used_llm: bool = False
     confidence: float = 1.0
+    grounding_status: GroundingStatus = GroundingStatus.GROUNDED
     facts: list[str] = field(default_factory=list)
     explanations: list[str] = field(default_factory=list)
     injection_detected: bool = False
@@ -92,10 +100,12 @@ class CopilotResponse:
             "domains_searched": self.domains_searched,
             "used_llm": self.used_llm,
             "confidence": round(self.confidence, 4),
+            "grounding_status": self.grounding_status.value if isinstance(self.grounding_status, GroundingStatus) else str(self.grounding_status),
             "facts": self.facts,
             "explanations": self.explanations,
             "injection_detected": self.injection_detected,
             "is_conclusive": self.is_conclusive,
             "category": self.category,
         }
+
 

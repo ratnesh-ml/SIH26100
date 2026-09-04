@@ -1,7 +1,11 @@
-.PHONY: help install verify test dev-backend dev-frontend worker docker-up docker-down docker-logs clean
+.PHONY: help install verify test dev-backend dev-frontend worker docker-up docker-down docker-logs clean demo demo-reset
 
 help:
 	@echo "VigilBid (SIH26100) — Project Automation Commands"
+	@echo ""
+	@echo "Demo Automation Targets:"
+	@echo "  make demo           Seed demo tender, 5 bidders, and precomputed findings (seed-only)"
+	@echo "  make demo-reset     Cleanly reset and reseed demo state from scratch"
 	@echo ""
 	@echo "Docker Targets (Single-command deployment):"
 	@echo "  make docker-up      Build and start all services (PostgreSQL, Backend, Frontend, Worker)"
@@ -49,3 +53,9 @@ worker:
 clean:
 	find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
 	find . -type d -name ".pytest_cache" -exec rm -rf {} + 2>/dev/null || true
+
+demo:
+	python scripts/demo_setup.py --seed-only
+
+demo-reset:
+	python scripts/demo_setup.py --reset --seed-only

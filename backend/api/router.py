@@ -62,6 +62,9 @@ from backend.schemas import (
     CopilotQueryResponse,
     RAGKnowledgeBaseStatus,
     DashboardMetricsOut,
+    RequirementTraceabilityMatrix,
+    RiskExplanationOut,
+    HistoricalVerificationRecord,
 )
 from backend.services.tender_service import TenderService
 from backend.services.bidder_service import BidderService
@@ -636,6 +639,21 @@ async def list_findings(
     return results
 
 
+@api_router.get(
+    "/bidders/{bidder_id}/requirement-matrix",
+    response_model=RequirementTraceabilityMatrix,
+    tags=["Findings"],
+)
+async def get_bidder_requirement_matrix(
+    bidder_id: uuid.UUID,
+    current_user: Annotated[User, Depends(get_current_user)],
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+):
+    """Retrieve requirement-to-evidence matrix mapping each tender requirement to observed values and visual citations."""
+    data = await BidderService.get_requirement_matrix(session, bidder_id)
+    return RequirementTraceabilityMatrix(**data)
+
+
 @api_router.post("/findings/{finding_id}/decision", response_model=DecisionOut, tags=["Findings"])
 async def record_decision(
     finding_id: uuid.UUID,
@@ -665,6 +683,21 @@ async def get_bidder_decisions(
 ):
     """Retrieve all decision history across findings and bids for a bidder."""
     return await DecisionService.get_decision_history(session, bidder_id=bidder_id)
+
+
+@api_router.get(
+    "/bidders/{bidder_id}/verification-history",
+    response_model=HistoricalVerificationRecord,
+    tags=["Decisions"],
+)
+async def get_historical_verification_record(
+    bidder_id: uuid.UUID,
+    current_user: Annotated[User, Depends(get_current_user)],
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+):
+    """Retrieve historical verification record containing snapshot of evaluated documents, rules, findings, and decisions."""
+    data = await BidderService.get_verification_history(session, bidder_id)
+    return HistoricalVerificationRecord(**data)
 
 
 @api_router.post("/bidders/{bidder_id}/complete-review", response_model=CompleteReviewResponse, tags=["Bidders"])
@@ -719,6 +752,17 @@ async def get_risk_profile(
     """Retrieve transparent risk score, drivers, and forensic anomalies."""
     risk_data = await BidderService.get_risk_profile(session, bidder_id)
     return RiskProfileOut(**risk_data)
+
+
+@api_router.get("/bidders/{bidder_id}/risk/explain", response_model=RiskExplanationOut, tags=["Risk"])
+async def explain_bidder_risk(
+    bidder_id: uuid.UUID,
+    current_user: Annotated[User, Depends(get_current_user)],
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+):
+    """Retrieve human-readable explainable risk breakdown answering WHY for every risk factor."""
+    data = await BidderService.explain_risk(session, bidder_id)
+    return RiskExplanationOut(**data)
 
 
 @api_router.get("/bidders/{bidder_id}/anomalies", response_model=list[AnomalySignalOut], tags=["Risk"])
@@ -939,7 +983,50 @@ async def export_tender_report(
     )
 
 
-# 9. Registry Verification
+# 9. Registry Verification & Simulation
+@api_router.get("/registry/scenarios", tags=["Registry"])
+async def get_registry_scenarios(
+    current_user: Annotated[User, Depends(get_current_user)],
+):
+    """Retrieve catalog of available deterministic registry simulation scenarios."""
+    return {
+        "disclaimer": "DEMO / MOCK / SYNTHETIC — Statutory Registry Simulation Engine",
+        "scenarios": [
+            {"id": "NORMAL", "description": "Returns verified, active registered taxpayer/enterprise records from fixtures."},
+            {"id": "MISMATCH", "description": "Simulates identity divergence between declared bidder and registered taxpayer."},
+            {"id": "EXPIRED", "description": "Simulates cancelled GST registration or inoperative PAN under Sec 139AA."},
+            {"id": "NOT_FOUND", "description": "Simulates unregistered statutory identifier absent from registry records."},
+            {"id": "API_UNAVAILABLE", "description": "Simulates 503 statutory portal gateway timeout (withholds compliance to REVIEW)."},
+            {"id": "DEBARRED", "description": "Simulates debarment order hit on CPPP / GeM national blacklist."},
+        ],
+    }
+
+
+@api_router.get("/demo/failure-modes", tags=["Demo & Chaos"])
+async def get_demo_failure_modes(
+    current_user: Annotated[User, Depends(get_current_user)],
+):
+    """List available failure modes for presenter demonstration."""
+    from pipeline.demo.chaos_simulator import ChaosSimulator
+    return {
+        "disclaimer": "DEMO / MOCK / SYNTHETIC — Controlled Chaos & Failure Demonstration",
+        "modes": ChaosSimulator.list_failure_modes(),
+    }
+
+
+@api_router.post("/demo/simulate-failure", tags=["Demo & Chaos"])
+async def simulate_demo_failure(
+    payload: dict[str, Any],
+    current_user: Annotated[User, Depends(get_current_user)],
+):
+    """Execute a controlled synthetic failure mode for evaluator and presenter demonstration."""
+    from pipeline.demo.chaos_simulator import ChaosSimulator
+    mode = payload.get("failure_mode", "REGISTRY_TIMEOUT")
+    context = payload.get("context", {})
+    result = ChaosSimulator.simulate_failure(mode, context)
+    return result.to_dict()
+
+
 @api_router.get("/registry/debarment", tags=["Registry"])
 async def check_registry_debarment(
     current_user: Annotated[User, Depends(require_role(UserRole.OFFICER, UserRole.EVALUATOR, UserRole.VIGILANCE, UserRole.ADMIN))],
@@ -947,10 +1034,11 @@ async def check_registry_debarment(
     name: Optional[str] = Query(default=None),
     gstin: Optional[str] = Query(default=None),
     cin: Optional[str] = Query(default=None),
+    scenario: Optional[str] = Query(default=None),
 ):
     """Query national debarment and blacklist records."""
     provider = get_registry_provider()
-    result = await provider.check_debarment(name=name, pan=pan, gstin=gstin, cin=cin)
+    result = await provider.check_debarment(name=name, pan=pan, gstin=gstin, cin=cin, scenario=scenario)
     return result.to_dict()
 
 
@@ -959,18 +1047,19 @@ async def check_registry(
     kind: str,
     value: str,
     current_user: Annotated[User, Depends(require_role(UserRole.OFFICER, UserRole.EVALUATOR, UserRole.VIGILANCE, UserRole.ADMIN))],
+    scenario: Optional[str] = Query(default=None),
 ):
     """Query statutory registry verification provider (GST, PAN, Udyam, CIN)."""
     provider = get_registry_provider()
     kind_lower = kind.strip().lower()
     if kind_lower in ("gst", "gstin"):
-        res = await provider.verify_gstin(value)
+        res = await provider.verify_gstin(value, scenario=scenario)
     elif kind_lower == "pan":
-        res = await provider.verify_pan(value)
+        res = await provider.verify_pan(value, scenario=scenario)
     elif kind_lower in ("udyam", "msme"):
-        res = await provider.verify_udyam(value)
+        res = await provider.verify_udyam(value, scenario=scenario)
     elif kind_lower in ("cin", "mca"):
-        res = await provider.verify_cin(value)
+        res = await provider.verify_cin(value, scenario=scenario)
     else:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,

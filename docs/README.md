@@ -30,11 +30,11 @@ Check our developer quick-lookup directories to find the exact file to inspect o
 👉 [docs/development/WHERE-TO-CHANGE.md](development/WHERE-TO-CHANGE.md)  
 👉 [docs/development/INTERFACE-CONTRACTS.md](development/INTERFACE-CONTRACTS.md)
 
-### 5. "I want to see the 7-minute judge demonstration"
-Review the step-by-step presentation narrative and runbook:
-👉 [docs/demo/DEMO-NARRATIVE.md](demo/DEMO-NARRATIVE.md)  
-👉 [docs/demo/DEMO-SCRIPT.md](demo/DEMO-SCRIPT.md)  
-👉 [docs/demo/README.md](demo/README.md) *(Guided `/demo` tour instructions)*
+### 5. "I want to see how the demonstration and evaluation flow work"
+Review the step-by-step walkthrough and scenario guide:
+👉 [docs/demo/DEMO-GUIDE.md](demo/DEMO-GUIDE.md)  
+👉 [docs/demo/README.md](demo/README.md) *(Guided `/demo` tour instructions)*  
+👉 [docs/demo/REGISTRY-SIMULATOR.md](demo/REGISTRY-SIMULATOR.md) *(Registry simulator & chaos testing)*
 
 ### 6. "I want to inspect how OCR and Document Intelligence work"
 Read how PyMuPDF and Tesseract extract text, layout coordinates, and identifiers:
@@ -51,7 +51,7 @@ Read about our 34 deterministic CPCL rules, forensic anomaly checks, and 4-facto
 👉 [docs/risk/GRAPH.md](risk/GRAPH.md)
 
 ### 8. "I want to check test results and release certification"
-Review our automated 353 backend tests, 70 frontend checks, and 20-subsystem audit report:
+Review our automated 380 backend tests, 70 frontend checks, and 20-subsystem audit report:
 👉 [docs/testing/RELEASE-CHECKLIST.md](testing/RELEASE-CHECKLIST.md)  
 👉 [docs/testing/EVALUATION.md](testing/EVALUATION.md)  
 👉 [docs/testing/PERFORMANCE.md](testing/PERFORMANCE.md)
@@ -63,19 +63,19 @@ Review our automated 353 backend tests, 70 frontend checks, and 20-subsystem aud
 ```
 docs/
 ├── README.md                          # This document index
-├── ONE-MINUTE-TOUR.md                 # 60-second judge and evaluator pitch
+├── ONE-MINUTE-TOUR.md                 # 60-second evaluator and reviewer summary
 ├── REPOSITORY-ORGANIZATION-AUDIT.md   # Structural audit of redundancy & naming
 ├── REFACTOR-MAP.md                    # Record of directory refactorings & moves
-├── BUILD-STATUS.md                    # Running engineering log (Phases 1 to 50)
+├── BUILD-STATUS.md                    # Engineering build status log
 ├── KNOWN-LIMITATIONS.md               # Honest disclosures on scope & simulated data
-├── FUTURE-ROADMAP.md                  # Post-hackathon enterprise scaling phases
+├── FUTURE-ROADMAP.md                  # Enterprise scaling roadmap
 │
 ├── architecture/                      # System Structure & Requirements
 │   ├── FINAL-ARCHITECTURE.md          # Comprehensive end-to-end architecture
 │   ├── DATA-FLOW.md                   # Step-by-step data transformation pipeline
 │   ├── REPOSITORY-MAP.md              # Codebase module taxonomy & directory guide
 │   ├── CURRENT-REPOSITORY-MAP.md      # Component classification audit
-│   ├── TARGET-REPOSITORY-MAP.md       # Approved target architecture
+│   ├── TARGET-REPOSITORY-MAP.md       # Target architecture taxonomy
 │   ├── RESTRUCTURE-BASELINE.md        # Pre- and post-restructuring test parity
 │   └── FEATURE-TRACEABILITY.md        # SIH26100 requirement-to-code traceability
 │
@@ -122,11 +122,10 @@ docs/
 │   ├── EVALUATION.md                  # Benchmark datasets and accuracy metrics
 │   └── PERFORMANCE.md                 # Sub-second latency audit and benchmarks
 │
-├── demo/                              # Presentation Materials & Walkthroughs
+├── demo/                              # Demonstration Materials & Walkthroughs
 │   ├── README.md                      # Guide to the interactive in-app /demo page
-│   ├── DEMO-NARRATIVE.md              # 7-minute chronological judge script
-│   ├── DEMO-SCRIPT.md                 # 12-beat detailed PSU presentation runbook
-│   ├── FINAL-DEMO.md                  # Presentation defense and judge Q&A guide
+│   ├── DEMO-GUIDE.md                  # Authoritative evaluator walkthrough and scenario guide
+│   ├── REGISTRY-SIMULATOR.md          # Statutory registry simulator & chaos engine
 │   ├── SCREENSHOTS.md                 # Screenshot capture specifications
 │   └── screenshots/                   # Directory for captured UI screenshot assets
 │

@@ -84,3 +84,71 @@ class CompleteReviewResponse(BaseModel):
     bid_id: Optional[uuid.UUID] = None
     bid_status: Optional[str] = None
     decisions_count: int = 0
+
+
+class RequirementEvidenceRow(BaseModel):
+    requirement_code: str
+    requirement_title: str
+    requirement_description: Optional[str] = None
+    status: str  # PASS, WARN, REVIEW, FAIL, PENDING
+    is_satisfied: bool
+    observed_value: Optional[str] = None
+    required_value: Optional[str] = None
+    rule_id: Optional[str] = None
+    rule_clause: Optional[str] = None
+    verification_source: Optional[str] = None
+    reason: Optional[str] = None
+    finding_id: Optional[uuid.UUID] = None
+    evidence: Optional[list[EvidenceItem]] = None
+
+
+class RequirementTraceabilityMatrix(BaseModel):
+    bidder_id: uuid.UUID
+    bidder_name: str
+    tender_id: uuid.UUID
+    tender_nit: str
+    overall_status: str
+    requirements: list[RequirementEvidenceRow]
+    total_requirements: int
+    satisfied_count: int
+    unsatisfied_count: int
+
+
+class RiskExplanationFactor(BaseModel):
+    factor_name: str
+    category: str  # Identity, Compliance, Financial, Anomaly
+    severity: str  # HIGH, MEDIUM, LOW
+    contribution: int  # Points contributed to the 0-100 score
+    reason: str  # Plain language explanation
+    rule_id: Optional[str] = None
+    rule_clause: Optional[str] = None
+    source: str
+    has_evidence: bool
+    evidence: Optional[list[dict[str, Any]]] = None
+    explanation_status: str = "EXPLAINED"  # EXPLAINED or INSUFFICIENT_EVIDENCE
+
+
+class RiskExplanationOut(BaseModel):
+    bidder_id: uuid.UUID
+    bidder_name: str
+    score: int
+    band: str  # LOW, MEDIUM, HIGH
+    summary: str
+    factors: list[RiskExplanationFactor]
+    total_contribution: int
+
+
+class HistoricalVerificationRecord(BaseModel):
+    bidder_id: uuid.UUID
+    bidder_name: str
+    tender_id: uuid.UUID
+    tender_nit: str
+    verified_at: datetime
+    ruleset_version: str = "1.0"
+    documents_evaluated: list[dict[str, Any]]
+    registry_responses: list[dict[str, Any]]
+    findings_count: int
+    risk_score: int
+    risk_band: str
+    officer_decisions: list[DecisionOut]
+    audit_chain_head: Optional[str] = None

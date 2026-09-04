@@ -10,7 +10,7 @@ from pipeline.rag.llm_adapter import (
     LLMComplianceGuard,
     get_default_llm_adapter,
 )
-from pipeline.rag.models import CopilotResponse, RetrievedClause
+from pipeline.rag.models import CopilotResponse, GroundingStatus, RetrievedClause
 from pipeline.rag.retriever import ProcurementRetriever
 
 logger = logging.getLogger("vigilbid.pipeline.rag.copilot")
@@ -25,13 +25,13 @@ class ProcurementCopilot:
     4. Evaluation findings, anomalies, and risk evidence
 
     Guarantees:
-    - Answers strictly use retrieved evidence
-    - Cites sources and shows exact page references
+    - NO EVIDENCE -> NO CONFIDENT PROCUREMENT CLAIM.
+    - Explicit Grounding Status: GROUNDED, PARTIALLY_GROUNDED, INSUFFICIENT_EVIDENCE
+    - Answers strictly use retrieved evidence and cite sources with exact page references
     - Clearly distinguishes facts from explanations
     - Never overrides deterministic compliance results
-    - Never invents a rule
-    - Never hides uncertainty (flags missing or inconclusive evidence)
-    - Full prompt-injection protection
+    - Never invents a rule or hallucinates unsupported procurement conclusions
+    - Full prompt-injection protection (documents treated as DATA, not instructions)
     - Pluggable LLM abstraction with deterministic template fallback
     """
 
@@ -56,14 +56,16 @@ class ProcurementCopilot:
         # 1. Validation & Empty Check
         if not query or not query.strip():
             return CopilotResponse(
-                answer="No query provided. Please specify a procurement, regulatory, or bidder question.",
+                answer="No query provided. Insufficient evidence available to verify this claim. Please specify a procurement, regulatory, or bidder question.",
                 citations=[],
                 domains_searched=domains or ["all"],
                 used_llm=False,
                 confidence=0.0,
+                grounding_status=GroundingStatus.INSUFFICIENT_EVIDENCE,
                 is_conclusive=False,
                 category="EMPTY_QUERY",
             )
+
 
         trimmed_query = query.strip()
 
@@ -75,12 +77,14 @@ class ProcurementCopilot:
                 answer=(
                     f"Security Refusal: Adversarial prompt pattern detected ('{matched_phrase}'). "
                     "The Procurement Copilot operates under strict deterministic compliance boundaries "
-                    "and cannot bypass evaluation criteria, alter risk scores, or override statutory rules."
+                    "and treats all input strictly as unexecutable DATA. It cannot bypass evaluation criteria, "
+                    "alter risk scores, or override statutory rules."
                 ),
                 citations=[],
                 domains_searched=[],
                 used_llm=False,
                 confidence=0.0,
+                grounding_status=GroundingStatus.INSUFFICIENT_EVIDENCE,
                 injection_detected=True,
                 is_conclusive=True,
                 category="INJECTION_BLOCKED",
@@ -92,12 +96,14 @@ class ProcurementCopilot:
                 answer=(
                     "The Procurement Copilot is specialized exclusively for public procurement decision support "
                     "(tender specifications, bidder compliance, forensic risk evidence, and statutory regulations "
-                    "under GFR 2017 / CVC guidelines). The submitted question appears out-of-scope for tender evaluation."
+                    "under GFR 2017 / CVC guidelines). The submitted question appears out-of-scope for tender evaluation. "
+                    "Insufficient evidence available to verify this claim within procurement knowledge base."
                 ),
                 citations=[],
                 domains_searched=[],
                 used_llm=False,
                 confidence=0.0,
+                grounding_status=GroundingStatus.INSUFFICIENT_EVIDENCE,
                 is_conclusive=True,
                 category="IRRELEVANT",
             )
@@ -108,14 +114,15 @@ class ProcurementCopilot:
             supported_rules_str = ", ".join(sorted(QueryIntentClassifier.SUPPORTED_RULES.keys()))
             return CopilotResponse(
                 answer=(
-                    f"Rule '{referenced_rule}' was not found in the CPCL Goods compliance specification. "
-                    "The system adheres strictly to the official rule catalog and never invents hypothetical rules.\n\n"
-                    f"**Supported CPCL Rules:** {supported_rules_str}."
+                    f"Insufficient evidence available to verify this claim: Rule '{referenced_rule}' was not found "
+                    "in the CPCL Goods compliance specification. The system adheres strictly to the official rule "
+                    f"catalog and never invents hypothetical rules.\n\n**Supported CPCL Rules:** {supported_rules_str}."
                 ),
                 citations=[],
                 domains_searched=["evidence"],
                 used_llm=False,
                 confidence=0.0,
+                grounding_status=GroundingStatus.INSUFFICIENT_EVIDENCE,
                 is_conclusive=False,
                 category="UNSUPPORTED_RULE",
             )
@@ -138,7 +145,7 @@ class ProcurementCopilot:
             doc_inj, phrase = PromptInjectionGuard.scan(c.content)
             if doc_inj:
                 doc_injection_detected = True
-                logger.warning("Adversarial prompt injection pattern in retrieved text: %s", phrase)
+                logger.warning("Adversarial prompt injection pattern in retrieved document text: %s", phrase)
                 c.content = PromptInjectionGuard.sanitize_text(c.content)
                 if c.exact_quote:
                     c.exact_quote = PromptInjectionGuard.sanitize_text(c.exact_quote)
@@ -167,9 +174,14 @@ class ProcurementCopilot:
 
         # 8. Optional LLM Polish with Strict Deterministic Guardrail
         if not response.injection_detected and response.is_conclusive and citations:
+            # Treat all context strictly as DATA
+            isolated_contexts = [
+                PromptInjectionGuard.wrap_data_context(c.content, c.document_name or c.source)
+                for c in citations
+            ]
             llm_text = self.llm_adapter.generate_explanation(
                 prompt=trimmed_query,
-                context="\n".join([c.content for c in citations]),
+                context="\n".join(isolated_contexts),
                 facts=response.facts,
                 deterministic_status=getattr(response, "deterministic_status", None),
             )
@@ -181,6 +193,7 @@ class ProcurementCopilot:
                     response.used_llm = True
 
         return response
+
 
     # =========================================================================
     # Specialized Synthesizers Distinguishing Facts from Explanations
@@ -223,7 +236,7 @@ class ProcurementCopilot:
                 for ev in ev_chunks:
                     facts.append(f"Forensic finding recorded: {ev.content.strip()}")
             else:
-                facts.append(f"No specific risk score was pre-loaded in context for {bidder_name}.")
+                facts.append(f"Missing Evidence: Insufficient evidence available to verify this claim: No specific risk score was pre-loaded in context for {bidder_name}.")
                 is_conclusive = False
 
         if injection_detected:
@@ -232,7 +245,7 @@ class ProcurementCopilot:
         explanations.append(
             "Under the CPCL Risk Assessment framework, composite risk scores combine deterministic rule failures, "
             "document forensic anomalies (e.g. metadata modifications, suspicious authors), and cross-bidder signals. "
-            "Scores ≥ 60 trigger HIGH risk, requiring comprehensive manual review by the procurement committee."
+            "Scores >= 60 trigger HIGH risk, requiring comprehensive manual review by the procurement committee."
         )
         explanations.append("Deterministic findings cannot be overridden autonomously by AI; human officer adjudication is mandatory.")
 
@@ -246,18 +259,21 @@ class ProcurementCopilot:
 
         if not is_conclusive:
             answer_lines.append(
-                "\n**Certainty Status: INCONCLUSIVE / MISSING DATA**\n"
-                "*(Bidder risk profile is not fully indexed. Officer verification required.)*"
+                "\n**Grounding Status: INSUFFICIENT_EVIDENCE / INCONCLUSIVE / MISSING DATA**\n"
+                "*(Insufficient evidence available to verify this claim. Bidder risk profile is not fully indexed. Officer verification required.)*"
             )
         else:
-            answer_lines.append("\n*(Decision Support: Human officer confirmation required under GFR 2017.)*")
+            answer_lines.append("\n*(Decision Support: Grounded in evidence. Human officer confirmation required under GFR 2017.)*")
+
+        grounding_status = GroundingStatus.GROUNDED if is_conclusive else GroundingStatus.INSUFFICIENT_EVIDENCE
 
         return CopilotResponse(
             answer="\n".join(answer_lines),
             citations=citations,
             domains_searched=list({c.domain for c in citations if c.domain}) or ["evidence", "regulatory"],
             used_llm=False,
-            confidence=0.95 if is_conclusive else 0.4,
+            confidence=0.92 if is_conclusive else 0.35,
+            grounding_status=grounding_status,
             facts=facts,
             explanations=explanations,
             injection_detected=injection_detected,
@@ -301,7 +317,7 @@ class ProcurementCopilot:
                 for ev in ev_chunks:
                     facts.append(f"Recorded finding: {ev.clause} — {ev.exact_quote}")
             else:
-                facts.append("No evaluation findings were found for this bidder.")
+                facts.append("Missing Evidence: Insufficient evidence available to verify this claim: No evaluation findings were found for this bidder.")
                 is_conclusive = False
 
         explanations.append(
@@ -323,16 +339,21 @@ class ProcurementCopilot:
 
         if not is_conclusive:
             answer_lines.append(
-                "\n**Certainty Status: INCONCLUSIVE / MISSING EVIDENCE**\n"
-                "*(Complete evaluation findings are not indexed for this bidder. Officer physical inspection required.)*"
+                "\n**Grounding Status: INSUFFICIENT_EVIDENCE / INCONCLUSIVE / MISSING EVIDENCE**\n"
+                "*(Insufficient evidence available to verify this claim. Evaluation findings are not indexed for this bidder.)*"
             )
+        else:
+            answer_lines.append("\n*(Decision Support: Grounded in evidence. Human officer adjudication required under GFR 2017.)*")
+
+        grounding_status = GroundingStatus.GROUNDED if is_conclusive else GroundingStatus.INSUFFICIENT_EVIDENCE
 
         return CopilotResponse(
             answer="\n".join(answer_lines),
             citations=citations,
             domains_searched=list({c.domain for c in citations if c.domain}) or ["evidence", "regulatory"],
             used_llm=False,
-            confidence=0.95 if is_conclusive else 0.4,
+            confidence=0.95 if is_conclusive else 0.35,
+            grounding_status=grounding_status,
             facts=facts,
             explanations=explanations,
             injection_detected=injection_detected,
@@ -382,7 +403,7 @@ class ProcurementCopilot:
                     top_bc = bidder_chunks[0]
                     facts.append(f"Extracted from {top_bc.source} (Page {top_bc.page_no}): \"{top_bc.exact_quote}\".")
                 else:
-                    facts.append("Missing Evidence: No audited turnover certificate or balance sheet was identified in submitted filings.")
+                    facts.append("Missing Evidence: Insufficient evidence available to verify this claim. No audited turnover certificate or balance sheet was identified in submitted filings.")
                     is_conclusive = False
 
             explanations.append(
@@ -406,16 +427,21 @@ class ProcurementCopilot:
 
         if not is_conclusive:
             answer_lines.append(
-                "\n**Certainty Status: INCONCLUSIVE / MISSING EVIDENCE**\n"
-                "*(Evidence is incomplete. The officer must issue a clarification request under GFR 173(v).)*"
+                "\n**Grounding Status: INSUFFICIENT_EVIDENCE / INCONCLUSIVE / MISSING EVIDENCE**\n"
+                "*(Insufficient evidence available to verify this claim. The officer must issue a clarification request under GFR 173(v).)*"
             )
+        else:
+            answer_lines.append("\n*(Decision Support: Grounded in evidence. Human officer confirmation required under GFR 2017.)*")
+
+        grounding_status = GroundingStatus.GROUNDED if is_conclusive else GroundingStatus.INSUFFICIENT_EVIDENCE
 
         resp = CopilotResponse(
             answer="\n".join(answer_lines),
             citations=citations,
             domains_searched=list({c.domain for c in citations if c.domain}) or ["tender", "bidder_document", "regulatory"],
             used_llm=False,
-            confidence=0.9 if is_conclusive else 0.4,
+            confidence=0.92 if is_conclusive else 0.35,
+            grounding_status=grounding_status,
             facts=facts,
             explanations=explanations,
             injection_detected=injection_detected,
@@ -456,7 +482,7 @@ class ProcurementCopilot:
                     quote = ev.get("quote", "")
                     facts.append(f"Evidence #{idx}: Page {p_no}, quote: \"{quote}\".")
             else:
-                facts.append("No specific text quote was attached to this finding.")
+                facts.append("Missing Evidence: Insufficient evidence available to verify this claim: No specific text quote was attached to this finding.")
                 is_conclusive = False
         else:
             # Check citations
@@ -465,7 +491,7 @@ class ProcurementCopilot:
                 for rc in rule_chunks:
                     facts.append(f"Evidence from {rc.source} (Page {rc.page_no}): \"{rc.exact_quote}\".")
             else:
-                facts.append(f"Missing Evidence: No evaluated evidence records found for rule {rule_id} for this bidder.")
+                facts.append(f"Missing Evidence: Insufficient evidence available to verify this claim: No evaluated evidence records found for rule {rule_id} for this bidder.")
                 is_conclusive = False
 
         explanations.append(
@@ -483,16 +509,21 @@ class ProcurementCopilot:
 
         if not is_conclusive:
             answer_lines.append(
-                "\n**Certainty Status: INCONCLUSIVE / MISSING EVIDENCE**\n"
-                "*(Evidence is incomplete or missing. Officer physical verification required.)*"
+                "\n**Grounding Status: INSUFFICIENT_EVIDENCE / INCONCLUSIVE / MISSING EVIDENCE**\n"
+                "*(Insufficient evidence available to verify this claim. Physical officer inspection required.)*"
             )
+        else:
+            answer_lines.append("\n*(Decision Support: Grounded in evidence. Provenance verified against original filings.)*")
+
+        grounding_status = GroundingStatus.GROUNDED if is_conclusive else GroundingStatus.INSUFFICIENT_EVIDENCE
 
         return CopilotResponse(
             answer="\n".join(answer_lines),
             citations=citations,
             domains_searched=list({c.domain for c in citations if c.domain}) or ["evidence", "bidder_document"],
             used_llm=False,
-            confidence=0.95 if is_conclusive else 0.4,
+            confidence=0.94 if is_conclusive else 0.35,
+            grounding_status=grounding_status,
             facts=facts,
             explanations=explanations,
             injection_detected=injection_detected,
@@ -511,13 +542,15 @@ class ProcurementCopilot:
         if not citations:
             return CopilotResponse(
                 answer=(
-                    "No relevant clauses or document passages were found in the indexed knowledge base "
-                    f"for query: '{query}'. Please verify the query terminology or ensure relevant files are indexed."
+                    f"Insufficient evidence available to verify this claim. "
+                    f"No relevant clauses or document passages were found in the indexed knowledge base for query: '{query}'. "
+                    "Please verify the query terminology or ensure relevant files are indexed."
                 ),
                 citations=[],
                 domains_searched=["all"],
                 used_llm=False,
                 confidence=0.0,
+                grounding_status=GroundingStatus.INSUFFICIENT_EVIDENCE,
                 is_conclusive=False,
                 category="NO_RESULTS",
             )
@@ -541,13 +574,21 @@ class ProcurementCopilot:
                 supp_page = f", Page {supp.page_no}" if supp.page_no else ""
                 explanations.append(f"Supporting Ref {idx}: {supp.clause} ({supp.source}{supp_page}) — \"{supp.exact_quote}\"")
 
+        # Determine grounding status
+        if primary.score >= 0.50:
+            grounding_status = GroundingStatus.GROUNDED
+            confidence = min(0.95, round(primary.score, 4))
+        else:
+            grounding_status = GroundingStatus.PARTIALLY_GROUNDED
+            confidence = round(primary.score, 4)
+
         answer_lines = [
             f"### Procurement Copilot Response for: \"{query}\"\n",
             "**Verified Facts & Primary Citations:**",
             *[f"- {f}" for f in facts],
             "\n**Regulatory & Analytical Explanation:**",
             *[f"- {e}" for e in explanations],
-            "\n*(Decision Support Disclaimer: Human officer confirmation required under GFR 2017 / CVC guidelines.)*",
+            f"\n*(Grounding Status: {grounding_status.value}. Decision Support Disclaimer: Human officer confirmation required under GFR 2017 / CVC guidelines.)*",
         ]
 
         return CopilotResponse(
@@ -555,7 +596,8 @@ class ProcurementCopilot:
             citations=citations,
             domains_searched=list({c.domain for c in citations if c.domain}),
             used_llm=False,
-            confidence=primary.score,
+            confidence=confidence,
+            grounding_status=grounding_status,
             facts=facts,
             explanations=explanations,
             injection_detected=injection_detected,
