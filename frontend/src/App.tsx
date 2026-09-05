@@ -333,7 +333,7 @@ export default function App() {
           <span>•</span>
           <span>PPP-MII Order 2017</span>
           <span>•</span>
-          <span>CVC 2021 Compliant</span>
+          <span>CVC-aligned workflow</span>
           <span>•</span>
           <span className="font-mono">v2.34.0</span>
         </div>

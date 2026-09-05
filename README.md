@@ -21,16 +21,16 @@
 
 ### Submission assets status
 
-| Asset | Current status |
-|---|---|
-| Live demo URL | [https://vigilbid-frontend.onrender.com](https://vigilbid-frontend.onrender.com) |
-| Backend API & Docs | [https://vigilbid-backend.onrender.com/api/v1/docs](https://vigilbid-backend.onrender.com/api/v1/docs) |
+| Asset | Current status | Next action |
+|---|---|---|
+| Live demo URL | [https://vigilbid-frontend.onrender.com](https://vigilbid-frontend.onrender.com) | Open the public demo. |
+| Backend API & Docs | [https://vigilbid-backend.onrender.com/api/v1/docs](https://vigilbid-backend.onrender.com/api/v1/docs) | Inspect the public OpenAPI contract. |
 | YouTube walkthrough | Not yet published | Add a final public video URL before submission. |
-| Dashboard screenshot | [`docs/demo/screenshots/01-dashboard.png`](docs/demo/screenshots/01-dashboard.png) (Captured & Attached) |
-| Bidder cockpit screenshot | [`docs/demo/screenshots/02-bidder-cockpit.png`](docs/demo/screenshots/02-bidder-cockpit.png) (Captured & Attached) |
-| Evidence inspector screenshot | [`docs/demo/screenshots/03-evidence-inspector.png`](docs/demo/screenshots/03-evidence-inspector.png) (Captured & Attached) |
-| Explainable risk screenshot | [`docs/demo/screenshots/04-risk-explanation.png`](docs/demo/screenshots/04-risk-explanation.png) (Captured & Attached) |
-| Audit ledger screenshot | [`docs/demo/screenshots/05-audit-ledger.png`](docs/demo/screenshots/05-audit-ledger.png) (Captured & Attached) |
+| Dashboard screenshot | [`docs/demo/screenshots/01-dashboard.png`](docs/demo/screenshots/01-dashboard.png) | Captured and attached. |
+| Bidder cockpit screenshot | [`docs/demo/screenshots/02-bidder-cockpit.png`](docs/demo/screenshots/02-bidder-cockpit.png) | Captured and attached. |
+| Evidence inspector screenshot | [`docs/demo/screenshots/03-evidence-inspector.png`](docs/demo/screenshots/03-evidence-inspector.png) | Captured and attached. |
+| Explainable risk screenshot | [`docs/demo/screenshots/04-risk-explanation.png`](docs/demo/screenshots/04-risk-explanation.png) | Captured and attached. |
+| Audit ledger screenshot | [`docs/demo/screenshots/05-audit-ledger.png`](docs/demo/screenshots/05-audit-ledger.png) | Captured and attached. |
 
 All 5 core UI screenshot assets and supplementary forensic views are captured and available in [`docs/demo/screenshots/`](docs/demo/screenshots/).
 
@@ -99,7 +99,7 @@ Public procurement scrutiny takes **8 to 10 hours per bidder**, leaving evaluati
 
 ## 📸 Visual Screenshots & Interface Walkthrough
 
-High-resolution UI captures generated from the official Stitch UI specifications and stored in [`docs/demo/screenshots/`](docs/demo/screenshots/):
+High-resolution UI captures based on the official Stitch UI specifications and stored in [`docs/demo/screenshots/`](docs/demo/screenshots/). The local Judge Mode and public deployment provide the runnable workflow; these images are presentation assets, not a substitute for runtime verification.
 
 ### 1. Executive Scrutiny Dashboard (`/dashboard`)
 *Portfolio-level procurement scrutiny overview, active CPCL tender telemetry, bidder evaluation progress, and real-time risk posture distribution.*
@@ -114,7 +114,7 @@ High-resolution UI captures generated from the official Stitch UI specifications
 ---
 
 ### 3. Split-Screen Evidence Inspector (`/bidders/:id/evidence`)
-*Zero-hallucination verification linking statutory findings directly to source PDF pages with visual coordinate bounding box overlays.*
+*Grounded verification linking statutory findings directly to source PDF pages with visual coordinate bounding box overlays.*
 ![Split-Screen Evidence Inspector](docs/demo/screenshots/07-evidence.png)
 
 ---
@@ -138,7 +138,7 @@ High-resolution UI captures generated from the official Stitch UI specifications
 ---
 
 ### 7. Tamper-Evident Cryptographic SHA-256 Audit Ledger (`/audit`)
-*Cryptographically sealed decision ledger with forward SHA-256 hash chains, CVC-mandated officer minutes, and live integrity verification.*
+*Tamper-evident decision ledger with forward SHA-256 hash chains, officer decision minutes, and live integrity verification.*
 ![Cryptographic Audit Ledger](docs/demo/screenshots/10-audit.png)
 
 ---
