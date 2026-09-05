@@ -38,7 +38,7 @@ The Field Extraction subsystem extracts typed, validated, and normalized data po
 
 ## 3. ExtractedFieldDTO Contract
 
-All extractors return instances of `ExtractedFieldDTO` ([pipeline/extraction/base.py](file:///c:/Users/ritik/Downloads/SIH26100/pipeline/extraction/base.py)):
+All extractors return instances of `ExtractedFieldDTO` ([pipeline/extraction/base.py](pipeline/extraction/base.py)):
 
 ```python
 @dataclass
@@ -81,7 +81,7 @@ class ExtractedFieldDTO:
 
 ## 5. Background Pipeline Integration
 
-The Field Extraction subsystem is invoked in Step 4 of the asynchronous evaluation pipeline ([backend/services/job_service.py](file:///c:/Users/ritik/Downloads/SIH26100/backend/services/job_service.py)):
+The Field Extraction subsystem is invoked in Step 4 of the asynchronous evaluation pipeline ([backend/services/job_service.py](backend/services/job_service.py)):
 
 1. In Step 2, `RuleBasedDocumentClassifier` assigns `Document.doc_type`.
 2. In Step 3, `PDFProcessor` and `OCRProvider` populate `document_pages`.

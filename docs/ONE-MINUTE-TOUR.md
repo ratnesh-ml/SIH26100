@@ -3,7 +3,7 @@
 **Project Name:** VigilBid (SIH26100)  
 **Track:** Smart India Hackathon 2026 Grand Finale  
 **Domain:** Public Procurement & Vigilance · GeM & CPCL (Ministry of Petroleum & Natural Gas)  
-**Status:** Certified Release Candidate · 100% Tests Passing (380 Backend, 70 Frontend, 20/20 Release Audit)
+**Status:** Verified Release Candidate · 100% Tests Passing (381 Backend, 70 Frontend, 20/20 Release Audit)
 
 ---
 

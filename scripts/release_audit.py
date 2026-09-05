@@ -565,7 +565,7 @@ class ReleaseAuditRunner:
         print(f"  RELEASE AUDIT SUMMARY: {passed_count}/20 SUBSYSTEMS VERIFIED ({total_elapsed:.2f}s)", flush=True)
         print("=" * 80, flush=True)
         if all_passed:
-            print("  >>> ALL 20 RELEASE REQUIREMENTS SATISFIED. SYSTEM PRODUCTION-READY. <<<\n", flush=True)
+            print("  >>> ALL 20 RELEASE REQUIREMENTS SATISFIED. SYSTEM DEMO-READY. <<<\n", flush=True)
         else:
             print(f"  >>> AUDIT INCOMPLETE: {20 - passed_count} SUBSYSTEMS FAILED. <<<\n", flush=True)
         return all_passed

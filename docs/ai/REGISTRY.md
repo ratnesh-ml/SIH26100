@@ -23,7 +23,7 @@ Per Section 19 of `docs/04-dataset-mockapi-security-devops-mvpcut-team.md`, Vigi
 
 ## 2. Interface Contract & Standard Result Shape
 
-All registry verification calls return an immutable `RegistryResult` container ([pipeline/registry_adapters/base.py](file:///c:/Users/ritik/Downloads/SIH26100/pipeline/registry_adapters/base.py)):
+All registry verification calls return an immutable `RegistryResult` container ([pipeline/registry_adapters/base.py](pipeline/registry_adapters/base.py)):
 
 ```python
 @dataclass
@@ -74,7 +74,7 @@ In production, parallel external API calls take between 300 ms and 800 ms. To en
 
 ---
 
-## 5. Local Fixtures ([data/fixtures/registry/](file:///c:/Users/ritik/Downloads/SIH26100/data/fixtures/registry/))
+## 5. Local Fixtures ([data/fixtures/registry/](data/fixtures/registry/))
 
 The mock provider is backed by deterministic JSON fixture databases representing the standard 4+1 demo bidder profiles:
 1. `gstin.json`: Active GSTIN for Apex Industrial Solutions, and Suo-moto Cancelled GSTIN for Coromandel Engineering Works.
@@ -87,7 +87,7 @@ The mock provider is backed by deterministic JSON fixture databases representing
 
 ## 6. REST API Endpoints
 
-VigilBid exposes authenticated registry endpoints ([backend/api/router.py](file:///c:/Users/ritik/Downloads/SIH26100/backend/api/router.py)):
+VigilBid exposes authenticated registry endpoints ([backend/api/router.py](backend/api/router.py)):
 - `GET /api/v1/registry/gstin/{gstin}`
 - `GET /api/v1/registry/pan/{pan}`
 - `GET /api/v1/registry/udyam/{udyam_no}`

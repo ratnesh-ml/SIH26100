@@ -3,34 +3,34 @@
 **Project:** VigilBid (SIH26100) — AI-Assisted, Evidence-First Bid Compliance Verification Platform  
 **Target Organization:** Chennai Petroleum Corporation Limited (CPCL) · Ministry of Petroleum & Natural Gas (MoPNG)  
 **Applicable Frameworks:** General Financial Rules (GFR) 2017, Central Vigilance Commission (CVC) Guidelines, CERT-In Secure Coding Guidelines  
-**Certification Status:** **DEMO-READY / HACKATHON-READY** *(Certified for SIH 2026 Evaluation & PSU Demonstration)*
+**Readiness Status:** **DEMO-READY / HACKATHON-READY** *(Repository verification baseline for SIH 2026 evaluation and PSU demonstration)*
 
 ---
 
-## 1. Executive Release Certification Summary
+## 1. Executive Release Verification Summary
 
-Following eight phases of controlled, backward-compatible architectural enhancements, VigilBid has completed its final end-to-end integration and regression pass. All 380 backend tests, 70 frontend tests, 20-subsystem release audits, and RAG evaluation benchmarks pass with **100% success rate and zero regressions**.
+Following eight phases of controlled, backward-compatible architectural enhancements, VigilBid has completed its final end-to-end integration and regression pass. All 381 backend tests, 70 frontend tests, 20-subsystem release audits, and RAG evaluation benchmarks pass with **100% success rate and zero regressions**.
 
 ```
 ┌───────────────────────────────────────────────────────────────────────────────────┐
 │                     VIGILBID RELEASE READINESS SCORECARD                          │
 ├─────────────────────────────────────┬───────────────────┬─────────────────────────┤
-│ Verification Area                   │ Certified Status  │ Metric / Evidence       │
+│ Verification Area                   │ Verification Status │ Metric / Evidence       │
 ├─────────────────────────────────────┼───────────────────┼─────────────────────────┤
-│ Backend Unit & Integration Tests    │ ✅ CERTIFIED      │ 380 / 380 Passed (100%) │
-│ Frontend Vitest & UI/UX Checks      │ ✅ CERTIFIED      │ 70 / 70 Passed (100%)   │
-│ Production Bundle Compilation       │ ✅ CERTIFIED      │ TypeScript + Vite (OK)  │
-│ 20-Point Release Automation Audit   │ ✅ CERTIFIED      │ 20 / 20 Verified (OK)   │
-│ AI RAG Grounding Benchmark          │ ✅ CERTIFIED      │ 9 / 9 Evaluated (100%)  │
-│ Demo Lifecycle (Seed & Reset)       │ ✅ CERTIFIED      │ 4.52s Pristine Reset    │
-│ Cryptographic Audit Chain Integrity │ ✅ CERTIFIED      │ SHA-256 Unbroken Chain  │
-│ Threat Model & Security Policy      │ ✅ CERTIFIED      │ 9 Threat Vectors Sealed │
+│ Backend Unit & Integration Tests    │ ✅ VERIFIED       │ 381 / 381 Passed (100%) │
+│ Frontend Vitest & UI/UX Checks      │ ✅ VERIFIED       │ 70 / 70 Passed (100%)   │
+│ Production Bundle Compilation       │ ✅ VERIFIED       │ TypeScript + Vite (OK)  │
+│ 20-Point Release Automation Audit   │ ✅ VERIFIED       │ 20 / 20 Verified (OK)   │
+│ AI RAG Grounding Benchmark          │ ✅ VERIFIED       │ 9 / 9 Evaluated (100%)  │
+│ Demo Lifecycle (Seed & Reset)       │ ✅ VERIFIED       │ 4.52s Pristine Reset    │
+│ Cryptographic Audit Chain Integrity │ ✅ VERIFIED       │ SHA-256 Unbroken Chain  │
+│ Threat Model & Security Policy      │ ✅ VERIFIED       │ 9 Threat Vectors Sealed │
 └─────────────────────────────────────┴───────────────────┴─────────────────────────┘
 ```
 
 > [!IMPORTANT]
 > **PROTOTYPE INTEGRITY DISCLOSURE**
-> In accordance with open-source and competition ethics, VigilBid is certified as **Demo-Ready** and **Hackathon-Ready**. It utilizes high-fidelity simulated sandbox adapters for statutory portals (GSTN, NSDL PAN, Ministry of MSME, MCA21, CPPP Debarment). It does **NOT** connect to live production government HSM credentials or external cloud APIs.
+> In accordance with open-source and competition ethics, VigilBid is documented as **Demo-Ready** and **Hackathon-Ready**. It utilizes high-fidelity simulated sandbox adapters for statutory portals (GSTN, NSDL PAN, Ministry of MSME, MCA21, CPPP Debarment). It does **NOT** connect to live production government HSM credentials or external cloud APIs.
 
 ---
 
@@ -38,22 +38,22 @@ Following eight phases of controlled, backward-compatible architectural enhancem
 
 | Enhancement Milestone | Core Deliverables | Verification Status | Key Architectural Artifact |
 | :--- | :--- | :--- | :--- |
-| **Part 1: One-Click Demo Mode** | Turnkey seeding (`make demo`), zero-leakage reset (`make demo-reset`), automated lifecycle tests. | ✅ Complete | [`scripts/demo_setup.py`](file:///c:/Users/ritik/Downloads/SIH26100/scripts/demo_setup.py), [`tests/test_demo_lifecycle.py`](file:///c:/Users/ritik/Downloads/SIH26100/tests/test_demo_lifecycle.py) |
-| **Part 2: Requirement Traceability Matrix** | Officer-centric `Requirement → Result → Evidence` matrix with direct bounding box inspector triggers. | ✅ Complete | [`docs/evidence/REQUIREMENT-EVIDENCE-MODEL.md`](file:///c:/Users/ritik/Downloads/SIH26100/docs/evidence/REQUIREMENT-EVIDENCE-MODEL.md), [`tests/test_requirement_evidence.py`](file:///c:/Users/ritik/Downloads/SIH26100/tests/test_requirement_evidence.py) |
-| **Part 3: Explainable Risk Decomposition** | Plain language `WHY?` factor breakdown with exact mathematical point attribution and GFR citations. | ✅ Complete | [`docs/risk/EXPLAINABLE-RISK.md`](file:///c:/Users/ritik/Downloads/SIH26100/docs/risk/EXPLAINABLE-RISK.md), [`tests/test_explainable_risk.py`](file:///c:/Users/ritik/Downloads/SIH26100/tests/test_explainable_risk.py) |
-| **Part 4: Governed Human Review** | Governed officer review with mandatory justification logging for overrides and dual-custody audit logs. | ✅ Complete | [`docs/audit/HUMAN-REVIEW.md`](file:///c:/Users/ritik/Downloads/SIH26100/docs/audit/HUMAN-REVIEW.md), [`tests/test_human_review.py`](file:///c:/Users/ritik/Downloads/SIH26100/tests/test_human_review.py) |
-| **Part 5: Ground-Truth Evaluation Framework** | Reproducible evaluation suite with synthetic golden datasets, confusion matrices, and precision metrics. | ✅ Complete | [`docs/testing/AI-EVALUATION.md`](file:///c:/Users/ritik/Downloads/SIH26100/docs/testing/AI-EVALUATION.md), [`data/fixtures/`](file:///c:/Users/ritik/Downloads/SIH26100/data/fixtures/) |
-| **Part 6: Evidence-Grounded RAG & Defense** | Grounding status taxonomy (`GROUNDED`, `INSUFFICIENT_EVIDENCE`), `<DOCUMENT_DATA>` prompt injection defense. | ✅ Complete | [`docs/ai/RAG-GROUNDING.md`](file:///c:/Users/ritik/Downloads/SIH26100/docs/ai/RAG-GROUNDING.md), [`tests/test_rag_grounding_adversarial.py`](file:///c:/Users/ritik/Downloads/SIH26100/tests/test_rag_grounding_adversarial.py) |
-| **Part 7: Statutory Registry Simulator** | Deterministic scenario control (6 modes), GFR 173(v) downtime non-compliance, presenter chaos failure engine. | ✅ Complete | [`docs/demo/REGISTRY-SIMULATOR.md`](file:///c:/Users/ritik/Downloads/SIH26100/docs/demo/REGISTRY-SIMULATOR.md), [`tests/test_registry_simulator.py`](file:///c:/Users/ritik/Downloads/SIH26100/tests/test_registry_simulator.py) |
-| **Part 8: GitHub CI & Security Foundation** | Hardened CI workflows, CERT-In threat model, issue/PR templates, static secret inspection. | ✅ Complete | [`docs/security/THREAT-MODEL.md`](file:///c:/Users/ritik/Downloads/SIH26100/docs/security/THREAT-MODEL.md), [`.github/workflows/ci.yml`](file:///c:/Users/ritik/Downloads/SIH26100/.github/workflows/ci.yml) |
+| **Part 1: One-Click Demo Mode** | Turnkey seeding (`make demo`), zero-leakage reset (`make demo-reset`), automated lifecycle tests. | ✅ Complete | [`scripts/demo_setup.py`](scripts/demo_setup.py), [`tests/test_demo_lifecycle.py`](tests/test_demo_lifecycle.py) |
+| **Part 2: Requirement Traceability Matrix** | Officer-centric `Requirement → Result → Evidence` matrix with direct bounding box inspector triggers. | ✅ Complete | [`docs/evidence/REQUIREMENT-EVIDENCE-MODEL.md`](docs/evidence/REQUIREMENT-EVIDENCE-MODEL.md), [`tests/test_requirement_evidence.py`](tests/test_requirement_evidence.py) |
+| **Part 3: Explainable Risk Decomposition** | Plain language `WHY?` factor breakdown with exact mathematical point attribution and GFR citations. | ✅ Complete | [`docs/risk/EXPLAINABLE-RISK.md`](docs/risk/EXPLAINABLE-RISK.md), [`tests/test_explainable_risk.py`](tests/test_explainable_risk.py) |
+| **Part 4: Governed Human Review** | Governed officer review with mandatory justification logging for overrides and dual-custody audit logs. | ✅ Complete | [`docs/audit/HUMAN-REVIEW.md`](docs/audit/HUMAN-REVIEW.md), [`tests/test_human_review.py`](tests/test_human_review.py) |
+| **Part 5: Ground-Truth Evaluation Framework** | Reproducible evaluation suite with synthetic golden datasets, confusion matrices, and precision metrics. | ✅ Complete | [`docs/testing/AI-EVALUATION.md`](docs/testing/AI-EVALUATION.md), [`data/fixtures/`](data/fixtures/) |
+| **Part 6: Evidence-Grounded RAG & Defense** | Grounding status taxonomy (`GROUNDED`, `INSUFFICIENT_EVIDENCE`), `<DOCUMENT_DATA>` prompt injection defense. | ✅ Complete | [`docs/ai/RAG-GROUNDING.md`](docs/ai/RAG-GROUNDING.md), [`tests/test_rag_grounding_adversarial.py`](tests/test_rag_grounding_adversarial.py) |
+| **Part 7: Statutory Registry Simulator** | Deterministic scenario control (6 modes), GFR 173(v) downtime non-compliance, presenter chaos failure engine. | ✅ Complete | [`docs/demo/REGISTRY-SIMULATOR.md`](docs/demo/REGISTRY-SIMULATOR.md), [`tests/test_registry_simulator.py`](tests/test_registry_simulator.py) |
+| **Part 8: GitHub CI & Security Foundation** | Hardened CI workflows, CERT-In threat model, issue/PR templates, static secret inspection. | ✅ Complete | [`docs/security/THREAT-MODEL.md`](docs/security/THREAT-MODEL.md), [`.github/workflows/ci.yml`](.github/workflows/ci.yml) |
 
 ---
 
 ## 3. Full Test & Quality Matrix
 
 ### A. Backend Test Execution (`pytest tests/ -v`)
-- **Total Test Cases Executed:** 380
-- **Passed:** 380 (100.0%)
+- **Total Test Cases Executed:** 381
+- **Passed:** 381 (100.0%)
 - **Failed:** 0
 - **Duration:** 38.15s (~100ms per test average)
 - **Key Modules Covered:**
@@ -73,7 +73,7 @@ Following eight phases of controlled, backward-compatible architectural enhancem
 ### C. Multi-Domain RAG Benchmark (`python -m pipeline.rag.eval_examples`)
 - **Total Benchmark Questions:** 9 / 9 Evaluated
 - **Accuracy / Grounding Score:** 100.0%
-- **Zero Hallucination Validation:** Correctly outputs `"Insufficient evidence available to verify this claim."` on missing filings.
+- **Grounding Boundary Validation:** Correctly outputs `"Insufficient evidence available to verify this claim."` on missing filings.
 
 ---
 
@@ -94,17 +94,17 @@ The complete 13-stage officer procurement workflow was tested and validated:
 [10. Officer Action]     POST /api/v1/bidders/{id}/decision         -> APPROVE / REJECT / OVERRIDE Recorded
 [11. Audit Trail]        GET /api/v1/audit/trail & /verify          -> SHA-256 Forward-Linked Chain Unbroken
 [12. History Check]      GET /api/v1/bidders/{id}/history           -> Historical Traceability Log Active
-[13. Generate Report]    GET /api/v1/reports/tender/{id}/dossier    -> Statutory CVC Dossier PDF Compiled
+[13. Generate Report]    GET /api/v1/reports/tender/{id}/dossier    -> CVC-aligned evidence dossier PDF compiled for officer review
 ```
 
 ---
 
 ## 5. Security & Threat Modeling Verification
 
-All 9 threat vectors defined in [`docs/security/THREAT-MODEL.md`](file:///c:/Users/ritik/Downloads/SIH26100/docs/security/THREAT-MODEL.md) have been verified:
+All 9 threat vectors defined in [`docs/security/THREAT-MODEL.md`](docs/security/THREAT-MODEL.md) have been verified:
 - **T1: Malicious PDF**: Magic-byte inspection (`%PDF-`) and sandboxed parser extraction.
 - **T2: ZIP Decompression Bomb**: 100:1 ratio limit, 200 file entry cap, and SHA-256 CAS storage naming.
-- **T3: Document Prompt Injection**: Retreived text quarantined inside `<DOCUMENT_DATA>` tags; deterministic rules override LLM.
+- **T3: Document Prompt Injection**: Retrieved text quarantined inside `<DOCUMENT_DATA>` tags; deterministic rules override LLM.
 - **T4: Unauthorized Officer Action**: RBAC enforced via `require_role(UserRole.OFFICER, UserRole.ADMIN)`.
 - **T5: Registry Spoofing**: Transparent `DEMO` labeling and GFR 173(v) non-compliance on portal downtime.
 - **T6: Data Leakage**: Multi-tenant query filters and Fernet identifier encryption at rest.
@@ -151,7 +151,7 @@ make dev-backend
 make dev-frontend
 ```
 
-### Option C: Verification & Audit Certification
+### Option C: Verification & Audit Checks
 ```bash
 # Run the 20-point release audit runner
 python scripts/release_audit.py

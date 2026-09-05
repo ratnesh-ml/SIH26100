@@ -8,7 +8,7 @@ This document reserves the evaluator-facing locations for final visual and video
 |---|---|---|
 | Live demo (Frontend) | [https://vigilbid-frontend.onrender.com](https://vigilbid-frontend.onrender.com) | Active public deployment instance on Render. |
 | Backend API & Docs | [https://vigilbid-backend.onrender.com/api/v1/docs](https://vigilbid-backend.onrender.com/api/v1/docs) | Active public FastAPI Swagger docs instance. |
-| YouTube walkthrough | `[ADD YOUTUBE VIDEO URL]` | Replace with the final public video URL. |
+| YouTube walkthrough | Not yet published | Add the final public video URL before submission. |
 | Project repository | [SIH26100 GitHub repository](https://github.com/ratnesh-ml/SIH26100) | Keep unchanged. |
 
 ## Screenshot slots

@@ -15,7 +15,7 @@ Public procurement compliance requires exact mathematical parity (such as embedd
 
 ---
 
-## 2. Statutory Validators ([pipeline/entity_resolution/validators.py](file:///c:/Users/ritik/Downloads/SIH26100/pipeline/entity_resolution/validators.py))
+## 2. Statutory Validators ([pipeline/entity_resolution/validators.py](pipeline/entity_resolution/validators.py))
 
 All validators return a standardized `ValidationResult`:
 
@@ -70,7 +70,7 @@ class ValidationResult:
 
 ---
 
-## 3. Normalization Pipeline ([pipeline/entity_resolution/normalizer.py](file:///c:/Users/ritik/Downloads/SIH26100/pipeline/entity_resolution/normalizer.py))
+## 3. Normalization Pipeline ([pipeline/entity_resolution/normalizer.py](pipeline/entity_resolution/normalizer.py))
 
 ### 3.1 Whitespace Normalization (`normalize_whitespace`)
 - Converts tabs and non-breaking spaces (`\xa0`) to standard space.

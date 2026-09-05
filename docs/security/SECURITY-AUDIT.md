@@ -81,7 +81,7 @@ The primary threat actors and attack surfaces considered in this security audit:
 
 ## 4. Automated Security Test Suite Verification
 
-A dedicated attack simulation test suite was created in [`tests/test_security_audit.py`](file:///c:/Users/ritik/Downloads/SIH26100/tests/test_security_audit.py).
+A dedicated attack simulation test suite was created in [`tests/test_security_audit.py`](tests/test_security_audit.py).
 
 ### Test Suite Execution Output
 ```

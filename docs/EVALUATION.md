@@ -1,10 +1,10 @@
 # VigilBid (SIH26100) — Reproducible System Evaluation Benchmark
 
-**Generated:** 2026-09-04T15:38:32.148372+00:00  
-**Evaluation Harness:** `scripts/evaluate.py`  
-**Ground Truth Reference:** `seed/ground_truth.json`  
-**Workload Processed:** 26 statutory filings across 26 PDF pages  
-**Total Benchmark Execution Time:** 1.22s  
+**Generated:** 2026-09-05T00:27:57.598023+00:00
+**Evaluation Harness:** `scripts/evaluate.py`
+**Ground Truth Reference:** `seed/ground_truth.json`
+**Workload Processed:** 26 statutory filings across 26 PDF pages
+**Total Benchmark Execution Time:** 0.10s
 
 ---
 
@@ -144,8 +144,8 @@ ACTUAL CLEAN             FP: 0               TN: 4
 
 | Bidder | Documents | Execution Time | Throughput (docs/sec) |
 |---|---|---|---|
-| `bidder_a_meridian` | 14 steps | **0.283s** | ~21.2 filings/sec |
-| `bidder_b_kaveri` | 14 steps | **0.054s** | ~111.1 filings/sec |
-| `bidder_c_bharat` | 14 steps | **0.173s** | ~34.6 filings/sec |
-| `bidder_d_nova` | 14 steps | **0.073s** | ~82.2 filings/sec |
-| `bidder_e_debarred` | 14 steps | **0.052s** | ~114.9 filings/sec |
+| `bidder_a_meridian` | 14 steps | **0.047s** | ~127.4 filings/sec |
+| `bidder_b_kaveri` | 14 steps | **0.017s** | ~352.9 filings/sec |
+| `bidder_c_bharat` | 14 steps | **0.013s** | ~447.8 filings/sec |
+| `bidder_d_nova` | 14 steps | **0.016s** | ~379.7 filings/sec |
+| `bidder_e_debarred` | 14 steps | **0.008s** | ~714.3 filings/sec |

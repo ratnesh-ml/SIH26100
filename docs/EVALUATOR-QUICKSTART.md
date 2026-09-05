@@ -10,7 +10,7 @@ The guiding principle is:
 
 > **AI assists. Rules verify. Evidence explains. Officer decides.**
 
-The current repository contains a reproducible synthetic demonstration environment. Government registry adapters are intentionally simulated and clearly separated from production integration requirements.
+The current repository contains a reproducible synthetic demonstration environment. The benchmark measures implementation behavior on synthetic fixtures, not production accuracy. Government registry adapters are intentionally simulated and clearly separated from production integration requirements.
 
 ## 2. Evaluator assets
 
@@ -20,12 +20,12 @@ The following assets will be added before the final submission. The placeholders
 |---|---|---|
 | Public live demo | Active | [https://vigilbid-frontend.onrender.com](https://vigilbid-frontend.onrender.com) |
 | Backend API & Swagger | Active | [https://vigilbid-backend.onrender.com/api/v1/docs](https://vigilbid-backend.onrender.com/api/v1/docs) |
-| YouTube walkthrough | To be added | `[ADD YOUTUBE VIDEO URL]` |
-| Dashboard screenshot | To be added | `docs/demo/screenshots/01-dashboard.png` |
-| Bidder cockpit screenshot | To be added | `docs/demo/screenshots/02-bidder-cockpit.png` |
-| Evidence inspector screenshot | To be added | `docs/demo/screenshots/03-evidence-inspector.png` |
-| Explainable risk screenshot | To be added | `docs/demo/screenshots/04-risk-explanation.png` |
-| Audit ledger screenshot | To be added | `docs/demo/screenshots/05-audit-ledger.png` |
+| YouTube walkthrough | Not yet published | Add a final public video URL before submission. |
+| Dashboard screenshot | Captured | `docs/demo/screenshots/01-dashboard.png` |
+| Bidder cockpit screenshot | Captured | `docs/demo/screenshots/02-bidder-cockpit.png` |
+| Evidence inspector screenshot | Captured | `docs/demo/screenshots/03-evidence-inspector.png` |
+| Explainable risk screenshot | Captured | `docs/demo/screenshots/04-risk-explanation.png` |
+| Audit ledger screenshot | Captured | `docs/demo/screenshots/05-audit-ledger.png` |
 
 ## 3. Fastest local verification path
 
@@ -108,6 +108,7 @@ That limitation is intentional: the prototype demonstrates the workflow, evidenc
 - [Known limitations](KNOWN-LIMITATIONS.md)
 - [Testing and evaluation](testing/EVALUATION.md)
 - [Demonstration benchmark](testing/DEMO-BENCHMARK.md)
+- [Impact benchmark](testing/IMPACT-BENCHMARK.md)
 - [Judge Mode specification](EVALUATOR-JUDGE-MODE.md)
 - [Final submission asset plan](demo/SUBMISSION-ASSETS.md)
 

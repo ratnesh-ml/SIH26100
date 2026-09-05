@@ -25,7 +25,7 @@
 |---|---|
 | Live demo URL | [https://vigilbid-frontend.onrender.com](https://vigilbid-frontend.onrender.com) |
 | Backend API & Docs | [https://vigilbid-backend.onrender.com/api/v1/docs](https://vigilbid-backend.onrender.com/api/v1/docs) |
-| YouTube walkthrough | `[ADD YOUTUBE VIDEO URL]` |
+| YouTube walkthrough | Not yet published | Add a final public video URL before submission. |
 | Dashboard screenshot | [`docs/demo/screenshots/01-dashboard.png`](docs/demo/screenshots/01-dashboard.png) (Captured & Attached) |
 | Bidder cockpit screenshot | [`docs/demo/screenshots/02-bidder-cockpit.png`](docs/demo/screenshots/02-bidder-cockpit.png) (Captured & Attached) |
 | Evidence inspector screenshot | [`docs/demo/screenshots/03-evidence-inspector.png`](docs/demo/screenshots/03-evidence-inspector.png) (Captured & Attached) |
@@ -38,6 +38,7 @@ Additional evaluator-facing planning documents are available for the future Judg
 
 - [Judge Mode specification](docs/EVALUATOR-JUDGE-MODE.md)
 - [Demonstration benchmark](docs/testing/DEMO-BENCHMARK.md)
+- [Impact benchmark](docs/testing/IMPACT-BENCHMARK.md)
 - [Final submission asset plan](docs/demo/SUBMISSION-ASSETS.md)
 
 ## 🏛️ SIH 2026 Project Identity
@@ -89,7 +90,7 @@ Public procurement scrutiny takes **8 to 10 hours per bidder**, leaving evaluati
 |---|---|---|
 | **Live Demo (Frontend)** | **[https://vigilbid-frontend.onrender.com](https://vigilbid-frontend.onrender.com)** | Public live deployment instance hosted on Render (Vite React SPA) |
 | **Backend API & Swagger** | **[https://vigilbid-backend.onrender.com/api/v1/docs](https://vigilbid-backend.onrender.com/api/v1/docs)** | Public FastAPI backend service with interactive Swagger / OpenAPI docs |
-| **Demo Video** | `[ADD YOUTUBE VIDEO URL]` | Comprehensive video walkthrough; link to be added before final submission |
+| **Demo Video** | Not yet published | Add a final public video walkthrough URL before submission |
 | **Interactive Tour** | **Available in Local Build (`/#/demo`)** | Self-contained, zero-setup 15-step interactive scrutiny tour |
 | **Evaluator Walkthrough Guide** | **[docs/demo/DEMO-GUIDE.md](docs/demo/DEMO-GUIDE.md)** | Step-by-step evaluator manual with exact coordinates, telemetry, and citations |
 | **60-Second Summary** | **[docs/ONE-MINUTE-TOUR.md](docs/ONE-MINUTE-TOUR.md)** | Executive brief for competition jury and technical reviewers |

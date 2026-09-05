@@ -8,7 +8,7 @@
 
 ## 1. Architectural Overview
 
-VigilBid verifies bidder statutory credentials against a standardized abstract provider contract ([`RegistryProvider`](file:///c:/Users/ritik/Downloads/SIH26100/pipeline/registry_adapters/base.py)). 
+VigilBid verifies bidder statutory credentials against a standardized abstract provider contract ([`RegistryProvider`](pipeline/registry_adapters/base.py)).
 
 The architecture supports five statutory government domains:
 1. **GST Registry (GSTN)**: Verifies 15-character GSTIN structure, active vs. cancelled registration status, legal/trade name, and return filing history.
@@ -53,7 +53,7 @@ The architecture supports five statutory government domains:
 
 ## 2. Standard Registry Result Contract
 
-Every registry check returns a strict [`RegistryResult`](file:///c:/Users/ritik/Downloads/SIH26100/pipeline/registry_adapters/base.py) object:
+Every registry check returns a strict [`RegistryResult`](pipeline/registry_adapters/base.py) object:
 
 ```json
 {
@@ -77,7 +77,7 @@ Every registry check returns a strict [`RegistryResult`](file:///c:/Users/ritik/
 
 ## 3. Deterministic Simulation Scenarios
 
-The simulator provides 6 deterministic scenarios via the [`RegistryScenario`](file:///c:/Users/ritik/Downloads/SIH26100/pipeline/registry_adapters/base.py) enumeration:
+The simulator provides 6 deterministic scenarios via the [`RegistryScenario`](pipeline/registry_adapters/base.py) enumeration:
 
 | Scenario | Return Status | Data Payload Highlights | System Decision Impact |
 | :--- | :--- | :--- | :--- |
@@ -125,7 +125,7 @@ When the simulated registry portal experiences downtime (`API_UNAVAILABLE` / 503
 
 ## 5. Presenter Chaos & Demo Failure Simulator
 
-For live evaluation and interactive demonstration, the [`ChaosSimulator`](file:///c:/Users/ritik/Downloads/SIH26100/pipeline/demo/chaos_simulator.py) engine provides 5 single-click failure injections:
+For live evaluation and interactive demonstration, the [`ChaosSimulator`](pipeline/demo/chaos_simulator.py) engine provides 5 single-click failure injections:
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
