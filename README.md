@@ -1,13 +1,15 @@
 # VigilBid
 
-### AI-assisted, evidence-first bid compliance verification and vigilance decision-support platform for public procurement on GeM.
+**VigilBid helps procurement officers verify bidder documents, find compliance risks, inspect the evidence, and record an auditable decision.**
+
+*An evidence-first compliance verification platform for Government e-Marketplace procurement under General Financial Rules 2017 and Central Vigilance Commission-aligned workflows.*
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![CI Pipeline](https://github.com/ratnesh-ml/SIH26100/actions/workflows/ci.yml/badge.svg)](https://github.com/ratnesh-ml/SIH26100/actions/workflows/ci.yml)
 [![Backend Tests: 381 Passing](https://img.shields.io/badge/Backend%20Tests-381%20Passing-brightgreen)](tests/)
 [![Frontend Tests: 70 Passing](https://img.shields.io/badge/Frontend%20Tests-70%20Passing-brightgreen)](frontend/)
-[![Release Audit: 20/20 Subsystems](https://img.shields.io/badge/Release%20Audit-20%2F20%20Certified-blue)](scripts/release_audit.py)
-[![Threat Model: Comprehensive](https://img.shields.io/badge/Threat%20Model-Certified-emerald)](docs/security/THREAT-MODEL.md)
+[![Release Audit: 20/20 Subsystems](https://img.shields.io/badge/Release%20Audit-20%2F20%20Verified-blue)](scripts/release_audit.py)
+[![Threat Model: Comprehensive](https://img.shields.io/badge/Threat%20Model-Prototype%20Safeguards-emerald)](docs/security/THREAT-MODEL.md)
 [![Architecture: Modular Monolith](https://img.shields.io/badge/Architecture-Modular%20Monolith-orange)](docs/architecture/REPOSITORY-MAP.md)
 [![SIH Problem: SIH26100](https://img.shields.io/badge/SIH%202026-SIH26100-purple)](docs/architecture/SIH26100-REQUIREMENT-MATRIX.md)
 
@@ -54,7 +56,7 @@ Additional evaluator-facing planning documents are available for the future Judg
 
 ## ⚡ One-Sentence Explanation
 
-**VigilBid is an evidence-first, buyer-side decision-support platform that transforms multi-document bid verification into sub-second, explainable compliance audits under GFR 2017 and CVC guidelines.**
+**VigilBid is an evidence-first, buyer-side decision-support platform that transforms multi-document bid verification into fast, explainable compliance review under the General Financial Rules 2017 and Central Vigilance Commission-aligned workflows.**
 
 ---
 
@@ -62,11 +64,11 @@ Additional evaluator-facing planning documents are available for the future Judg
 
 Public procurement scrutiny takes **8 to 10 hours per bidder**, leaving evaluation committees vulnerable to unverified tax credentials, cross-document inconsistencies, and manipulated files. VigilBid delivers:
 
-- 🛡️ **Sub-Second Scrutiny:** Evaluates multi-document bidder archives across 34 CPCL Goods criteria in &lt;108ms.
-- 🔍 **Split-Screen Evidence:** Connects every finding directly to exact source PDF pages and coordinate bounding box highlights.
-- ⚖️ **Zero AI Hallucinations:** Legal compliance is executed by **100% deterministic Python rules citing GFR 2017 clauses**—probabilistic LLMs are never legal judges.
-- 👤 **Preserved Human Authority:** Procurement officers retain complete discretion to accept, reject, or override findings with mandatory written minutes.
-- 🔐 **Cryptographic Auditability:** Every decision is committed to a tamper-evident SHA-256 forward hash chain for CAG and CVC audit oversight.
+- 🛡️ **Fast scrutiny:** Evaluates multi-document bidder archives across 34 CPCL Goods criteria in &lt;108ms.
+- 🔍 **Evidence, not just alerts:** Connects every finding directly to source PDF pages and coordinate highlights.
+- ⚖️ **Deterministic authority:** Compliance rules cite GFR 2017 clauses; AI-assisted components cannot override evidence or statutory rules.
+- 👤 **Human decision authority:** Procurement officers retain discretion to accept, reject, or override findings with written minutes.
+- 🔐 **Auditability:** Every decision is committed to a tamper-evident SHA-256 forward hash chain.
 
 ```
 ┌────────────────────────────────────────────────────────────────────────────────────────┐
@@ -152,10 +154,35 @@ High-resolution UI captures generated from the official Stitch UI specifications
 
 ---
 
-## ⏱️ See VigilBid in 3 Minutes: The Case of Bharat Hydrotech Corp
+## ⏱️ Judge Mode: See the value in 90 seconds
+
+Use one synthetic case and follow five visible outcomes. This is the recommended first pass for a busy evaluator; the full technical walkthrough follows immediately afterward.
+
+| Step | What the judge sees | What it proves |
+|---:|---|---|
+| **1. Problem** | A bidder package with scattered statutory documents. | Manual cross-checking is slow and error-prone. |
+| **2. Detection** | Bharat Hydrotech Corp marked **HIGH RISK**. | The PAN embedded in the GSTIN does not match the submitted PAN card. |
+| **3. Proof** | Side-by-side source pages with highlighted values. | The finding is inspectable at exact pages and coordinates, not a black-box alert. |
+| **4. Governance** | Rule explanation, risk breakdown, and officer decision form. | Rules explain the finding, while the procurement officer retains legal authority. |
+| **5. Audit** | The audit ledger and generated dossier. | The final action is recorded with traceable evidence for later review. |
+
+> **Judge takeaway:** VigilBid does not replace the officer. It compresses document scrutiny into an evidence-backed, explainable decision path.
+
+![VigilBid evidence-first workflow](docs/demo/screenshots/01-dashboard.png)
+
+### Why not ordinary OCR or a spreadsheet?
+
+| Ordinary OCR / spreadsheet | VigilBid |
+|---|---|
+| Extracts text or stores manually entered values. | Extracts values and links them to source pages and coordinate evidence. |
+| Leaves cross-document comparison to the reviewer. | Runs deterministic identity, compliance, and threshold checks across the package. |
+| Provides limited explanation for a warning. | Shows the rule, evidence, risk factors, and reviewer action together. |
+| Does not create a governed decision record by default. | Preserves officer authority and records a tamper-evident audit trail. |
+
+## ⏱️ Full technical walkthrough: The case of Bharat Hydrotech Corp
 
 > [!NOTE]
-> ### 🧪 Synthetic Demonstration Scenario
+> ### 🧪 SYNTHETIC DEMO — MOCK REGISTRY RESPONSE
 > The following example uses synthetic bidder, tender, and registry data. It illustrates the system workflow and does not represent a real CPCL procurement.
 
 An evaluator can understand the complete value of VigilBid in under 3 minutes through **ONE synthetic bidder scenario**: **Bharat Hydrotech Corp** (Bidder C) submitting for CPCL tender `CPCL/MM/2026/PUMP-217` (12 API-610 Centrifugal Process Pumps, estimated value **₹18.40 Crores**):
@@ -172,7 +199,7 @@ An evaluator can understand the complete value of VigilBid in under 3 minutes th
 └────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-### The 15 Scrutiny Milestones
+### Technical verification: the 15 scrutiny milestones
 
 1. **Tender Context:** Ref `CPCL/MM/2026/PUMP-217` (₹18.40 Cr, 12 API-610 Pumps). Rules: GFR 144/161, Class-I MII $\ge$ 50%, Min Turnover ₹5.52 Cr (30%).
 2. **Select Bidder:** Bidder C (**Bharat Hydrotech Corp**) selected from 5 participating vendor packages.
@@ -301,6 +328,15 @@ VigilBid covers all 24 official requirement areas defined in Problem Statement S
 
 ## 🏗️ System Architecture
 
+### Four layers in plain language
+
+1. **Perceive:** ingest bidder files, classify documents, and extract text and coordinates.
+2. **Verify:** compare identifiers and requirements using deterministic rules and controlled registry responses.
+3. **Explain:** show the exact evidence, rule, risk contribution, and limitation behind each finding.
+4. **Decide and audit:** let the procurement officer record the final decision and preserve the evidence-backed history.
+
+The detailed architecture below names the services and implementation boundaries behind these four layers.
+
 VigilBid is structured as a **Modular Monolith** designed for high reliability, straightforward local evaluation, and air-gapped deployment:
 
 ```mermaid
@@ -379,12 +415,12 @@ graph TB
 | **2** | **Document Intelligence** | TF-IDF classification across 13 statutory document types with sub-second PyMuPDF text layer and Tesseract 5.0 OCR fallback. | Eliminates manual document sorting and extracts word coordinates. |
 | **3** | **Entity Resolution** | Deterministic PAN-in-GSTIN containment checking (chars 3–12) and Jaro-Winkler legal name similarity ($\ge 0.85$). | Mitigates identity mismatches while protecting MSEs from wrongful disqualification due to minor abbreviations. |
 | **4** | **Registry Adapters** | Controlled mock adapters that follow the expected verification interface conforming to GSTN, PAN, MCA-21, Udyam, and CPPP schemas. | Validates credentials without requiring officers to log into 5 external portals. |
-| **5** | **Deterministic Rules Engine** | 34 CPCL Goods criteria under GFR 2017 evaluated in Python with strict legal precedence (`FAIL > REVIEW > WARN > PASS`). | Guarantees 100% reproducible compliance rulings with zero generative hallucinations. |
+| **5** | **Deterministic Rules Engine** | 34 CPCL Goods criteria under GFR 2017 evaluated in Python with strict legal precedence (`FAIL > REVIEW > WARN > PASS`). | Guarantees 100% reproducible compliance rulings with no generative component is the compliance authority. |
 | **6** | **PDF Metadata & Anomaly Detection** | Flags suspicious PDF metadata inconsistencies (editing tool traces, modification timestamps) and detects instruction patterns in bid document layers. | Flags unexpected editing tool signatures and prompt manipulation attempts. |
 | **7** | **Explainable Risk Scoring** | Transparent 0–100 composite risk score decomposed into Identity (+35), Compliance (+25), Financial (+5), and Anomaly factors. | Eliminates black-box scoring; every single risk point is attributed to a verifiable root cause. |
 | **8** | **Split-Screen Evidence Inspector** | Dual-pane viewer rendering high-resolution PDF pages with exact coordinate bounding box highlight overlays. | Enables officers to verify evidence visually in seconds without opening external PDF viewers. |
 | **9** | **Officer Review Cockpit** | Dedicated interface allowing officers to accept findings, issue clarifications, or record mandatory written justifications for overrides. | Preserves human authority; procurement officers retain sole legal discretion. |
-| **10** | **Cryptographic Audit & Dossier** | Forward SHA-256 tamper-evident hash chain verified at runtime, with one-click export to official CVC Compliance Dossier PDFs. | Generates standardized CVC-formatted compliance dossiers for evaluation committee and CAG review. |
+| **10** | **Cryptographic Audit & Dossier** | Forward SHA-256 tamper-evident hash chain verified at runtime, with one-click export to CVC-aligned evidence dossier PDFs for officer review. | Generates standardized CVC-aligned evidence dossiers for evaluation committee and CAG review. |
 
 ---
 
@@ -404,7 +440,7 @@ VigilBid applies defense-in-depth across the ingestion and evaluation pipeline:
 
 ## 🧪 Testing & Verification
 
-The project includes unit, integration, and release certification test suites:
+The project includes unit, integration, and release verification test suites:
 
 ```bash
 # 1. Run all backend automated tests (381 tests)
@@ -413,7 +449,7 @@ pytest tests/ -v
 # 2. Run frontend component & UI architecture checks (70 tests)
 cd frontend && npm test && cd ..
 
-# 3. Run the automated 20-subsystem release certification audit
+# 3. Run the automated 20-subsystem release verification audit
 python scripts/release_audit.py
 ```
 
@@ -520,7 +556,9 @@ The table below provides a complete accounting across all government databases a
 ### 🧪 Demonstration Test Matrix (5 Intentional Scenarios)
 
 > [!NOTE]
-> **Synthetic Demonstration Data Guarantee:** All demonstration vendor packages, tax identifiers, and financial certificates are synthetic datasets generated for reproducible hackathon evaluation under simulated CPCL Tender `CPCL/MM/2026/PUMP-217`. They illustrate the system workflow and do not represent a real CPCL procurement.
+> **SYNTHETIC DEMO — MOCK REGISTRY RESPONSE.** All demonstration vendor packages, tax identifiers, and financial certificates are synthetic datasets generated for reproducible hackathon evaluation.
+
+**Synthetic Demonstration Data Guarantee:** All demonstration vendor packages, tax identifiers, and financial certificates are synthetic datasets generated for reproducible hackathon evaluation under simulated CPCL Tender `CPCL/MM/2026/PUMP-217`. They illustrate the system workflow and do not represent a real CPCL procurement.
 
 Rather than arbitrary test files, VigilBid provides 5 synthetic vendor packages in `seed/demo_packages/` (26 PDF submission files total, compared to the ~900 documents problem-scale scenario) engineered as an **intentional test matrix**. Each scenario tests a distinct legal and forensic scrutiny path:
 

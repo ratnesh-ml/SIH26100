@@ -49,23 +49,19 @@ After the services become healthy, open:
 
 If Docker is unavailable, follow the native setup in the main [README](../README.md) and [final setup guide](deployment/FINAL-SETUP.md).
 
-## 4. Three-minute golden-path demonstration
+## 4. 90-second judge path
 
-Use the synthetic **Bharat Hydrotech Corp** scenario. It is designed to demonstrate the complete decision-support workflow without requiring real government credentials.
+Use the **SYNTHETIC DEMO — MOCK REGISTRY RESPONSE** scenario for Bharat Hydrotech Corp. It demonstrates the decision-support workflow without requiring real government credentials.
 
 | Step | Evaluator action | Expected result |
 |---:|---|---|
-| 1 | Open the demo tour or dashboard | The tender and synthetic bidder scenarios are visible. |
-| 2 | Select Bharat Hydrotech Corp | The bidder cockpit shows the submitted document package and extracted values. |
-| 3 | Open the identity finding | The system shows the PAN-versus-GSTIN inconsistency. |
-| 4 | Open source evidence | The relevant PDF pages and coordinate highlights are displayed. |
-| 5 | Open the risk explanation | The composite score is decomposed into understandable factors. |
-| 6 | Review the compliance rule | The deterministic rule and statutory reference are visible. |
-| 7 | Record a human decision | The officer decision requires written justification where applicable. |
-| 8 | Open the audit ledger | The decision appears in the tamper-evident audit history. |
-| 9 | Generate the dossier | The evidence-backed compliance report is available for review. |
+| 1 | Open the dashboard and select Bharat Hydrotech Corp | The synthetic bidder package and HIGH-RISK state are visible. |
+| 2 | Open the identity finding | The PAN-versus-GSTIN inconsistency is stated plainly. |
+| 3 | Open source evidence | The relevant PDF pages and coordinate highlights prove the finding. |
+| 4 | Review rule, risk, and officer decision | The deterministic rule explains the result, but the officer remains the final authority. |
+| 5 | Open the audit ledger and dossier | The evidence-backed action is preserved for later review. |
 
-For the detailed version of this flow, see [docs/demo/DEMO-GUIDE.md](demo/DEMO-GUIDE.md) and [docs/ONE-MINUTE-TOUR.md](ONE-MINUTE-TOUR.md). The planned scenario-card experience is specified in [Judge Mode](EVALUATOR-JUDGE-MODE.md).
+For the full technical 15-stage version of this flow, see [docs/demo/DEMO-GUIDE.md](demo/DEMO-GUIDE.md) and [docs/ONE-MINUTE-TOUR.md](ONE-MINUTE-TOUR.md). The planned scenario-card experience is specified in [Judge Mode](EVALUATOR-JUDGE-MODE.md).
 
 ## 5. What the evaluator should verify
 
@@ -97,7 +93,7 @@ The authoritative current metrics should be read from [`docs/release/PROJECT-MET
 
 ## 7. Prototype scope disclosure
 
-This repository is **demo-ready and hackathon-ready**, not a claim of production deployment against live government systems. Registry responses are simulated, the bidder packages are synthetic, and live production operation would require approved integrations, credentials, infrastructure, security review, and institutional agreements.
+This repository is **demo-ready and hackathon-ready**, not a claim of production deployment against live government systems. Use the label **SYNTHETIC DEMO — MOCK REGISTRY RESPONSE** wherever the demo scope is shown. Registry responses are simulated, the bidder packages are synthetic, and live production operation would require approved integrations, credentials, infrastructure, security review, and institutional agreements.
 
 That limitation is intentional: the prototype demonstrates the workflow, evidence model, explainability, human governance, and auditability without using real citizen or vendor data.
 
