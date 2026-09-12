@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { MOCK_TENDERS } from '../../mockData/tenders';
 import { MOCK_BIDDERS } from '../../mockData/bidders';
-import { MOCK_AUDIT_EVENTS } from '../../mockData/auditEvents';
 
 interface DashboardViewProps {
   onNavigate: (view: string, params?: any) => void;
@@ -12,7 +11,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   onNavigate,
   onDownloadDossier,
 }) => {
-  const [selectedTenderId] = useState('CPCL-2026-PUMP');
   const [scanRunning, setScanRunning] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
@@ -20,14 +18,13 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     setScanRunning(true);
     setTimeout(() => {
       setScanRunning(false);
-      setToastMessage('Deterministic Red-Flag Scan complete. 3 high-risk anomalies reaffirmed across 5 bidders.');
+      setToastMessage('Deterministic Red-Flag Scan complete. 4 high-risk anomalies reaffirmed across 5 bidders.');
       setTimeout(() => setToastMessage(null), 4000);
     }, 800);
   };
 
-  const currentTender = MOCK_TENDERS.find((t) => t.id === selectedTenderId) || MOCK_TENDERS[0];
-  const activeBidders = MOCK_BIDDERS.filter((b) => b.tenderId === currentTender.id);
-  const recentEvents = MOCK_AUDIT_EVENTS.slice(0, 5);
+  const currentTender = MOCK_TENDERS.find((t) => t.id === 'CPCL-PUMP-217') || MOCK_TENDERS[0];
+  const primaryBidder = MOCK_BIDDERS.find((b) => b.id === 'BID-HYD-0419') || MOCK_BIDDERS[0];
 
   return (
     <div className="flex flex-col gap-5 text-slate-800 text-xs">
@@ -40,7 +37,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       )}
 
       {/* Top Action & Overview Title Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-4 bg-white p-5 rounded-lg border border-slate-200 shadow-xs">
+      <div className="flex flex-wrap items-center justify-between gap-4 bg-white p-5 rounded-lg border border-slate-200 shadow-sm">
         <div className="flex flex-col gap-0.5">
           <div className="flex items-center gap-2.5">
             <h1 className="text-xl font-bold text-slate-900 tracking-tight">Procurement Scrutiny Overview</h1>
@@ -60,7 +57,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           </div>
           <button
             onClick={onDownloadDossier}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md bg-white text-slate-700 font-medium text-[13px] border border-slate-300 hover:bg-slate-50 hover:text-slate-900 transition-colors shadow-xs cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-md bg-white text-slate-700 font-medium text-[13px] border border-slate-300 hover:bg-slate-50 hover:text-slate-900 transition-colors shadow-xs cursor-pointer"
+            type="button"
           >
             <span className="material-symbols-outlined text-[16px] text-slate-500">file_download</span>
             <span>Export Scrutiny Dossier</span>
@@ -68,7 +66,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           <button
             onClick={triggerScan}
             disabled={scanRunning}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md bg-blue-600 text-white font-medium text-[13px] hover:bg-blue-700 transition-colors shadow-xs cursor-pointer disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-md bg-blue-600 text-white font-medium text-[13px] hover:bg-blue-700 transition-colors shadow-xs cursor-pointer disabled:opacity-50"
+            type="button"
           >
             <span className={`material-symbols-outlined text-[16px] text-white ${scanRunning ? 'animate-spin' : ''}`}>
               security_update_good
@@ -83,7 +82,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         {/* Card 1 */}
         <div
           onClick={() => onNavigate('tenders')}
-          className="bg-white p-4 rounded-lg border border-slate-200 shadow-xs flex flex-col justify-between h-28 hover:border-blue-400 cursor-pointer transition-colors"
+          className="bg-white p-4 rounded-lg border border-slate-200 shadow-sm flex flex-col justify-between h-28 hover:border-blue-300 cursor-pointer transition-colors"
         >
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Active Tenders</span>
@@ -103,12 +102,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         {/* Card 2 */}
         <div
           onClick={() => onNavigate('bidders')}
-          className="bg-white p-4 rounded-lg border border-slate-200 shadow-xs flex flex-col justify-between h-28 hover:border-blue-400 cursor-pointer transition-colors"
+          className="bg-white p-4 rounded-lg border border-slate-200 shadow-sm flex flex-col justify-between h-28 hover:border-blue-300 cursor-pointer transition-colors"
         >
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
-              Bidders Under Review
-            </span>
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Bidders Under Review</span>
             <span className="p-1 rounded bg-blue-50 text-blue-600">
               <span className="material-symbols-outlined text-[16px]">group</span>
             </span>
@@ -124,13 +121,11 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
         {/* Card 3 */}
         <div
-          onClick={() => onNavigate('risk-anomalies')}
-          className="bg-white p-4 rounded-lg border border-slate-200 shadow-xs flex flex-col justify-between h-28 hover:border-rose-400 cursor-pointer transition-colors"
+          onClick={() => onNavigate('scrutiny', { bidderId: 'BID-HYD-0419' })}
+          className="bg-white p-4 rounded-lg border border-slate-200 shadow-sm flex flex-col justify-between h-28 hover:border-rose-300 cursor-pointer transition-colors"
         >
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
-              High-Risk Bidders
-            </span>
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">High-Risk Bidders</span>
             <span className="px-2 py-0.5 rounded bg-rose-50 text-rose-700 border border-rose-200 font-mono text-[10px] font-bold uppercase tracking-wider">
               Action Required
             </span>
@@ -141,15 +136,13 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               <span className="material-symbols-outlined text-[14px]">crisis_alert</span> High Severity
             </span>
           </div>
-          <div className="font-mono text-[11px] text-slate-500 truncate">
-            Immediate escalation & ROC/GeM cross-check
-          </div>
+          <div className="font-mono text-[11px] text-slate-500 truncate">Immediate escalation & ROC/GeM cross-check</div>
         </div>
 
         {/* Card 4 */}
         <div
           onClick={() => onNavigate('bidders')}
-          className="bg-white p-4 rounded-lg border border-slate-200 shadow-xs flex flex-col justify-between h-28 hover:border-amber-400 cursor-pointer transition-colors"
+          className="bg-white p-4 rounded-lg border border-slate-200 shadow-sm flex flex-col justify-between h-28 hover:border-amber-300 cursor-pointer transition-colors"
         >
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Pending Decisions</span>
@@ -167,12 +160,12 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         </div>
       </div>
 
-      {/* Main Workspace Split-Grid */}
+      {/* Main Workspace Split-Grid (8 cols / 4 cols) */}
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-5">
         {/* LEFT COLUMN: Tender Spotlight & Bidder Matrix (8 cols) */}
         <div className="xl:col-span-8 flex flex-col gap-5">
-          {/* Spotlight Card */}
-          <div className="bg-white rounded-lg border border-slate-200 shadow-xs overflow-hidden">
+          {/* Current Tender Spotlight Card */}
+          <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
             <div className="px-5 py-3.5 border-b border-slate-200 bg-slate-50/60 flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-center gap-2.5 flex-wrap">
                 <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200 font-mono text-[11px] font-semibold uppercase">
@@ -182,204 +175,532 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                   REF: {currentTender.refNo}
                 </span>
               </div>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => onNavigate('tenders', { tenderId: currentTender.id })}
-                  className="text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1"
-                >
-                  <span>Tender Details</span>
-                  <span className="material-symbols-outlined text-[14px]">open_in_new</span>
-                </button>
+              <div className="flex items-center gap-1 text-slate-500 font-mono text-[11px]">
+                <span className="material-symbols-outlined text-[15px]">event</span> Closing: <strong className="text-slate-800">18 Mar 2026, 17:00 IST</strong>
               </div>
             </div>
 
             <div className="p-5 flex flex-col gap-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                <div>
-                  <h2 className="text-base font-bold text-slate-900">{currentTender.title}</h2>
-                  <p className="text-xs text-slate-500 mt-0.5">{currentTender.description}</p>
+              <div>
+                <h2 className="text-lg font-bold text-slate-900">
+                  API-610 Centrifugal Process Pumps for Crude Distillation Unit-III
+                </h2>
+                <p className="text-[12px] text-slate-500 mt-0.5">
+                  Procuring Entity: <span className="font-medium text-slate-800">Chennai Petroleum Corporation Ltd (CPCL)</span> • Mechanical Maintenance Division
+                </p>
+              </div>
+
+              {/* Metadata Pills Row */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-3.5 bg-slate-50 rounded-md border border-slate-200">
+                <div className="flex flex-col">
+                  <span className="text-[10px] uppercase font-semibold text-slate-500">Estimated Value</span>
+                  <span className="font-mono text-[13px] font-bold text-slate-900">₹18.40 Cr</span>
                 </div>
-                <div className="text-right">
-                  <div className="text-base font-bold font-mono text-slate-900">{currentTender.estimatedValue}</div>
-                  <div className="text-[11px] text-slate-500">Sanctioned Capex (FY26)</div>
+                <div className="flex flex-col">
+                  <span className="text-[10px] uppercase font-semibold text-slate-500">Bidders Participating</span>
+                  <span className="font-mono text-[13px] font-bold text-slate-900">5 Formal Submissions</span>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-[10px] uppercase font-semibold text-slate-500">Procurement Route</span>
+                  <span className="font-mono text-[13px] font-bold text-slate-900">Open ICB (Domestic)</span>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-[10px] uppercase font-semibold text-slate-500">Security Deposit / EMD</span>
+                  <span className="font-mono text-[13px] font-bold text-emerald-700">₹36.80 Lakhs (Verified)</span>
                 </div>
               </div>
 
-              {/* Bidder List Table */}
-              <div className="border border-slate-200 rounded-lg overflow-hidden">
-                <table className="w-full text-left border-collapse">
-                  <thead>
-                    <tr className="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200 text-[11px] uppercase tracking-wider">
-                      <th className="py-2.5 px-4">Bidder Entity</th>
-                      <th className="py-2.5 px-3 text-center">Compliance</th>
-                      <th className="py-2.5 px-3 text-center">Risk Score</th>
-                      <th className="py-2.5 px-3">Officer Decision</th>
-                      <th className="py-2.5 px-4 text-right">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100 text-[12px]">
-                    {activeBidders.map((bidder) => (
-                      <tr key={bidder.id} className="hover:bg-slate-50/80 transition-colors">
-                        <td className="py-2.5 px-4">
-                          <div className="font-semibold text-slate-900">{bidder.legalName}</div>
-                          <div className="font-mono text-[11px] text-slate-400">
-                            {bidder.code} • GSTIN: {bidder.gstin}
-                          </div>
-                        </td>
-                        <td className="py-2.5 px-3 text-center">
-                          <span
-                            className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
-                              bidder.complianceStatus === 'PASS'
-                                ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
-                                : 'bg-rose-50 text-rose-800 border border-rose-200'
-                            }`}
-                          >
-                            {bidder.complianceStatus}
-                          </span>
-                        </td>
-                        <td className="py-2.5 px-3 text-center">
-                          <span
-                            className={`font-mono font-bold text-xs ${
-                              bidder.riskScore >= 60
-                                ? 'text-rose-600'
-                                : bidder.riskScore >= 30
-                                ? 'text-amber-600'
-                                : 'text-emerald-600'
-                            }`}
-                          >
-                            {bidder.riskScore}/100
-                          </span>
-                        </td>
-                        <td className="py-2.5 px-3">
-                          <span
-                            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold uppercase ${
-                              bidder.officerDecision === 'OVERRIDE'
-                                ? 'bg-blue-50 text-blue-700 border border-blue-200'
-                                : bidder.officerDecision === 'QUALIFY'
-                                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                                : bidder.officerDecision === 'REJECT'
-                                ? 'bg-rose-50 text-rose-700 border border-rose-200'
-                                : 'bg-amber-50 text-amber-700 border border-amber-200'
-                            }`}
-                          >
-                            <span
-                              className={`w-1.5 h-1.5 rounded-full ${
-                                bidder.officerDecision === 'OVERRIDE'
-                                  ? 'bg-blue-600'
-                                  : bidder.officerDecision === 'QUALIFY'
-                                  ? 'bg-emerald-500'
-                                  : bidder.officerDecision === 'REJECT'
-                                  ? 'bg-rose-500'
-                                  : 'bg-amber-500'
-                              }`}
-                            ></span>
-                            {bidder.officerDecision}
-                          </span>
-                        </td>
-                        <td className="py-2.5 px-4 text-right whitespace-nowrap">
-                          <button
-                            onClick={() => onNavigate('scrutiny', { bidderId: bidder.id })}
-                            className="px-2.5 py-1 bg-blue-50 hover:bg-blue-600 hover:text-white text-blue-700 rounded-md font-semibold text-[11px] transition-colors cursor-pointer"
-                          >
-                            Scrutiny Cockpit →
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              {/* Evaluation Stage Stepper Progress */}
+              <div className="flex flex-col gap-1.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-[13px] font-semibold text-slate-800">Technical &amp; Integrity Scrutiny (Step 3 of 5)</span>
+                  <span className="font-mono text-[11px] font-bold text-blue-700">68% Phase Completion</span>
+                </div>
+                <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden flex">
+                  <div className="bg-blue-600 h-2 rounded-full transition-all duration-500" style={{ width: '68%' }}></div>
+                </div>
+
+                {/* Workflow Stage Badges */}
+                <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 mt-1">
+                  <div className="flex items-center gap-1.5 px-2 py-1.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200">
+                    <span className="material-symbols-outlined text-[15px] text-emerald-600">check_circle</span>
+                    <span className="font-mono text-[10px] font-semibold leading-none">1. Prequal</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 px-2 py-1.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200">
+                    <span className="material-symbols-outlined text-[15px] text-emerald-600">check_circle</span>
+                    <span className="font-mono text-[10px] font-semibold leading-none">2. Collusion</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 px-2 py-1.5 rounded bg-blue-50 text-blue-700 border border-blue-200 font-semibold">
+                    <span className="material-symbols-outlined text-[15px] text-blue-600 animate-spin">autorenew</span>
+                    <span className="font-mono text-[10px] leading-none">3. Tech Review</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 px-2 py-1.5 rounded bg-slate-100 text-slate-400 border border-slate-200">
+                    <span className="material-symbols-outlined text-[15px]">lock</span>
+                    <span className="font-mono text-[10px] font-medium leading-none">4. Price Open</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 px-2 py-1.5 rounded bg-slate-100 text-slate-400 border border-slate-200">
+                    <span className="material-symbols-outlined text-[15px]">verified</span>
+                    <span className="font-mono text-[10px] font-medium leading-none">5. Final Award</span>
+                  </div>
+                </div>
               </div>
+
+              {/* Risk Distribution Bar */}
+              <div className="flex flex-col gap-1.5 pt-2 border-t border-slate-100">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Bidder Risk Profile Distribution</span>
+                  <span className="font-mono text-[11px] text-slate-500">N=5 Vendors Assessed</span>
+                </div>
+                <div className="w-full h-2 rounded-full overflow-hidden flex gap-0.5 bg-slate-100">
+                  <div className="bg-emerald-500 h-full" style={{ width: '40%' }} title="Low Risk: 40%"></div>
+                  <div className="bg-amber-400 h-full" style={{ width: '40%' }} title="Medium Risk: 40%"></div>
+                  <div className="bg-rose-500 h-full" style={{ width: '20%' }} title="High Risk: 20%"></div>
+                </div>
+                <div className="flex flex-wrap items-center gap-3 mt-0.5">
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-50 border border-emerald-200 text-emerald-800 font-mono text-[10px] font-semibold">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-600"></span> LOW RISK: 2 (40%)
+                  </span>
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-amber-50 border border-amber-200 text-amber-800 font-mono text-[10px] font-semibold">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span> MEDIUM RISK: 2 (40%)
+                  </span>
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-rose-50 border border-rose-200 text-rose-800 font-mono text-[10px] font-semibold">
+                    <span className="w-1.5 h-1.5 rounded-full bg-rose-600"></span> HIGH RISK: 1 (20%)
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Bidder Progress & Evaluation Table */}
+          <div className="bg-white rounded-lg border border-slate-200 shadow-sm flex flex-col overflow-hidden">
+            <div className="px-5 py-3 border-b border-slate-200 bg-slate-50/60 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-[14px] font-bold text-slate-900">Bidder Scrutiny Matrix</span>
+                <span className="font-mono text-[11px] text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                  {currentTender.refNo}
+                </span>
+              </div>
+              <div className="flex items-center gap-1">
+                <span className="font-mono text-[11px] text-slate-500">5 of 5 Audited</span>
+              </div>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-slate-50 border-b border-slate-200 text-[11px] font-semibold uppercase tracking-wider text-slate-500 select-none">
+                    <th className="py-2.5 px-4">Bidder Entity &amp; GSTIN</th>
+                    <th className="py-2.5 px-3 text-right">Compliance</th>
+                    <th className="py-2.5 px-3 text-center">Risk Tier</th>
+                    <th className="py-2.5 px-4">Algorithmic Scrutiny Findings</th>
+                    <th className="py-2.5 px-3">Status</th>
+                    <th className="py-2.5 px-3 text-right">Action</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 text-[12px]">
+                  {/* Row 1 */}
+                  <tr className="hover:bg-slate-50/70 transition-colors">
+                    <td className="py-3 px-4">
+                      <div className="flex flex-col">
+                        <span className="text-[13px] font-semibold text-slate-900">Apex Industrial Flow Ltd</span>
+                        <span className="font-mono text-[11px] text-slate-500">GST: 33AAACA1122Q1Z3</span>
+                      </div>
+                    </td>
+                    <td className="py-3 px-3 text-right font-mono font-bold text-emerald-700">94%</td>
+                    <td className="py-3 px-3 text-center">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200 font-mono text-[10px] font-bold">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-600"></span> LOW
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 text-slate-700 max-w-xs">
+                      <span className="truncate block" title="All certificates validated via MCA & GSTN">All certificates validated via MCA &amp; GSTN registry</span>
+                    </td>
+                    <td className="py-3 px-3">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200 font-mono text-[11px] font-medium whitespace-nowrap">
+                        Clearance Rec.
+                      </span>
+                    </td>
+                    <td className="py-3 px-3 text-right">
+                      <button
+                        onClick={() => onNavigate('evidence', { findingId: 'FND-APX-01' })}
+                        className="text-[12px] text-blue-600 hover:text-blue-800 font-semibold px-2 py-1 rounded hover:bg-blue-50 transition-colors cursor-pointer"
+                        type="button"
+                      >
+                        View File
+                      </button>
+                    </td>
+                  </tr>
+
+                  {/* Row 2 */}
+                  <tr className="hover:bg-slate-50/70 transition-colors">
+                    <td className="py-3 px-4">
+                      <div className="flex flex-col">
+                        <span className="text-[13px] font-semibold text-slate-900">Bharat Heavy Turbotech Corp</span>
+                        <span className="font-mono text-[11px] text-slate-500">GST: 27AABCB8899K1Z4</span>
+                      </div>
+                    </td>
+                    <td className="py-3 px-3 text-right font-mono font-bold text-emerald-700">88%</td>
+                    <td className="py-3 px-3 text-center">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200 font-mono text-[10px] font-bold">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-600"></span> LOW
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 text-slate-600 max-w-xs">
+                      <span className="truncate block" title="Minor specification deviation on casing alloy (MOC-11)">Minor specification deviation on casing alloy (MOC-11)</span>
+                    </td>
+                    <td className="py-3 px-3">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200 font-mono text-[11px] font-medium whitespace-nowrap">
+                        Clarified
+                      </span>
+                    </td>
+                    <td className="py-3 px-3 text-right">
+                      <button
+                        onClick={() => onNavigate('evidence', { findingId: 'FND-BHT-02' })}
+                        className="text-[12px] text-blue-600 hover:text-blue-800 font-semibold px-2 py-1 rounded hover:bg-blue-50 transition-colors cursor-pointer"
+                        type="button"
+                      >
+                        View File
+                      </button>
+                    </td>
+                  </tr>
+
+                  {/* Row 3 */}
+                  <tr className="hover:bg-slate-50/70 transition-colors bg-amber-50/30">
+                    <td className="py-3 px-4">
+                      <div className="flex flex-col">
+                        <span className="text-[13px] font-semibold text-slate-900">Synergy Fluid Dynamics Pvt</span>
+                        <span className="font-mono text-[11px] text-slate-500">GST: 24AAGCS4512P1ZM</span>
+                      </div>
+                    </td>
+                    <td className="py-3 px-3 text-right font-mono font-bold text-amber-700">74%</td>
+                    <td className="py-3 px-3 text-center">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200 font-mono text-[10px] font-bold">
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span> MEDIUM
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 text-amber-900 max-w-xs">
+                      <span className="truncate block" title="Local content declaration shows 48% vs 50% mandated threshold">Local content 48% vs 50% threshold</span>
+                    </td>
+                    <td className="py-3 px-3">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200 font-mono text-[11px] font-medium whitespace-nowrap">
+                        Affidavit Pend.
+                      </span>
+                    </td>
+                    <td className="py-3 px-3 text-right">
+                      <button
+                        onClick={() => onNavigate('scrutiny', { bidderId: 'BID-HYD-0419' })}
+                        className="text-[12px] text-blue-600 hover:text-blue-800 font-semibold px-2 py-1 rounded hover:bg-blue-50 transition-colors cursor-pointer"
+                        type="button"
+                      >
+                        Review
+                      </button>
+                    </td>
+                  </tr>
+
+                  {/* Row 4 */}
+                  <tr className="hover:bg-slate-50/70 transition-colors bg-amber-50/30">
+                    <td className="py-3 px-4">
+                      <div className="flex flex-col">
+                        <span className="text-[13px] font-semibold text-slate-900">Trishul Heavy Engineering LLP</span>
+                        <span className="font-mono text-[11px] text-slate-500">GST: 29AABFT7821H1ZQ</span>
+                      </div>
+                    </td>
+                    <td className="py-3 px-3 text-right font-mono font-bold text-amber-700">69%</td>
+                    <td className="py-3 px-3 text-center">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200 font-mono text-[10px] font-bold">
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span> MEDIUM
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 text-amber-900 max-w-xs">
+                      <span className="truncate block" title="PDF author metadata matches competitor subcontractor">PDF author metadata matches competitor subcontractor</span>
+                    </td>
+                    <td className="py-3 px-3">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200 font-mono text-[11px] font-medium whitespace-nowrap">
+                        Collusion Inquiry
+                      </span>
+                    </td>
+                    <td className="py-3 px-3 text-right">
+                      <button
+                        onClick={() => onNavigate('graph')}
+                        className="text-[12px] text-blue-600 hover:text-blue-800 font-semibold px-2 py-1 rounded hover:bg-blue-50 transition-colors cursor-pointer"
+                        type="button"
+                      >
+                        Review
+                      </button>
+                    </td>
+                  </tr>
+
+                  {/* Row 5 - Primary Scrutiny Target */}
+                  <tr className="hover:bg-rose-50/50 transition-colors bg-rose-50/20">
+                    <td className="py-3 px-4">
+                      <div className="flex flex-col">
+                        <span className="text-[13px] font-semibold text-rose-700">{primaryBidder.legalName}</span>
+                        <span className="font-mono text-[11px] text-slate-500">GST: {primaryBidder.gstin}</span>
+                      </div>
+                    </td>
+                    <td className="py-3 px-3 text-right font-mono font-bold text-rose-600">38%</td>
+                    <td className="py-3 px-3 text-center">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-rose-50 text-rose-700 border border-rose-200 font-mono text-[10px] font-bold">
+                        <span className="w-1.5 h-1.5 rounded-full bg-rose-600"></span> HIGH
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 text-rose-800 max-w-xs">
+                      <span className="truncate block font-medium" title="PAN-GSTIN mismatch; GeM exclusion match">
+                        PAN-GSTIN mismatch (33-TN vs 27-MH); Turn. relaxation
+                      </span>
+                    </td>
+                    <td className="py-3 px-3">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-rose-50 text-rose-700 border border-rose-200 font-mono text-[11px] font-bold whitespace-nowrap">
+                        Disqualify Drafted
+                      </span>
+                    </td>
+                    <td className="py-3 px-3 text-right">
+                      <button
+                        onClick={() => onNavigate('scrutiny', { bidderId: primaryBidder.id })}
+                        className="text-[12px] text-rose-600 hover:text-rose-800 hover:underline font-semibold px-2 py-1 rounded transition-colors cursor-pointer"
+                        type="button"
+                      >
+                        Resolve
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            {/* Matrix Footer */}
+            <div className="p-3 bg-slate-50/70 border-t border-slate-200 flex items-center justify-between px-4 text-slate-500 font-mono text-[11px]">
+              <span>Algorithm Confidence: 99.4% (NIC-CERT Rule Pack 2026.1)</span>
+              <button
+                onClick={() => onNavigate('matrix')}
+                className="text-blue-600 hover:text-blue-800 hover:underline font-semibold cursor-pointer"
+              >
+                Export Compliance Matrix (XLSX) →
+              </button>
             </div>
           </div>
         </div>
 
-        {/* RIGHT COLUMN: Priority Findings & Live Ledger (4 cols) */}
+        {/* RIGHT COLUMN: Priority Findings & Audit Ledger (4 cols) */}
         <div className="xl:col-span-4 flex flex-col gap-5">
           {/* Priority Findings Card */}
-          <div className="bg-white rounded-lg border border-slate-200 shadow-xs p-5">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+          <div className="bg-white rounded-lg border border-slate-200 shadow-sm flex flex-col overflow-hidden">
+            <div className="px-4 py-3 border-b border-slate-200 bg-slate-50/60 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="material-symbols-outlined text-[18px] text-rose-600">crisis_alert</span>
-                <h3 className="font-bold text-slate-900">Priority Findings</h3>
+                <span className="material-symbols-outlined text-[18px] text-rose-600">notification_important</span>
+                <h3 className="text-[14px] font-bold text-slate-900">Priority Findings</h3>
               </div>
-              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
-                2 HIGH SEVERITY
+              <span className="px-2 py-0.5 rounded bg-rose-50 text-rose-700 border border-rose-200 font-mono text-[10px] font-bold">
+                4 ANOMALIES
               </span>
             </div>
 
-            <div className="mt-3.5 space-y-3">
-              <div className="p-3 rounded-lg bg-rose-50/50 border border-rose-200">
-                <div className="flex items-center justify-between text-[11px]">
-                  <span className="font-bold text-rose-800">PAN-GSTIN State Discordance</span>
-                  <span className="font-mono text-rose-700">BID-HYD-0419</span>
+            <div className="divide-y divide-slate-100 flex flex-col">
+              {/* Finding 1 */}
+              <div className="p-3.5 hover:bg-slate-50/60 transition-colors flex flex-col gap-1">
+                <div className="flex items-center justify-between">
+                  <span className="inline-flex items-center gap-1 font-mono text-[10px] font-bold text-rose-700 uppercase bg-rose-50 px-2 py-0.5 rounded border border-rose-200">
+                    <span className="w-1.5 h-1.5 rounded-full bg-rose-600"></span> CRITICAL ANOMALY
+                  </span>
+                  <span className="font-mono text-[11px] text-slate-400">Tender #217</span>
                 </div>
-                <p className="text-[11px] text-slate-600 mt-1 leading-snug">
-                  GSTIN state 33-TN mismatches registered ROC Pune, Maharashtra (27-MH). GFR 144(xi) scrutiny flag.
+                <div className="text-[13px] font-bold text-slate-900 leading-snug mt-0.5">
+                  PAN-GSTIN Identity Inconsistency
+                </div>
+                <p className="text-[12px] text-slate-600 leading-relaxed">
+                  <strong className="text-slate-800">Bharat Hydrotech Corp:</strong> Characters 3–12 of Form REG-06 mismatch declared PAN (State prefix 33-TN vs Pune ROC 27-MH).
                 </p>
-                <div className="mt-2 flex items-center justify-between pt-1 text-[11px]">
+                <div className="pt-1 flex items-center justify-between">
                   <button
-                    onClick={() => onNavigate('evidence', { findingId: 'FND-2026-0042' })}
-                    className="text-blue-600 hover:underline font-semibold flex items-center gap-0.5"
+                    onClick={() => onNavigate('scrutiny', { bidderId: 'BID-HYD-0419' })}
+                    className="text-blue-600 font-semibold text-[11px] hover:underline flex items-center gap-0.5 cursor-pointer"
+                    type="button"
                   >
-                    <span>Inspect Dual Evidences</span>
-                    <span className="material-symbols-outlined text-[13px]">chevron_right</span>
+                    View Discrepancy <span className="material-symbols-outlined text-[13px]">arrow_forward</span>
                   </button>
+                  <span className="font-mono text-[10px] text-slate-400">ROC ID: U29100MH2018</span>
                 </div>
               </div>
 
-              <div className="p-3 rounded-lg bg-amber-50/50 border border-amber-200">
-                <div className="flex items-center justify-between text-[11px]">
-                  <span className="font-bold text-amber-800">Collusion / Shared Director Match</span>
-                  <span className="font-mono text-amber-700">BID-HYD / BID-NOV</span>
+              {/* Finding 2 */}
+              <div className="p-3.5 hover:bg-slate-50/60 transition-colors flex flex-col gap-1">
+                <div className="flex items-center justify-between">
+                  <span className="inline-flex items-center gap-1 font-mono text-[10px] font-bold text-rose-700 uppercase bg-rose-50 px-2 py-0.5 rounded border border-rose-200">
+                    <span className="w-1.5 h-1.5 rounded-full bg-rose-600"></span> DEBARMENT MATCH
+                  </span>
+                  <span className="font-mono text-[11px] text-slate-400">GeM Blacklist</span>
                 </div>
-                <p className="text-[11px] text-slate-600 mt-1 leading-snug">
-                  Common director DIN #08492019 identified between Bharat Hydrotech and Nova Pumps.
+                <div className="text-[13px] font-bold text-slate-900 leading-snug mt-0.5">
+                  Debarment Record (GeM Portal Match)
+                </div>
+                <p className="text-[12px] text-slate-600 leading-relaxed">
+                  Director DIN-08492014 matched against MoF 2024 exclusion circular OM-F.1/2/2023-PPD.
                 </p>
-                <div className="mt-2 flex items-center justify-between pt-1 text-[11px]">
+                <div className="pt-1 flex items-center justify-between">
                   <button
-                    onClick={() => onNavigate('vendor-graph')}
-                    className="text-blue-600 hover:underline font-semibold flex items-center gap-0.5"
+                    onClick={() => onNavigate('registry')}
+                    className="text-blue-600 font-semibold text-[11px] hover:underline flex items-center gap-0.5 cursor-pointer"
+                    type="button"
                   >
-                    <span>Inspect Collusion Graph</span>
-                    <span className="material-symbols-outlined text-[13px]">hub</span>
+                    Inspect Sanction <span className="material-symbols-outlined text-[13px]">arrow_forward</span>
                   </button>
+                  <span className="font-mono text-[10px] text-slate-400">Exp: 14 Dec 2026</span>
+                </div>
+              </div>
+
+              {/* Finding 3 */}
+              <div className="p-3.5 hover:bg-slate-50/60 transition-colors flex flex-col gap-1">
+                <div className="flex items-center justify-between">
+                  <span className="inline-flex items-center gap-1 font-mono text-[10px] font-bold text-amber-800 uppercase bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span> POLICY COMPLIANCE
+                  </span>
+                  <span className="font-mono text-[11px] text-slate-400">Make In India</span>
+                </div>
+                <div className="text-[13px] font-bold text-slate-900 leading-snug mt-0.5">
+                  Local Content Deficit (Class-I Criteria)
+                </div>
+                <p className="text-[12px] text-slate-600 leading-relaxed">
+                  <strong className="text-slate-800">Synergy Fluid Dynamics:</strong> Declared 48.2% local value addition; mandatory CPCL threshold is 50.0%.
+                </p>
+                <div className="pt-1 flex items-center justify-between">
+                  <button
+                    onClick={onDownloadDossier}
+                    className="text-blue-600 font-semibold text-[11px] hover:underline flex items-center gap-0.5 cursor-pointer"
+                    type="button"
+                  >
+                    Download CA Cert <span className="material-symbols-outlined text-[13px]">file_open</span>
+                  </button>
+                  <span className="font-mono text-[10px] text-amber-700 font-bold">-1.8% Gap</span>
+                </div>
+              </div>
+
+              {/* Finding 4 */}
+              <div className="p-3.5 hover:bg-slate-50/60 transition-colors flex flex-col gap-1">
+                <div className="flex items-center justify-between">
+                  <span className="inline-flex items-center gap-1 font-mono text-[10px] font-bold text-amber-800 uppercase bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span> FORENSIC ANOMALY
+                  </span>
+                  <span className="font-mono text-[11px] text-slate-400">Collusion Engine</span>
+                </div>
+                <div className="text-[13px] font-bold text-slate-900 leading-snug mt-0.5">
+                  PDF Metadata &amp; Author Overlap
+                </div>
+                <p className="text-[12px] text-slate-600 leading-relaxed">
+                  Identical author GUID <code className="bg-slate-100 px-1 py-0.5 rounded">XeroxWorkCentre-7845</code> between Trishul LLP and competitor proposal.
+                </p>
+                <div className="pt-1 flex items-center justify-between">
+                  <button
+                    onClick={() => onNavigate('graph')}
+                    className="text-blue-600 font-semibold text-[11px] hover:underline flex items-center gap-0.5 cursor-pointer"
+                    type="button"
+                  >
+                    Examine Forensic Graph <span className="material-symbols-outlined text-[13px]">hub</span>
+                  </button>
+                  <span className="font-mono text-[10px] text-slate-400">Δt = 11 mins</span>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Immutable Audit Ledger Snippet */}
-          <div className="bg-white rounded-lg border border-slate-200 shadow-xs p-5">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+          {/* Audit Ledger Integrity & Stream Card */}
+          <div className="bg-white rounded-lg border border-slate-200 shadow-sm flex flex-col overflow-hidden">
+            <div className="p-3.5 border-b border-slate-200 bg-slate-50/60 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="material-symbols-outlined text-[18px] text-slate-600">receipt_long</span>
-                <h3 className="font-bold text-slate-900">Live Forensic Ledger</h3>
+                <span className="material-symbols-outlined text-[18px] text-emerald-600">verified</span>
+                <div className="flex flex-col">
+                  <span className="text-[13px] font-bold text-slate-900 leading-tight">Audit Ledger Integrity</span>
+                  <span className="font-mono text-[10px] text-emerald-700 font-bold uppercase">Immutable &amp; Verified</span>
+                </div>
               </div>
-              <button
-                onClick={() => onNavigate('audit-ledger')}
-                className="text-blue-600 hover:underline font-semibold text-[11px]"
-              >
-                View Full Chain →
-              </button>
+              <span className="font-mono text-[10px] text-slate-500 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                Block #19,402
+              </span>
             </div>
 
-            <div className="mt-3.5 space-y-2.5">
-              {recentEvents.map((evt) => (
-                <div
-                  key={evt.blockNumber}
-                  onClick={() => onNavigate('audit-ledger', { blockNumber: evt.blockNumber })}
-                  className="p-2.5 rounded bg-slate-50 border border-slate-200 hover:bg-slate-100/80 cursor-pointer transition-colors"
-                >
+            <div className="px-3.5 py-1.5 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+              <span className="font-mono text-[10px] text-slate-500 truncate max-w-[220px]">
+                SHA: 0x8f2d4e7a091b...c94b
+              </span>
+              <span className="font-mono text-[10px] text-emerald-700 font-semibold flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-600"></span> Synced
+              </span>
+            </div>
+
+            {/* Activity Stream */}
+            <div className="p-4 flex flex-col gap-3.5">
+              <div className="flex items-start gap-2.5">
+                <span className="w-2 h-2 rounded-full bg-blue-600 mt-1.5 flex-shrink-0"></span>
+                <div className="flex flex-col gap-0.5 flex-1 min-w-0">
                   <div className="flex items-center justify-between">
-                    <span className="font-mono font-bold text-[11px] text-slate-800">Block #{evt.blockNumber}</span>
-                    <span className="text-[10px] text-slate-400 font-mono">{evt.timestamp}</span>
+                    <span className="text-[12px] font-bold text-slate-900">Clarification Dispatched</span>
+                    <span className="font-mono text-[10px] text-slate-400">10:42 AM</span>
                   </div>
-                  <div className="text-[11px] font-semibold text-slate-700 mt-0.5">{evt.action}</div>
-                  <div className="font-mono text-[10px] text-slate-400 truncate mt-1">
-                    SHA-256: {evt.hash.substring(0, 24)}...
+                  <p className="text-[11px] text-slate-600 line-clamp-2">
+                    Official letter dispatched to Synergy Fluid Dynamics regarding Class-I local value shortfall.
+                  </p>
+                  <div className="flex items-center gap-1 font-mono text-[10px] text-slate-400 mt-0.5">
+                    <span className="material-symbols-outlined text-[12px]">person</span> R. Verma (Officer-in-Charge)
                   </div>
                 </div>
-              ))}
+              </div>
+
+              <div className="flex items-start gap-2.5">
+                <span className="w-2 h-2 rounded-full bg-slate-800 mt-1.5 flex-shrink-0"></span>
+                <div className="flex flex-col gap-0.5 flex-1 min-w-0">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[12px] font-bold text-slate-900">Forensic Scan Finished</span>
+                    <span className="font-mono text-[10px] text-slate-400">09:15 AM</span>
+                  </div>
+                  <p className="text-[11px] text-slate-600 line-clamp-2">
+                    Comprehensive automated red-flag report generated for Tender Ref: CPCL/MM/2026/PUMP-217.
+                  </p>
+                  <div className="flex items-center gap-1 font-mono text-[10px] text-slate-400 mt-0.5">
+                    <span className="material-symbols-outlined text-[12px]">smart_toy</span> Automated Engine v2.4
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-2.5">
+                <span className="w-2 h-2 rounded-full bg-rose-600 mt-1.5 flex-shrink-0"></span>
+                <div className="flex flex-col gap-0.5 flex-1 min-w-0">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[12px] font-bold text-rose-700">Disqualification Drafted</span>
+                    <span className="font-mono text-[10px] text-slate-400">Yest, 16:30</span>
+                  </div>
+                  <p className="text-[11px] text-slate-600 line-clamp-2">
+                    Recommendation drafted for Kestrel Heavy Pumps Infra (ROC Dormancy &amp; MoF Debarment overlap).
+                  </p>
+                  <div className="flex items-center gap-1 font-mono text-[10px] text-slate-400 mt-0.5">
+                    <span className="material-symbols-outlined text-[12px]">person</span> R. Verma
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-2.5">
+                <span className="w-2 h-2 rounded-full bg-emerald-600 mt-1.5 flex-shrink-0"></span>
+                <div className="flex flex-col gap-0.5 flex-1 min-w-0">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[12px] font-bold text-slate-900">Tech Compliance Approved</span>
+                    <span className="font-mono text-[10px] text-slate-400">Yest, 14:10</span>
+                  </div>
+                  <p className="text-[11px] text-slate-600 line-clamp-2">
+                    Cleared technical compliance specification for Apex Industrial Flow Ltd without caveats.
+                  </p>
+                  <div className="flex items-center gap-1 font-mono text-[10px] text-slate-400 mt-0.5">
+                    <span className="material-symbols-outlined text-[12px]">groups</span> Evaluation Committee (3/3)
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-3 bg-slate-50 border-t border-slate-200 text-center">
+              <button
+                onClick={() => onNavigate('audit')}
+                className="text-[12px] text-blue-600 hover:text-blue-800 hover:underline font-semibold cursor-pointer"
+                type="button"
+              >
+                View Complete Audit Trail (64 entries) →
+              </button>
             </div>
           </div>
         </div>

@@ -50,12 +50,34 @@ export default function App() {
   // Global Toast
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
+  // Route alias normalization
+  const normalizeRoute = (r: string) => {
+    const routeMap: Record<string, string> = {
+      'vendor-graph': 'graph',
+      'audit-ledger': 'audit',
+      'compliance-matrix': 'matrix',
+      'cvc-dossier': 'dossier',
+      'cvc-final': 'dossier',
+      'tender-scope': 'tender-detail',
+      'tenders-overview': 'tenders',
+      'risk-analysis': 'risk',
+      'risk-anomalies': 'risk',
+      'bidder-cockpit': 'scrutiny',
+      'evidence-inspector': 'evidence',
+      'source-truth': 'registry',
+      'structured-extraction': 'extraction',
+      'pipeline-stepper': 'pipeline',
+    };
+    return routeMap[r] || r;
+  };
+
   // Synchronize with URL hash changes
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash.replace('#/', '').replace('#', '') || 'hero';
-      const [route, paramString] = hash.split('?');
-      setCurrentRoute(route || 'hero');
+      const [rawRoute, paramString] = hash.split('?');
+      const route = normalizeRoute(rawRoute || 'hero');
+      setCurrentRoute(route);
 
       if (paramString) {
         const searchParams = new URLSearchParams(paramString);
@@ -74,7 +96,8 @@ export default function App() {
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
-  const navigateTo = (route: string, params?: any) => {
+  const navigateTo = (rawRoute: string, params?: any) => {
+    const route = normalizeRoute(rawRoute);
     setCurrentRoute(route);
     setRouteParams(params || {});
     if (params?.tenderId) setSelectedTenderId(params.tenderId);

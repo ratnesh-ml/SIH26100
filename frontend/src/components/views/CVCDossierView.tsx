@@ -1,21 +1,52 @@
 import React, { useState } from 'react';
 import { procurementService } from '../../services/procurementService';
-import { MOCK_BIDDERS } from '../../mockData/bidders';
 
 interface CVCDossierViewProps {
   onNavigate: (view: string, params?: any) => void;
 }
 
+interface ChecklistSection {
+  id: string;
+  name: string;
+  count: string;
+  status: 'clean' | 'adverse' | 'neutral';
+  checked: boolean;
+}
+
 export const CVCDossierView: React.FC<CVCDossierViewProps> = ({ onNavigate }) => {
-  const [incCitations, setIncCitations] = useState(true);
-  const [incMerkle, setIncMerkle] = useState(true);
-  const [incCollusion, setIncCollusion] = useState(true);
+  const [sections, setSections] = useState<ChecklistSection[]>([
+    { id: 'sec-1', name: '1. Tender Information', count: '2 params', status: 'clean', checked: true },
+    { id: 'sec-2', name: '2. Bidder Profile', count: 'CIN, PAN, GSTIN', status: 'clean', checked: true },
+    { id: 'sec-3', name: '3. Submitted Documents', count: '14 envelopes', status: 'clean', checked: true },
+    { id: 'sec-4', name: '4. Document Extraction', count: '3 exhibits parsed', status: 'clean', checked: true },
+    { id: 'sec-5', name: '5. Govt Registry Verification', count: 'MCA/GSTN/GeM', status: 'clean', checked: true },
+    { id: 'sec-6', name: '6. Compliance Results', count: '14 rules eval', status: 'clean', checked: true },
+    { id: 'sec-7', name: '7. Critical Findings', count: '2 ADVERSE', status: 'adverse', checked: true },
+    { id: 'sec-8', name: '8. Evidence References', count: '3 source PDFs', status: 'clean', checked: true },
+  ]);
+
   const [downloading, setDownloading] = useState(false);
+  const [zoomLevel, setZoomLevel] = useState(100);
+  const [toastMsg, setToastMsg] = useState<string | null>(null);
+
+  const toggleSection = (id: string) => {
+    setSections((prev) =>
+      prev.map((s) => (s.id === id ? { ...s, checked: !s.checked } : s))
+    );
+  };
+
+  const handleSelectAll = (val: boolean) => {
+    setSections((prev) => prev.map((s) => ({ ...s, checked: val })));
+  };
 
   const handleDownload = () => {
     setDownloading(true);
     procurementService.downloadDossierFile('CPCL-PUMP-217', 'BID-HYD-0419');
-    setTimeout(() => setDownloading(false), 800);
+    setTimeout(() => {
+      setDownloading(false);
+      setToastMsg('Statutory CVC Compliance Dossier downloaded successfully.');
+      setTimeout(() => setToastMsg(null), 4000);
+    }, 900);
   };
 
   const handlePrint = () => {
@@ -24,239 +55,376 @@ export const CVCDossierView: React.FC<CVCDossierViewProps> = ({ onNavigate }) =>
 
   return (
     <div className="flex flex-col w-full space-y-4 text-slate-800 text-xs">
-      {/* Top Header */}
-      <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex flex-wrap items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => onNavigate('scrutiny')}
-            className="p-1.5 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors cursor-pointer"
-            title="Back to Cockpit"
-          >
-            <span className="material-symbols-outlined text-[18px]">arrow_back</span>
-          </button>
-          <div className="h-5 w-px bg-slate-200"></div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-xl font-bold text-slate-900 tracking-tight">CVC Compliance Scrutiny Dossier</h1>
-              <span className="font-mono text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">
-                AUDIT COMPLIANT • GFR 144(xi)
-              </span>
-            </div>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Formal technical-commercial evaluation dossier for Central Vigilance Commission (CVC) submission and audit record.
-            </p>
+      {/* Toast Alert */}
+      {toastMsg && (
+        <div className="bg-slate-900 text-white px-4 py-2.5 rounded-lg shadow-md flex items-center justify-between border border-blue-500">
+          <div className="flex items-center gap-2">
+            <span className="material-symbols-outlined text-[18px] text-emerald-400">check_circle</span>
+            <span className="text-xs font-semibold">{toastMsg}</span>
           </div>
+          <button onClick={() => setToastMsg(null)} className="text-slate-400 hover:text-white text-xs">
+            ✕
+          </button>
+        </div>
+      )}
+
+      {/* TOP SUB-HEADER BAR */}
+      <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <button
+              onClick={() => onNavigate('audit')}
+              className="text-xs text-slate-400 hover:text-slate-600 flex items-center gap-1 transition-colors cursor-pointer"
+            >
+              <span className="material-symbols-outlined text-[15px]">arrow_back</span>
+              Return to Audit Ledger
+            </button>
+            <span className="text-slate-300">/</span>
+            <span className="text-xs text-slate-500 font-mono">CPCL/MM/2026/PUMP-217</span>
+            <span className="text-slate-300">/</span>
+            <span className="text-xs font-semibold text-blue-600">CVC Compliance Dossier</span>
+          </div>
+          <div className="flex items-center gap-2.5">
+            <h1 className="text-xl font-bold text-slate-900 tracking-tight">CVC Compliance Dossier</h1>
+            <span className="px-2.5 py-0.5 text-[10px] uppercase font-bold tracking-wider rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+              GAZETTE COMPLIANT • NIC L3 SECURED
+            </span>
+          </div>
+          <p className="text-xs text-slate-500 mt-0.5">
+            Comprehensive statutory procurement verification &amp; technical adjudication dossier for Central Vigilance Commission.
+          </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2.5 flex-wrap">
           <button
             onClick={handlePrint}
-            className="px-3.5 py-1.5 bg-white text-slate-700 hover:bg-slate-50 font-medium text-xs rounded-lg border border-slate-300 transition-colors flex items-center gap-1.5 shadow-xs cursor-pointer"
+            className="px-3 py-1.5 bg-white text-slate-700 hover:bg-slate-50 font-semibold text-xs rounded-lg border border-slate-300 transition-colors flex items-center gap-1.5 shadow-2xs cursor-pointer"
           >
             <span className="material-symbols-outlined text-[16px] text-slate-500">print</span>
-            <span>Print Official Dossier</span>
+            <span>Print Official Record</span>
           </button>
           <button
             onClick={handleDownload}
             disabled={downloading}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-lg shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-lg shadow-2xs transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
           >
             <span className={`material-symbols-outlined text-[16px] ${downloading ? 'animate-spin' : ''}`}>
               {downloading ? 'sync' : 'download'}
             </span>
-            <span>{downloading ? 'Generating Signed Package...' : 'Download Dossier (.JSON / .PDF)'}</span>
+            <span>{downloading ? 'Compiling Dossier...' : 'Download PDF / Signed Package'}</span>
           </button>
         </div>
       </div>
 
-      {/* Grid: Controls Sidebar (4 Cols) + Printable Dossier Sheet (8 Cols) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-        {/* Controls Sidebar (4 Cols) */}
+      {/* TWO-PANEL WORKSPACE: LEFT CONTROLS (4 cols) + RIGHT PAPER DOCKET (8 cols) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+        {/* LEFT PANEL: PREPARE DOSSIER (4 cols) */}
         <div className="lg:col-span-4 space-y-4">
-          <div className="bg-white rounded-xl border border-slate-200 shadow-xs p-4 space-y-3">
-            <div className="font-bold text-slate-900 text-xs pb-2 border-b border-slate-100">
-              Dossier Manifest Options
+          <div className="bg-white rounded-xl border border-slate-200 shadow-2xs p-4 space-y-3.5">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+              <div>
+                <h2 className="font-bold text-slate-900 text-sm">Prepare Dossier</h2>
+                <p className="text-[11px] text-slate-500">Select sections to compile into statutory record.</p>
+              </div>
+              <div className="flex items-center gap-1 text-[11px]">
+                <button
+                  onClick={() => handleSelectAll(true)}
+                  className="text-blue-600 hover:underline cursor-pointer"
+                >
+                  Select All
+                </button>
+                <span className="text-slate-300">•</span>
+                <button
+                  onClick={() => handleSelectAll(false)}
+                  className="text-slate-500 hover:underline cursor-pointer"
+                >
+                  Clear All
+                </button>
+              </div>
             </div>
 
-            <div className="space-y-2 text-xs text-slate-700">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={incCitations}
-                  onChange={(e) => setIncCitations(e.target.checked)}
-                  className="rounded text-blue-600 focus:ring-blue-500"
-                />
-                <span>Include Dual Evidence Citations</span>
-              </label>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={incMerkle}
-                  onChange={(e) => setIncMerkle(e.target.checked)}
-                  className="rounded text-blue-600 focus:ring-blue-500"
-                />
-                <span>Include Merkle Block Signatures</span>
-              </label>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={incCollusion}
-                  onChange={(e) => setIncCollusion(e.target.checked)}
-                  className="rounded text-blue-600 focus:ring-blue-500"
-                />
-                <span>Include Collusion Radial Graph Data</span>
-              </label>
+            {/* Checklist Items */}
+            <div className="space-y-2">
+              {sections.map((sec) => (
+                <label
+                  key={sec.id}
+                  className="flex items-center justify-between p-2 rounded-lg border border-slate-200/80 bg-slate-50/50 hover:bg-slate-100/60 transition-colors cursor-pointer"
+                >
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={sec.checked}
+                      onChange={() => toggleSection(sec.id)}
+                      className="rounded text-blue-600 focus:ring-blue-500 cursor-pointer"
+                    />
+                    <span className="font-medium text-xs text-slate-800">{sec.name}</span>
+                  </div>
+                  <span
+                    className={`text-[10px] font-mono px-1.5 py-0.2 rounded border ${
+                      sec.status === 'adverse'
+                        ? 'bg-rose-50 text-rose-700 border-rose-200 font-bold'
+                        : 'bg-white text-slate-500 border-slate-200'
+                    }`}
+                  >
+                    {sec.count}
+                  </span>
+                </label>
+              ))}
             </div>
+
+            {/* Re-compile button */}
+            <button
+              onClick={() => {
+                setToastMsg('Dossier re-compiled with active statutory sections.');
+                setTimeout(() => setToastMsg(null), 3000);
+              }}
+              className="w-full py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold text-xs rounded-lg transition-colors border border-slate-200 flex items-center justify-center gap-1.5 cursor-pointer"
+            >
+              <span className="material-symbols-outlined text-[16px]">refresh</span>
+              <span>Re-compile CVC Dossier</span>
+            </button>
           </div>
 
-          <div className="bg-white rounded-xl border border-slate-200 shadow-xs p-4 space-y-3">
-            <div className="font-bold text-slate-900 text-xs pb-2 border-b border-slate-100">
-              Statutory Concurrence Mandates
-            </div>
-
-            <div className="space-y-2 text-[11px] text-slate-600">
-              <div className="flex items-start gap-1.5">
-                <span className="material-symbols-outlined text-[15px] text-emerald-600 shrink-0 mt-0.5">check_circle</span>
-                <span>General Financial Rules (GFR) 2017 Rule 144(xi) border country audit satisfied</span>
+          {/* Quick Context Card */}
+          <div className="bg-white rounded-xl border border-slate-200 shadow-2xs p-4 space-y-2.5">
+            <div className="font-bold text-slate-900 text-xs">Attestation Metadata</div>
+            <div className="space-y-1.5 text-[11px] font-mono text-slate-600">
+              <div className="flex justify-between">
+                <span className="text-slate-400">Dossier Ref:</span>
+                <span className="font-semibold text-slate-800">CVC-CPCL-2026-BHT-042</span>
               </div>
-              <div className="flex items-start gap-1.5">
-                <span className="material-symbols-outlined text-[15px] text-emerald-600 shrink-0 mt-0.5">check_circle</span>
-                <span>Public Procurement Policy (Make in India Order 2017) verification completed</span>
+              <div className="flex justify-between">
+                <span className="text-slate-400">Tender Ref:</span>
+                <span className="font-semibold text-slate-800">CPCL/MM/2026/PUMP-217</span>
               </div>
-              <div className="flex items-start gap-1.5">
-                <span className="material-symbols-outlined text-[15px] text-emerald-600 shrink-0 mt-0.5">check_circle</span>
-                <span>CVC Circular 02/05/2022 integrity pact attestation attached</span>
+              <div className="flex justify-between">
+                <span className="text-slate-400">Evaluation Officer:</span>
+                <span className="font-semibold text-slate-800">Rajesh Verma (CPCL)</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-400">DSC Key Serial:</span>
+                <span className="font-semibold text-emerald-700">SHA256-EMUDHRA-99410</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-400">Merkle Anchor Block:</span>
+                <span className="font-semibold text-blue-700">Block #142</span>
               </div>
             </div>
-          </div>
-
-          <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 text-blue-900 space-y-2">
-            <div className="font-bold text-xs flex items-center gap-1.5">
-              <span className="material-symbols-outlined text-[16px] text-blue-600">lock</span>
-              <span>Cryptographic Integrity Seal</span>
-            </div>
-            <p className="text-[11px] leading-relaxed text-blue-800">
-              Every section of this dossier is verified against SHA-256 Merkle root in Block #144. Any manual post-issuance
-              tampering invalidates the federal cryptographic seal.
-            </p>
           </div>
         </div>
 
-        {/* Printable Dossier Sheet (8 Cols) */}
-        <div className="lg:col-span-8 bg-white rounded-xl border border-slate-300 shadow-md p-8" id="cvc-dossier-sheet">
-          {/* Government Emblem / Header */}
-          <div className="text-center pb-6 border-b-2 border-slate-900 space-y-1">
-            <div className="font-serif font-bold text-sm tracking-wide text-slate-900 uppercase">
-              Government of India • Ministry of Petroleum & Natural Gas
+        {/* RIGHT PANEL: A4 LEGAL PAPER SHEET CANVAS (8 cols) */}
+        <div className="lg:col-span-8 flex flex-col items-center">
+          {/* Sticky Document Toolbar */}
+          <div className="w-full bg-white border border-slate-200 rounded-t-xl px-5 py-2.5 flex items-center justify-between shadow-2xs">
+            <div className="flex items-center space-x-3">
+              <span className="inline-flex items-center space-x-1 text-[10px] font-semibold text-emerald-800 bg-emerald-50 border border-emerald-300 px-2 py-0.5 rounded-full">
+                <span className="material-symbols-outlined text-[14px] text-emerald-600">verified</span>
+                <span>Document Status: Audit Verified</span>
+              </span>
+              <span className="text-slate-300">|</span>
+              <span className="text-[11px] text-slate-600 font-mono">Page 1 of 4</span>
             </div>
-            <div className="font-bold text-base text-slate-900 tracking-tight">
-              CHENNAI PETROLEUM CORPORATION LIMITED (CPCL)
-            </div>
-            <div className="font-sans text-[11px] text-slate-600">
-              Materials & Contracts Directorate • Tender Scrutiny Wing
-            </div>
-            <div className="pt-2 font-mono text-[10px] text-slate-500 font-semibold uppercase">
-              CONFIDENTIAL TECHNICAL-COMMERCIAL SCRUTINY DOSSIER • CVC FILE REF: CVC/DOSSIER/2026/CPCL-PUMP-217
+
+            <div className="flex items-center space-x-3">
+              <div className="flex items-center border border-slate-200 rounded-md bg-slate-50 text-slate-700 text-xs">
+                <button
+                  onClick={() => setZoomLevel((z) => Math.max(z - 10, 80))}
+                  className="px-2 py-0.5 hover:bg-slate-200 rounded-l cursor-pointer"
+                  title="Zoom Out"
+                >
+                  -
+                </button>
+                <span className="px-2 py-0.5 font-mono text-[10px] border-x border-slate-200 bg-white">
+                  {zoomLevel}%
+                </span>
+                <button
+                  onClick={() => setZoomLevel((z) => Math.min(z + 10, 130))}
+                  className="px-2 py-0.5 hover:bg-slate-200 rounded-r cursor-pointer"
+                  title="Zoom In"
+                >
+                  +
+                </button>
+              </div>
+
+              <div className="flex items-center space-x-1 text-[10px] text-slate-500 font-mono bg-slate-100 border border-slate-200 px-2 py-0.5 rounded">
+                <span className="material-symbols-outlined text-[12px] text-slate-400">shield</span>
+                <span>NIC Watermark: Official Record</span>
+              </div>
             </div>
           </div>
 
-          {/* Tender Metadata */}
-          <div className="grid grid-cols-2 gap-4 py-4 border-b border-slate-200 text-[11px]">
-            <div>
-              <span className="text-slate-500">Tender Reference ID:</span>{' '}
-              <strong className="font-mono text-slate-900">CPCL/MM/2026/PUMP-217</strong>
-            </div>
-            <div>
-              <span className="text-slate-500">Global GeM Bid ID:</span>{' '}
-              <strong className="font-mono text-slate-900">GEM/2026/B/892110</strong>
-            </div>
-            <div>
-              <span className="text-slate-500">Procurement Title:</span>{' '}
-              <strong className="text-slate-900">API-610 Centrifugal Process Pumps</strong>
-            </div>
-            <div>
-              <span className="text-slate-500">Sanctioned Capex Value:</span>{' '}
-              <strong className="font-mono text-slate-900">₹18.40 Crores (INR)</strong>
-            </div>
-          </div>
-
-          {/* Bidder Evaluation Summary Table */}
-          <div className="py-4 border-b border-slate-200">
-            <div className="font-bold text-xs uppercase tracking-wider text-slate-900 mb-2">
-              1. Comparative Technical Evaluation Summary
-            </div>
-            <table className="w-full text-left border-collapse text-[11px]">
-              <thead>
-                <tr className="bg-slate-100 text-slate-700 font-semibold border-b border-slate-300">
-                  <th className="py-1.5 px-2">Bidder Entity</th>
-                  <th className="py-1.5 px-2 font-mono">PAN / GSTIN</th>
-                  <th className="py-1.5 px-2 text-center">Verdict</th>
-                  <th className="py-1.5 px-2 text-center font-mono">Risk Score</th>
-                  <th className="py-1.5 px-2">Final Adjudication</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-200">
-                {MOCK_BIDDERS.map((b) => (
-                  <tr key={b.id}>
-                    <td className="py-1.5 px-2">
-                      <div className="font-semibold text-slate-900">{b.legalName}</div>
-                      <div className="font-mono text-[9px] text-slate-400">{b.code}</div>
-                    </td>
-                    <td className="py-1.5 px-2 font-mono text-[10px]">
-                      <div>{b.pan}</div>
-                      <div className="text-slate-400 text-[9px]">{b.gstin}</div>
-                    </td>
-                    <td className="py-1.5 px-2 text-center font-bold">
-                      <span className={b.complianceStatus === 'PASS' ? 'text-emerald-700' : 'text-rose-700'}>
-                        {b.complianceStatus}
-                      </span>
-                    </td>
-                    <td className="py-1.5 px-2 text-center font-mono font-bold">{b.riskScore}/100</td>
-                    <td className="py-1.5 px-2 font-semibold">
-                      <span className="px-1.5 py-0.5 rounded text-[10px] bg-slate-100 border border-slate-300">
-                        {b.officerDecision}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Adjudication Minutes & Written Override */}
-          <div className="py-4 border-b border-slate-200 space-y-2">
-            <div className="font-bold text-xs uppercase tracking-wider text-slate-900">
-              2. Designated Officer Adjudication Minutes & Regulatory Override
-            </div>
-            <div className="bg-slate-50 border border-slate-200 rounded p-3 text-[11px] leading-relaxed text-slate-800">
-              <strong>Matter of Bharat Hydrotech Corp (BID-HYD-0419):</strong>
-              <p className="mt-1">
-                The Tender Evaluation Committee (TEC) reviewed Bharat Hydrotech Corp’s Udyam Registration
-                (UDYAM-MH-26-0034912) and affirms that under Public Procurement Policy (MSE Order 2012 Clause 10) & CPCL
-                Prequalification relaxation rules, the ₹6.10 Cr turnover is admissible for technical evaluation.
-                Regarding the GSTIN state code discordance (33-TN vs 27-MH), the bidder holds an active Tamil Nadu project
-                execution branch registration; provisional qualification is granted subject to submission of Form REG-06
-                annexure within 5 calendar days.
-              </p>
-            </div>
-          </div>
-
-          {/* Signatures & Merkle Chain Seal */}
-          <div className="pt-6 grid grid-cols-2 gap-8 text-[11px]">
-            <div>
-              <div className="font-bold text-slate-900">Rajesh Verma</div>
-              <div className="text-slate-600">Chief Procurement Officer</div>
-              <div className="font-mono text-[10px] text-slate-400 mt-1">
-                DSC Token: RAJESH_VERMA_CPCL_0942 (Class 3 Valid)
+          {/* THE FORMAL LEGAL PAPER SHEET */}
+          <article
+            id="cvc-dossier-sheet"
+            style={{ transform: `scale(${zoomLevel / 100})`, transformOrigin: 'top center' }}
+            className="w-full bg-white border-x border-b border-slate-200 rounded-b-xl shadow-sm p-8 sm:p-10 space-y-7 relative transition-transform"
+          >
+            {/* Subtle Diagonal Watermark */}
+            <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-[0.03] select-none overflow-hidden">
+              <div className="text-slate-900 font-black text-6xl rotate-[-25deg] tracking-widest text-center leading-tight">
+                OFFICIAL RECORD<br />CVC COMPLIANCE
               </div>
             </div>
 
-            <div className="text-right font-mono text-[10px] text-slate-500">
-              <div className="font-bold text-slate-900 text-xs">VigilBid Ledger Verification</div>
-              <div className="text-emerald-700 font-semibold mt-1">Merkle Block #144 Anchored</div>
-              <div className="truncate text-[9px] mt-0.5">Digest: 8f4e229a17c76a91d...</div>
+            {/* 1. OFFICIAL DOSSIER HEADER */}
+            <div className="border-b-2 border-slate-800 pb-5 text-center relative space-y-1.5">
+              <div className="flex items-center justify-between text-[10px] font-mono text-slate-500 uppercase tracking-widest pb-1 border-b border-slate-100">
+                <span>FORM CVC-PROC-04</span>
+                <span className="font-bold text-slate-700">CONFIDENTIAL • FOR STATUTORY AUDIT ONLY</span>
+                <span>GAZETTE NOTIFIED</span>
+              </div>
+
+              <div className="py-1">
+                <div className="text-[11px] font-bold tracking-wider text-slate-600 uppercase">
+                  Government of India
+                </div>
+                <div className="text-sm font-black tracking-tight text-slate-900 uppercase">
+                  Chennai Petroleum Corporation Limited (CPCL)
+                </div>
+                <div className="text-xs font-bold text-blue-900 tracking-wide uppercase mt-1">
+                  Central Vigilance Commission (CVC) Statutory Compliance Dossier
+                </div>
+                <div className="text-[10px] text-slate-500 font-sans mt-0.5">
+                  Comprehensive Procurement Verification &amp; Technical Adjudication Dossier
+                </div>
+              </div>
+
+              <div className="pt-2 flex items-center justify-between text-[11px] font-mono text-slate-700 border-t border-slate-200">
+                <div>
+                  <span className="text-slate-400">Dossier Ref No: </span>
+                  <strong className="text-slate-900">CVC-CPCL-2026-BHT-042</strong>
+                </div>
+                <div>
+                  <span className="text-slate-400">Date of Attestation: </span>
+                  <strong className="text-slate-900">26 March 2026</strong>
+                </div>
+              </div>
             </div>
-          </div>
+
+            {/* SECTION 1: Executive Summary */}
+            <div className="space-y-2">
+              <div className="font-bold text-xs text-slate-900 uppercase tracking-wide border-b border-slate-200 pb-1 flex items-center justify-between">
+                <span>Section 1: Executive Summary &amp; Procurement Scope</span>
+                <span className="font-mono text-[10px] text-slate-500">Tender: CPCL/MM/2026/PUMP-217</span>
+              </div>
+              <p className="text-xs text-slate-700 leading-relaxed">
+                This statutory dossier records the technical-commercial evaluation for{' '}
+                <strong>API-610 Centrifugal Process Pumps</strong> at CPCL Manali Refinery (Packet ₹18.40 Cr ICB). Five
+                responsive envelopes were ingested, decrypted, and evaluated against GFR 2017, PPP-MII Order 2017, and
+                NIC-CERT forensic telemetry.
+              </p>
+            </div>
+
+            {/* SECTION 2: Critical Statutory Findings */}
+            <div className="space-y-2.5">
+              <div className="font-bold text-xs text-rose-800 uppercase tracking-wide border-b border-rose-200 pb-1 flex items-center justify-between">
+                <span>Section 2: Critical Statutory Findings (2 Adverse Determinations)</span>
+                <span className="font-mono text-[10px] bg-rose-100 text-rose-800 px-2 py-0.2 rounded border border-rose-200">
+                  DISQUALIFICATION GROUNDS
+                </span>
+              </div>
+
+              <div className="p-3 bg-rose-50/50 border border-rose-200 rounded-lg space-y-1.5 text-xs">
+                <div className="font-bold text-rose-900">
+                  1. GFR Rule 144(i) &amp; GSTIN State Discordance (FND-2026-0042)
+                </div>
+                <p className="text-slate-700 leading-relaxed">
+                  Bidder C (Bharat Hydrotech Corp) submitted an envelope declaring GSTIN with State Code 33 (Tamil Nadu),
+                  whereas official MCA-21 filings confirm registered office in Maharashtra (State 27). The embedded PAN
+                  was found discordant with CBDT records.
+                </p>
+              </div>
+
+              <div className="p-3 bg-rose-50/50 border border-rose-200 rounded-lg space-y-1.5 text-xs">
+                <div className="font-bold text-rose-900">
+                  2. Land Border Restriction Non-Compliance (GFR 144(xi) F.No.6/18/2019-PPD)
+                </div>
+                <p className="text-slate-700 leading-relaxed">
+                  Beneficial ownership investigation revealed corporate shareholding traced to a foreign entity without
+                  mandatory DPIIT registration clearance.
+                </p>
+              </div>
+            </div>
+
+            {/* SECTION 3: Evidentiary Exhibit References */}
+            <div className="space-y-2">
+              <div className="font-bold text-xs text-slate-900 uppercase tracking-wide border-b border-slate-200 pb-1">
+                Section 3: Evidentiary Exhibit References &amp; Rules
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 font-mono text-[10.5px]">
+                <div className="p-2 bg-slate-50 border border-slate-200 rounded">
+                  <div className="font-bold text-slate-800">Exhibit A: gst_reg06.pdf</div>
+                  <div className="text-slate-500 mt-0.5">Page 1 • State 33 Discordance</div>
+                </div>
+                <div className="p-2 bg-slate-50 border border-slate-200 rounded">
+                  <div className="font-bold text-slate-800">Exhibit B: pan_card.pdf</div>
+                  <div className="text-slate-500 mt-0.5">Page 1 • CBDT Validation Fail</div>
+                </div>
+                <div className="p-2 bg-slate-50 border border-slate-200 rounded">
+                  <div className="font-bold text-slate-800">Exhibit C: turnover_ca.pdf</div>
+                  <div className="text-slate-500 mt-0.5">Page 2 • ₹6.10 Cr Turnover Deficit</div>
+                </div>
+              </div>
+            </div>
+
+            {/* SECTION 4: Explainable Risk Attribution Engine */}
+            <div className="space-y-2">
+              <div className="font-bold text-xs text-slate-900 uppercase tracking-wide border-b border-slate-200 pb-1 flex items-center justify-between">
+                <span>Section 4: Explainable Risk Attribution Engine</span>
+                <span className="font-mono text-rose-700 font-bold">COMPOSITE RISK: 65 / 100</span>
+              </div>
+              <p className="text-xs text-slate-700 leading-relaxed">
+                NIC-CERT Heuristics v2.4 decomposed risk into Identity Discordance (42%), Cartel/Subnet Clustering (31%),
+                Turnover Deficit (18%), and Document Timestamp Discrepancy (9%). Confidence index is verified at 94.2%.
+              </p>
+            </div>
+
+            {/* SECTION 5: Human Officer Decision & Statutory Minute */}
+            <div className="space-y-2">
+              <div className="font-bold text-xs text-slate-900 uppercase tracking-wide border-b border-slate-200 pb-1">
+                Section 5: Human Officer Decision &amp; Statutory Minute
+              </div>
+              <div className="p-3 bg-slate-50 border border-slate-300 rounded-lg text-xs leading-relaxed font-mono">
+                <div className="text-slate-500 mb-1">DETERMINATION COMMITTED:</div>
+                <div className="text-slate-900 font-semibold">
+                  “The Tender Evaluation Committee (TEC) reviewed Bharat Hydrotech Corp’s Udyam Registration
+                  (UDYAM-MH-26-0034912) and affirms that under Public Procurement Policy (MSE Order 2012 Clause 10), provisional
+                  qualification is granted subject to submission of Form REG-06 annexure within 5 calendar days.”
+                </div>
+                <div className="mt-2 text-[11px] text-slate-500 flex items-center justify-between">
+                  <span>Adjudicating Officer: Rajesh Verma (Sr. Procurement Officer, CPCL)</span>
+                  <span>DSC: Verified Valid Class-3 Token</span>
+                </div>
+              </div>
+            </div>
+
+            {/* SECTION 6: Cryptographic Audit Ledger Integrity */}
+            <div className="space-y-2 border-t-2 border-slate-800 pt-4">
+              <div className="font-bold text-xs text-slate-900 uppercase tracking-wide flex items-center justify-between">
+                <span>Section 6: Cryptographic Audit Ledger Integrity</span>
+                <span className="font-mono text-emerald-700 font-bold">ANCHOR BLOCK #142</span>
+              </div>
+              <div className="p-3 bg-slate-900 text-slate-300 rounded-lg font-mono text-[10.5px] space-y-1">
+                <div>
+                  <span className="text-slate-500">BLOCK_HASH: </span>
+                  <span className="text-emerald-400 font-bold">
+                    3c7e1d54b899a1f2e3d4c5b6a7890123456789abcdef0123456789abcdef912f
+                  </span>
+                </div>
+                <div>
+                  <span className="text-slate-500">MERKLE_ROOT: </span>
+                  <span className="text-sky-400">
+                    d8c4b2a19f0e3d5c7b9a1e3f5a7c9b1d3f5a7c9e1b3d5f7a9c1e3b5d7f9a1c3e
+                  </span>
+                </div>
+                <div>
+                  <span className="text-slate-500">TIMESTAMP: </span>
+                  <span>2026-03-26 15:45:10 IST • Nonce: 48921 • Consensus: NIC-DELHI-04</span>
+                </div>
+              </div>
+            </div>
+          </article>
         </div>
       </div>
     </div>
