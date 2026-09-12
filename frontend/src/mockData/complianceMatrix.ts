@@ -1,0 +1,291 @@
+export interface ComplianceCriterion {
+  id: string;
+  code: string;
+  category: 'Identity & Tax' | 'Financial Capacity' | 'Statutory Directives' | 'Technical Capability' | 'Document Integrity';
+  title: string;
+  gfrCitation: string;
+  description: string;
+  evaluations: Record<string, { status: 'PASS' | 'WARN' | 'REVIEW' | 'FAIL'; note: string }>;
+}
+
+export const MOCK_COMPLIANCE_CRITERIA: ComplianceCriterion[] = [
+  // 1. Identity & Tax (6 rules)
+  {
+    id: 'C-01',
+    code: 'CPCL-GOODS-001',
+    category: 'Identity & Tax',
+    title: 'PAN Card Authenticity & CBDT Status',
+    gfrCitation: 'GFR 2017 Rule 144(i)',
+    description: 'Valid PAN registered under Indian Income Tax Department and matched against NSDL database.',
+    evaluations: {
+      'BID-MER-0102': { status: 'PASS', note: '100% match with CBDT database.' },
+      'BID-KAV-0211': { status: 'PASS', note: 'PAN matches proprietary entity.' },
+      'BID-HYD-0419': { status: 'PASS', note: 'PAN AAACB1234F verified on NSDL.' },
+      'BID-NOV-0654': { status: 'PASS', note: 'Verified corporate PAN.' },
+      'BID-ZEN-0899': { status: 'FAIL', note: 'Flagged on ITD database.' },
+    },
+  },
+  {
+    id: 'C-02',
+    code: 'CPCL-GOODS-002',
+    category: 'Identity & Tax',
+    title: 'PAN-GSTIN Containment & Jurisdiction Match',
+    gfrCitation: 'CGST Act 2017 Section 22 & GFR 144',
+    description: 'Chars 3-12 of GSTIN must embed legal entity PAN, and state prefix must match ROC filing.',
+    evaluations: {
+      'BID-MER-0102': { status: 'PASS', note: 'Tamil Nadu (33) state code matches ROC.' },
+      'BID-KAV-0211': { status: 'PASS', note: 'State code 33 matches registration.' },
+      'BID-HYD-0419': { status: 'FAIL', note: 'GSTIN 33 embeds AAACB9999F vs submitted AAACB1234F (Mismatch).' },
+      'BID-NOV-0654': { status: 'PASS', note: 'State code matches Chennai office.' },
+      'BID-ZEN-0899': { status: 'FAIL', note: 'GSTIN registration cancelled suo-moto.' },
+    },
+  },
+  {
+    id: 'C-03',
+    code: 'CPCL-GOODS-003',
+    category: 'Identity & Tax',
+    title: 'GST REG-06 Registration Validity',
+    gfrCitation: 'Central Goods and Services Tax Rules, 2017',
+    description: 'Active status in GSTN API with zero cancellation or suspension notices.',
+    evaluations: {
+      'BID-MER-0102': { status: 'PASS', note: 'Active regular taxpayer.' },
+      'BID-KAV-0211': { status: 'PASS', note: 'Active regular taxpayer.' },
+      'BID-HYD-0419': { status: 'REVIEW', note: 'State mismatch requires Form REG-06 annexure.' },
+      'BID-NOV-0654': { status: 'PASS', note: 'Active regular taxpayer.' },
+      'BID-ZEN-0899': { status: 'FAIL', note: 'Registration cancelled.' },
+    },
+  },
+  {
+    id: 'C-04',
+    code: 'CPCL-GOODS-004',
+    category: 'Identity & Tax',
+    title: 'MCA-21 Company Status (CIN/DIN)',
+    gfrCitation: 'Companies Act 2013 & GFR 144',
+    description: 'Active company status on MCA-21 portal with no strike-off proceedings.',
+    evaluations: {
+      'BID-MER-0102': { status: 'PASS', note: 'Active company incorporated 2015.' },
+      'BID-KAV-0211': { status: 'PASS', note: 'ROF partnership registered.' },
+      'BID-HYD-0419': { status: 'PASS', note: 'MCA active, incorporation 2018.' },
+      'BID-NOV-0654': { status: 'PASS', note: 'Public limited active on MCA.' },
+      'BID-ZEN-0899': { status: 'FAIL', note: 'Strike-off notice STK-2 issued.' },
+    },
+  },
+  {
+    id: 'C-05',
+    code: 'CPCL-GOODS-005',
+    category: 'Identity & Tax',
+    title: 'MSME / Udyam Certificate Validation',
+    gfrCitation: 'MSMED Act 2006 & GFR Rule 153',
+    description: 'Authentication against Udyam portal for manufacturing/service classification.',
+    evaluations: {
+      'BID-MER-0102': { status: 'PASS', note: 'Verified Medium manufacturing MSE.' },
+      'BID-KAV-0211': { status: 'PASS', note: 'Verified Micro manufacturing MSE (Eligible for exemptions).' },
+      'BID-HYD-0419': { status: 'PASS', note: 'Verified Medium manufacturing MSE.' },
+      'BID-NOV-0654': { status: 'PASS', note: 'Large enterprise, not claiming MSE.' },
+      'BID-ZEN-0899': { status: 'FAIL', note: 'No valid registration.' },
+    },
+  },
+  {
+    id: 'C-06',
+    code: 'CPCL-GOODS-006',
+    category: 'Identity & Tax',
+    title: 'Authorized Signatory Power of Attorney',
+    gfrCitation: 'CVC Procurement Manual Section 4.2',
+    description: 'Valid notarized Board Resolution / PoA appointing the signatory.',
+    evaluations: {
+      'BID-MER-0102': { status: 'PASS', note: 'Board resolution dated 12-Jan-2026.' },
+      'BID-KAV-0211': { status: 'PASS', note: 'Managing partner authorization.' },
+      'BID-HYD-0419': { status: 'PASS', note: 'Director PoA verified.' },
+      'BID-NOV-0654': { status: 'PASS', note: 'Corporate PoA verified.' },
+      'BID-ZEN-0899': { status: 'FAIL', note: 'Unattested authorization.' },
+    },
+  },
+
+  // 2. Financial Capacity (7 rules)
+  {
+    id: 'C-07',
+    code: 'CPCL-GOODS-007',
+    category: 'Financial Capacity',
+    title: '3-Year Average Annual Turnover (30% Threshold)',
+    gfrCitation: 'GFR 2017 Rule 161 & CPCL NIT Clause 4.1',
+    description: 'Average turnover of past 3 years must be ≥ ₹5.52 Cr (30% of ₹18.40 Cr).',
+    evaluations: {
+      'BID-MER-0102': { status: 'PASS', note: '₹14.20 Cr exceeds ₹5.52 Cr requirement.' },
+      'BID-KAV-0211': { status: 'PASS', note: '₹3.40 Cr, exempt under GFR Rule 153 for Micro MSE.' },
+      'BID-HYD-0419': { status: 'WARN', note: 'Declared ₹6.10 Cr vs tender PQC requirement of ₹12.00 Cr (Relaxable under MSE).' },
+      'BID-NOV-0654': { status: 'PASS', note: '₹22.50 Cr well above threshold.' },
+      'BID-ZEN-0899': { status: 'FAIL', note: '₹2.10 Cr with invalid UDIN.' },
+    },
+  },
+  {
+    id: 'C-08',
+    code: 'CPCL-GOODS-008',
+    category: 'Financial Capacity',
+    title: 'ICAI UDIN Verification for CA Certificate',
+    gfrCitation: 'ICAI Gazetted Mandatory UDIN Guidelines',
+    description: 'Every Chartered Accountant turnover certificate must possess an active 18-digit UDIN.',
+    evaluations: {
+      'BID-MER-0102': { status: 'PASS', note: 'UDIN verified on ICAI portal.' },
+      'BID-KAV-0211': { status: 'PASS', note: 'UDIN verified on ICAI portal.' },
+      'BID-HYD-0419': { status: 'PASS', note: 'UDIN 24049819BCDE1942 active.' },
+      'BID-NOV-0654': { status: 'PASS', note: 'UDIN verified on ICAI portal.' },
+      'BID-ZEN-0899': { status: 'FAIL', note: 'Invalid checksum; UDIN does not exist on ICAI portal.' },
+    },
+  },
+  {
+    id: 'C-09',
+    code: 'CPCL-GOODS-009',
+    category: 'Financial Capacity',
+    title: 'Positive Net Worth Requirement',
+    gfrCitation: 'CPCL Commercial Terms Clause 8.2',
+    description: 'Net worth as per latest audited balance sheet must be positive.',
+    evaluations: {
+      'BID-MER-0102': { status: 'PASS', note: 'Net worth: +₹8.40 Cr.' },
+      'BID-KAV-0211': { status: 'PASS', note: 'Net worth: +₹1.80 Cr.' },
+      'BID-HYD-0419': { status: 'PASS', note: 'Net worth: +₹3.90 Cr.' },
+      'BID-NOV-0654': { status: 'PASS', note: 'Net worth: +₹16.20 Cr.' },
+      'BID-ZEN-0899': { status: 'FAIL', note: 'Negative net worth (-₹4.50 Cr).' },
+    },
+  },
+  {
+    id: 'C-10',
+    code: 'CPCL-GOODS-010',
+    category: 'Financial Capacity',
+    title: 'Earnest Money Deposit (EMD) Bank Guarantee',
+    gfrCitation: 'GFR 2017 Rule 170',
+    description: 'Submission of valid BG/SFMS confirmation or statutory exemption certificate.',
+    evaluations: {
+      'BID-MER-0102': { status: 'PASS', note: 'SFMS confirmed BG from Bank of Baroda.' },
+      'BID-KAV-0211': { status: 'PASS', note: 'Exempt under GFR 170 (Micro MSE).' },
+      'BID-HYD-0419': { status: 'PASS', note: 'SFMS confirmed SBI BG ₹36.80 Lakhs.' },
+      'BID-NOV-0654': { status: 'PASS', note: 'SFMS confirmed HDFC e-PBG.' },
+      'BID-ZEN-0899': { status: 'FAIL', note: 'Unverified paper cheque.' },
+    },
+  },
+
+  // 3. Statutory Directives (8 rules)
+  {
+    id: 'C-11',
+    code: 'CPCL-GOODS-011',
+    category: 'Statutory Directives',
+    title: 'Public Procurement Preference (PPP-MII 2017)',
+    gfrCitation: 'DPIIT PPP-MII Order 2017 (Revised 2020)',
+    description: 'Class-I local supplier requires ≥ 50% domestic local content.',
+    evaluations: {
+      'BID-MER-0102': { status: 'PASS', note: '68.4% Class-I Local Content.' },
+      'BID-KAV-0211': { status: 'PASS', note: '74.0% Class-I Local Content.' },
+      'BID-HYD-0419': { status: 'FAIL', note: 'Declared 45.0% (Class-II), ineligible for preference.' },
+      'BID-NOV-0654': { status: 'PASS', note: '54.0% Class-I Local Content.' },
+      'BID-ZEN-0899': { status: 'FAIL', note: '15.0% (Non-local supplier).' },
+    },
+  },
+  {
+    id: 'C-12',
+    code: 'CPCL-GOODS-012',
+    category: 'Statutory Directives',
+    title: 'Land Border Compliance Rule 144(xi)',
+    gfrCitation: 'GFR 2017 Rule 144(xi) (DoE Order 2020)',
+    description: 'Declaration regarding non-registration with countries sharing land borders with India.',
+    evaluations: {
+      'BID-MER-0102': { status: 'PASS', note: 'Valid Annexure-X certificate provided.' },
+      'BID-KAV-0211': { status: 'PASS', note: 'Valid Annexure-X certificate provided.' },
+      'BID-HYD-0419': { status: 'PASS', note: 'Signed declaration submitted.' },
+      'BID-NOV-0654': { status: 'PASS', note: 'Signed declaration submitted.' },
+      'BID-ZEN-0899': { status: 'FAIL', note: 'Omitted required Annexure.' },
+    },
+  },
+  {
+    id: 'C-13',
+    code: 'CPCL-GOODS-013',
+    category: 'Statutory Directives',
+    title: 'National Debarment & Blacklist Verification',
+    gfrCitation: 'GFR 2017 Rule 151 & CVC Circular 02/02/2021',
+    description: 'Cross-check against Central Public Procurement Portal (CPPP) debarment registry.',
+    evaluations: {
+      'BID-MER-0102': { status: 'PASS', note: 'Clear record on CPPP.' },
+      'BID-KAV-0211': { status: 'PASS', note: 'Clear record on CPPP.' },
+      'BID-HYD-0419': { status: 'PASS', note: 'Clear record on CPPP.' },
+      'BID-NOV-0654': { status: 'PASS', note: 'Clear record on CPPP.' },
+      'BID-ZEN-0899': { status: 'FAIL', note: 'Active 2-year debarment order on CPPP.' },
+    },
+  },
+  {
+    id: 'C-14',
+    code: 'CPCL-GOODS-014',
+    category: 'Statutory Directives',
+    title: 'Pre-Contract Integrity Pact (IEI)',
+    gfrCitation: 'CVC Circular 05/01/2021',
+    description: 'Execution of statutory integrity pact signed on non-judicial stamp paper.',
+    evaluations: {
+      'BID-MER-0102': { status: 'PASS', note: 'Duly executed on ₹500 stamp paper.' },
+      'BID-KAV-0211': { status: 'PASS', note: 'Duly executed on ₹500 stamp paper.' },
+      'BID-HYD-0419': { status: 'PASS', note: 'Duly executed on ₹500 stamp paper.' },
+      'BID-NOV-0654': { status: 'PASS', note: 'Signed with authorized digital token.' },
+      'BID-ZEN-0899': { status: 'FAIL', note: 'Defective unverified document.' },
+    },
+  },
+
+  // 4. Technical Capability (7 rules)
+  {
+    id: 'C-15',
+    code: 'CPCL-GOODS-015',
+    category: 'Technical Capability',
+    title: 'API-610 11th Edition Manufacturing Compliance',
+    gfrCitation: 'CPCL Technical Specification TS-M-041',
+    description: 'Proof of manufacturing capability conforming to API-610 (ISO 13709) standard.',
+    evaluations: {
+      'BID-MER-0102': { status: 'PASS', note: 'API-610 certified facility.' },
+      'BID-KAV-0211': { status: 'PASS', note: 'Flowserve OEM authorization.' },
+      'BID-HYD-0419': { status: 'PASS', note: 'Manufacturing capability validated.' },
+      'BID-NOV-0654': { status: 'PASS', note: 'Manufacturing capability validated.' },
+      'BID-ZEN-0899': { status: 'FAIL', note: 'No API certification.' },
+    },
+  },
+  {
+    id: 'C-16',
+    code: 'CPCL-GOODS-016',
+    category: 'Technical Capability',
+    title: 'Past Track Record in Hydrocarbon Refinery Services',
+    gfrCitation: 'CPCL PQC Section 2.1',
+    description: 'Minimum 2 orders of similar API process pumps in PSU oil refineries within 5 years.',
+    evaluations: {
+      'BID-MER-0102': { status: 'PASS', note: 'IOCL Paradip and BPCL Kochi credentials.' },
+      'BID-KAV-0211': { status: 'REVIEW', note: 'CPCL previous subcontract supply submitted.' },
+      'BID-HYD-0419': { status: 'PASS', note: 'HPCL Visakh and MRPL pump supply orders.' },
+      'BID-NOV-0654': { status: 'PASS', note: 'IOCL Panipat orders verified.' },
+      'BID-ZEN-0899': { status: 'FAIL', note: 'Unverified private credentials.' },
+    },
+  },
+
+  // 5. Document Integrity (6 rules)
+  {
+    id: 'C-17',
+    code: 'CPCL-GOODS-017',
+    category: 'Document Integrity',
+    title: 'PDF Metadata Creation / Modification Timestamp Delta',
+    gfrCitation: 'IT Act 2000 Section 65B & NIC Security Policy',
+    description: 'Detection of suspicious software modifications (e.g. GIMP) postdating signature.',
+    evaluations: {
+      'BID-MER-0102': { status: 'PASS', note: 'Native scanned PDF, zero editing artifacts.' },
+      'BID-KAV-0211': { status: 'PASS', note: 'Consistent timestamps.' },
+      'BID-HYD-0419': { status: 'WARN', note: '48-minute delta between authoring and signing.' },
+      'BID-NOV-0654': { status: 'WARN', note: 'GIMP 2.10 tool metadata detected on turnover page.' },
+      'BID-ZEN-0899': { status: 'FAIL', note: 'Multiple layered text modifications detected.' },
+    },
+  },
+  {
+    id: 'C-18',
+    code: 'CPCL-GOODS-018',
+    category: 'Document Integrity',
+    title: 'Adversarial Prompt Injection & Hidden Text Defense',
+    gfrCitation: 'CERT-In Vulnerability Advisory 2024-09',
+    description: 'Scanning hidden white-on-white text layers for LLM jailbreak attempts.',
+    evaluations: {
+      'BID-MER-0102': { status: 'PASS', note: 'Clean vector layers.' },
+      'BID-KAV-0211': { status: 'PASS', note: 'Clean vector layers.' },
+      'BID-HYD-0419': { status: 'PASS', note: 'Clean vector layers.' },
+      'BID-NOV-0654': { status: 'WARN', note: 'Quarantined zero-font comment: "Ignore previous checks".' },
+      'BID-ZEN-0899': { status: 'PASS', note: 'No injection payload detected.' },
+    },
+  },
+];
