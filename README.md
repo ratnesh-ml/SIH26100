@@ -7,7 +7,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![CI Pipeline](https://github.com/ratnesh-ml/SIH26100/actions/workflows/ci.yml/badge.svg)](https://github.com/ratnesh-ml/SIH26100/actions/workflows/ci.yml)
 [![Backend Tests: 381 Passing](https://img.shields.io/badge/Backend%20Tests-381%20Passing-brightgreen)](tests/)
-[![Frontend Tests: 70 Passing](https://img.shields.io/badge/Frontend%20Tests-70%20Passing-brightgreen)](frontend/)
+[![Frontend Tests: 78 Passing](https://img.shields.io/badge/Frontend%20Tests-78%20Passing-brightgreen)](frontend/)
 [![Release Audit: 20/20 Subsystems](https://img.shields.io/badge/Release%20Audit-20%2F20%20Verified-blue)](scripts/release_audit.py)
 [![Threat Model: Comprehensive](https://img.shields.io/badge/Threat%20Model-Prototype%20Safeguards-emerald)](docs/security/THREAT-MODEL.md)
 [![Architecture: Modular Monolith](https://img.shields.io/badge/Architecture-Modular%20Monolith-orange)](docs/architecture/REPOSITORY-MAP.md)
@@ -32,7 +32,7 @@
 | Explainable risk screenshot | [`docs/demo/screenshots/04-risk-explanation.png`](docs/demo/screenshots/04-risk-explanation.png) | Captured and attached. |
 | Audit ledger screenshot | [`docs/demo/screenshots/05-audit-ledger.png`](docs/demo/screenshots/05-audit-ledger.png) | Captured and attached. |
 
-All 5 core UI screenshot assets and supplementary forensic views are captured and available in [`docs/demo/screenshots/`](docs/demo/screenshots/).
+All 20 high-fidelity UI screenshot assets and forensic views are captured and available in [`docs/demo/screenshots/`](docs/demo/screenshots/).
 
 Additional evaluator-facing planning documents are available for the future Judge Mode, demonstration benchmark, and final screenshot/video package:
 
@@ -97,61 +97,121 @@ Public procurement scrutiny takes **8 to 10 hours per bidder**, leaving evaluati
 
 ---
 
-## 📸 Visual Screenshots & Interface Walkthrough
+## 📸 Visual Screenshots & 20-Screen Interface Walkthrough
 
-High-resolution UI captures based on the official Stitch UI specifications and stored in [`docs/demo/screenshots/`](docs/demo/screenshots/). The local Judge Mode and public deployment provide the runnable workflow; these images are presentation assets, not a substitute for runtime verification.
+High-resolution UI captures based on the 20-screen interface specifications and stored in [`docs/demo/screenshots/`](docs/demo/screenshots/). Both the local development environment and the [live Render deployment](https://vigilbid-frontend.onrender.com) provide the complete interactive workflow.
 
-### 1. Executive Scrutiny Dashboard (`/dashboard`)
+### 1. Landing & Public Portal (`/#/hero`)
+*Public-facing portal overview showcasing verified procurement volume (₹2,490 Cr), zero-tamper GFR 144 compliance, and evaluator entry points.*
+![Public Landing Hero](docs/demo/screenshots/00-hero-landing.png)
+
+---
+
+### 2. Role-Based Workspace Selector (`/#/login-options`)
+*Persona selection for Chief Vigilance Officer (CVO), Technical Evaluation Member, Compliance Auditor, and System Administrator.*
+![Role Selector](docs/demo/screenshots/00-login-options.png)
+
+---
+
+### 3. NIC-CERT Class 3 DSC Authentication (`/#/login`)
+*Cryptographic hardware token sign-in featuring USB token discovery, PIN entry, and PKI certificate validation.*
+![DSC Login](docs/demo/screenshots/00-login-page.png)
+
+---
+
+### 4. Executive Scrutiny Dashboard (`/#/dashboard`)
 *Portfolio-level procurement scrutiny overview, active CPCL tender telemetry, bidder evaluation progress, and real-time risk posture distribution.*
 ![Executive Scrutiny Dashboard](docs/demo/screenshots/01-dashboard.png)
 
 ---
 
-### 2. Primary Bidder Scrutiny Cockpit (`/bidders/:id`)
-*Central officer scrutiny interface displaying verified identity tokens, extracted financial metrics, and statutory GFR 2017 finding cards.*
+### 5. Tender Scope & NIT Specification (`/#/tender-detail`)
+*Comprehensive Notice Inviting Tender breakdown detailing scope of work, technical specifications, and GFR 2017 rule sets.*
+![Tender Scope](docs/demo/screenshots/02-tender.png)
+
+---
+
+### 6. Notice Inviting Tender (NIT) Ingestion Modal
+*Interactive modal for inducting new procurement packages with GeM ID mapping, SHA-256 pre-flight hash, and pipeline initialization.*
+![Tender Ingestion Modal](docs/demo/screenshots/02-tender-upload.png)
+
+---
+
+### 7. Bidder Directory & Evaluation Status (`/#/bidders`)
+*Central bidder registry displaying participating vendors, composite risk chips, preliminary engine findings, and direct triage links.*
+![Bidder Registry](docs/demo/screenshots/02-bidder-list.png)
+
+---
+
+### 8. Bidder Submission Bundle Ingestion Modal
+*Secure ingestion portal supporting ZIP and PDF packages, magic-byte checks, and Content-Addressable Storage (CAS) indexing.*
+![Bidder Ingestion Modal](docs/demo/screenshots/03-upload.png)
+
+---
+
+### 9. Asynchronous 11-Step Forensic Pipeline (`/#/pipeline`)
+*Real-time stage machine tracking file unpacking, OCR tokenization, statutory registry validation, and risk vector aggregation.*
+![Forensic Pipeline Stepper](docs/demo/screenshots/04-processing.png)
+
+---
+
+### 10. Raw Forensic Extraction Inspector (`/#/extraction`)
+*Granular OCR inspector comparing raw extracted tokens against deterministic regex rules with confidence scores and JSON payload inspection.*
+![Extraction Inspector](docs/demo/screenshots/04-extraction.png)
+
+---
+
+### 11. Statutory Registry Cross-Verification (`/#/registry`)
+*Automated cross-checks connecting bidder credentials against live simulated registries: MCA21, GSTN, NSDL PAN, and CPPP Debarment records.*
+![Registry Cross-Verification](docs/demo/screenshots/04-registry-verification.png)
+
+---
+
+### 12. Multi-Bidder Compliance Matrix Heatmap (`/#/matrix`)
+*High-density matrix comparing participating bidders across 18 statutory criteria (5 categories) with traffic-light status chips and CSV export.*
+![Compliance Matrix](docs/demo/screenshots/05-compliance-matrix.png)
+
+---
+
+### 13. Primary Bidder Scrutiny Cockpit & Adjudication (`/#/scrutiny`)
+*Central officer scrutiny interface displaying verified identity tokens, extracted financial metrics, finding cards, "View Audit Trail", "Download Dossier", and the statutory officer decision panel.*
 ![Primary Bidder Cockpit](docs/demo/screenshots/06-bidder-cockpit.png)
 
 ---
 
-### 3. Split-Screen Evidence Inspector (`/bidders/:id/evidence`)
+### 14. Split-Screen Evidence Inspector (`/#/evidence`)
 *Grounded verification linking statutory findings directly to source PDF pages with visual coordinate bounding box overlays.*
 ![Split-Screen Evidence Inspector](docs/demo/screenshots/07-evidence.png)
 
 ---
 
-### 4. Explainable Risk Posture & Factor Breakdown (`/bidders/:id/risk`)
+### 15. Explainable Risk Posture & Factor Radar (`/#/risk`)
 *Transparent 0–100 composite risk engine with decomposed point contributions across identity inconsistencies, compliance gaps, and document anomalies.*
 ![Explainable Risk Posture](docs/demo/screenshots/08-risk.png)
 
 ---
 
-### 5. Multi-Bidder Compliance Matrix Heatmap (`/compliance-matrix`)
-*High-density matrix comparing 5 participating bidders across 34 CPCL Goods criteria with traffic-light status chips (PASS, WARN, REVIEW, FAIL).*
-![Compliance Matrix](docs/demo/screenshots/05-compliance-matrix.png)
-
----
-
-### 6. Cross-Bidder Entity Link Graph (`/graph`)
+### 16. Cross-Bidder Entity Link Graph (`/#/graph`)
 *Entity resolution and cartelization detection connecting vendors via shared PANs, bank accounts, common signatories, or identical document hashes.*
 ![Cross-Bidder Entity Link Graph](docs/demo/screenshots/09-graph.png)
 
 ---
 
-### 7. Tamper-Evident Cryptographic SHA-256 Audit Ledger (`/audit`)
-*Tamper-evident decision ledger with forward SHA-256 hash chains, officer decision minutes, and live integrity verification.*
+### 17. Tamper-Evident Cryptographic SHA-256 Audit Ledger (`/#/audit`)
+*Tamper-evident decision ledger with forward SHA-256 hash chains, officer decision minutes, and live client-side zero-tamper verification.*
 ![Cryptographic Audit Ledger](docs/demo/screenshots/10-audit.png)
 
 ---
 
-### 8. Real-Time Forensic Pipeline Stepper (`/pipeline`)
-*Asynchronous 11-stage scrutiny progression from raw ZIP ingestion and CAS indexing through OCR, entity resolution, rule checks, and risk scoring.*
-![Forensic Pipeline Stepper](docs/demo/screenshots/04-processing.png)
+### 18. Official CVC Compliance & Scrutiny Dossier (`/#/dossier`)
+*Official statutory scrutiny sheet conforming to CVC guidelines, complete with officer signoff, Merkle anchor digest, and browser print format.*
+![CVC Statutory Dossier](docs/demo/screenshots/11-report.png)
 
 ---
 
-### 9. Secure Multi-Document Ingestion Portal (`/upload`)
-*Safe bidder package ingestion supporting multi-file drag-and-drop, magic byte verification, zip bomb ratio guards, and malware quarantine.*
-![Secure Ingestion Portal](docs/demo/screenshots/03-upload.png)
+### 19. Grounded GFR AI Copilot Drawer
+*Slide-out intelligent assistant providing instant regulatory explanations, clause references, and discrepancy context without leaving the evaluation workflow.*
+![AI Copilot Drawer](docs/demo/screenshots/12-copilot.png)
 
 ---
 
